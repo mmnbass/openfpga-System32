@@ -1,0 +1,205 @@
+# Sega System 32 for MiSTer FPGA
+
+MiSTer FPGA core for Sega's standard single-screen System 32 arcade board
+(837-7428 / 171-5964E), including Air Rescue's reduced one-board/single-screen
+profile, Dragon Ball Z: V.R. V.S., and the descriptor-gated three-player
+control-ball interface used by SegaSonic the Hedgehog. It targets the
+DE10-Nano with SDRAM and uses one universal dated
+`Arcade-SegaSystem32_YYYYMMDD.rbf` release artifact; each MRA selects the
+required game hardware, including the real NEC V25 path for Arabian Fight and
+Golden Axe II.
+
+Commercial ROMs are not included. Multi 32 and AS-1 hardware are not supported.
+
+## Features in the OSD
+
+- Original 4:3 or full-screen aspect ratio
+- Normal, vertical-integer, or full-integer scaling
+- Native direct-video output for HDMI-to-VGA/DAC and 15 kHz CRT setups
+- MiSTer analog VGA output plus the full HDMI scaler/OSD output path
+- Full native CRT path with adjustable 15 kHz geometry controls
+- Optional CRT 25%, 50%, and 75% scandoubler effects
+- CRT horizontal size/position and vertical-shift controls for 15 kHz output
+- Persistent 128-byte 93C46 high-score/settings storage
+- Service mode and reset
+- Per-game remappable controls defined by each MRA
+- Alien3: The Gun and Jurassic Park positional-gun inputs through the generic
+  MiSTer/JTFRAME-compatible analog, USB-relative-mouse, and d-pad paths;
+  Jurassic Park additionally supports GunCon 2 over SNAC
+- SegaSonic the Hedgehog: descriptor-gated three-player control-ball support;
+  player 1 accepts native MiSTer USB/PS/2 mouse relative X/Y reports, while all
+  three players retain left-analog-stick or d-pad compatibility input. Its
+  optional Invert Trackball Y setting applies to both analog/d-pad and
+  USB/mouse trackball input and is only exposed for SegaSonic.
+- Driving games: left-stick X is the analog steering source and right-stick
+  up/down are the pedals; Rad Mobile and Slip Stream also accept d-pad
+  left/right endpoints.
+- Dragon Ball Z: V.R. V.S.: SW1 Left Punch, SW2 Right Punch, and SW3 Jump;
+  its standard-board analog inputs remain at the documented unknown pull-up
+  value.
+- Air Rescue: title-gated one-board/single-screen reduction with P1 Fire and
+  Secondary inputs, the flight stick mapped to P1's left-analog X/Y (with the
+  documented reversed X polarity), three ADC channels (left-stick X/Y plus a centered third
+  channel), 4-KiB direct-link RAM, main-board ID 0, and the documented DSP
+  command-register HLE. The original peer PCB and twin-screen synchronization
+  are intentionally outside this profile.
+- Rad Mobile also supports P1 steering from a paddle/wheel, dedicated spinner,
+  reverse spinner, or mouse-relative input; Low/Normal/High sensitivity applies
+  to analog stick, wheel, and spinner steering.
+- Slip Stream, Rad Mobile, and Rad Rally expose P1 Steering (analog stick,
+  paddle, spinner, or reverse spinner) plus Low/Normal/High steering
+  sensitivity. Dedicated HPS spinner events and mouse-relative reports are
+  accumulated before the MSM6253 wheel sample.
+
+## PCB Accuracy
+
+This table lists only areas supported by schematics or silicon evidence. It
+defines the implemented hardware boundary, not a blanket cycle-accuracy claim.
+Open timing, analogue, PLD, and protection questions remain outside the
+documented claims below.
+
+| Area | Evidence | Core implementation |
+| --- | --- | --- |
+| Board and clocks | Sega schematics 171-5964D / 171-5965C | Standard single-screen board; V60, Z80/YM3438, and PCM domains |
+| Main CPU/controller | Schematics, sheet 1 | 16-bit V60 bus, interrupts, timers, and system control |
+| Scroll hardware | Schematics, sheet 2; Sega 315-5387 | Four tilemap layers and dual-port VRAM |
+| Objects/frame memory | Schematics, sheets 3-4; Sega 315-5386 | Object processing and double-buffered framebuffer |
+| Colour/video output | Schematics, sheet 5; [315-5242 silicon evidence](https://github.com/furrtek/SiliconRE/tree/master/Sega/315-5242) | Palette, priority, shadow/highlight, and RGB output |
+| I/O, EEPROM, and sound | Schematics, sheets 6-8 | 315-5296 I/O, 93C46 storage, Z80, dual YM3438, and PCM |
+| Dragon Ball Z V.R.V.S. cabinet | [System 32 service manual, p. 2](https://www.segakore.fr/download.php?file=sys32_dbzvrvs_manual_j.pdf) | Two-player 8-way controls, SW1 Left Punch, SW2 Right Punch, SW3 Jump, and 15.7 kHz horizontal sync |
+| SegaSonic control interface | [420-6095 service manual, pp. 5, 8, 11](https://arcade.segakore.fr/downloads/manuals/420-6095_segasonic_the_hedeghog_service_manual_1st.pdf): 837-8685 interface board, three XA/XB and YA/YB channels, and 1P/2P/3P control-ball test | Descriptor-gated relative counter adapter; exact gain/polarity remains a validation item |
+| Driving input adapter | MiSTer HPS paddle, spinner-toggle, and PS/2 mouse packet contracts; MSM6253 channel-0 load boundary | [s32_driving_controls.sv](rtl/io/s32_driving_controls.sv); descriptor-gated Slip Stream, Rad Mobile, and Rad Rally source selection |
+
+## Supported games
+
+The 38 tracked MRA variants use the same universal RBF:
+
+- **Arabian Fight:** World, US, Japan
+- **Air Rescue:** World, US, Japan (reduced one-board/single-screen profile)
+- **Burning Rival:** World, Japan
+- **Dark Edge:** World, Japan
+- **Golden Axe: The Revenge of Death Adder:** World Rev B, US Rev A, Japan
+- **Holosseum:** US Rev A
+- **Alien3: The Gun:** World, US Rev A, Japan
+- **Jurassic Park:** World Rev A, Japan Rev A Deluxe, Japan Deluxe, Japan Rev A Conversion
+- **Rad Mobile:** World, US
+- **Rad Rally:** World, US, Japan
+- **Slip Stream:** Brazil, Hispanic
+- **Spider-Man: The Videogame:** World, US Rev A, Japan
+- **Super Visual Football / Soccer:** European Rev A, US Rev A
+- **The J.League 1994:** Japan, Japan Rev A
+- **SegaSonic the Hedgehog:** Japan Rev C, Japan Prototype
+- **Dragon Ball Z: V.R. V.S.:** Japan Rev A
+
+Hard Dunk, OutRunners, Stadium Cross, Title Fight, AS-1,
+and other Multi 32 games remain outside the production profile. Air Rescue is
+the deliberate exception to the historical twin-board requirement: only the
+main board is represented, so peer-board link traffic and original dual-screen
+synchronization are not claimed. Alien3 retains
+its special SERVICE12 coin wiring; Jurassic Park keeps its one-button Shoot
+assignment and MRA compatibility patch. Neither game uses the retired
+framebuffer/HUD blending workaround.
+
+## **Hardware emulated**
+
+| Chip or subsystem | Interface | Implementation / reference |
+| --- | --- | --- |
+| NEC µPD70616 V60 | ~16.108 MHz, 16-bit data / 24-bit address bus | [`s32_v60.sv`](rtl/cpu/v60/s32_v60.sv), [`s32_v60_bus.sv`](rtl/cpu/v60/s32_v60_bus.sv) |
+| Sega 315-5385 controller | V60 registers, IRQs, timers | [`s32_io.sv`](rtl/io/s32_io.sv); schematics and MAME behaviour |
+| Sega 315-5386 objects | Object RAM and framebuffer | [`s32_sprite.sv`](rtl/video/s32_sprite.sv); schematic sheets 3-4 |
+| Sega 315-5387 scroll | Tilemap VRAM and registers | [`s32_tilemap.sv`](rtl/video/s32_tilemap.sv); schematic sheet 2 |
+| Sega 315-5388 / 315-5242 video | Palette, priority, RGB | [`s32_mixer.sv`](rtl/video/s32_mixer.sv); schematic and silicon evidence |
+| Sega 315-5296 I/O | JAMMA, DIP, service, coin | [`s32_io.sv`](rtl/io/s32_io.sv); schematic sheet 6 |
+| BR93C46 EEPROM | Serial NVRAM | `s32_io.sv`; MiSTer NVRAM upload/download |
+| MSM6253 ADC / 8255 PPI | Driving and parallel I/O, including Burning Rival's two-player six-button map | Descriptor-selected interfaces in `s32_io.sv`, `Arcade-SegaSystem32.sv`, and `s32_prot.sv` |
+| SegaSonic control-ball adapter | Three player channels, 12-bit relative X/Y counters, c00040/c00048/c00050-style byte reads and reset writes | [`s32_trackball_adapter`](rtl/io/s32_io.sv); service-manual control wiring and current MAME uPD4701A contract |
+| Generic MiSTer/JTFRAME positional-gun input | Signed analog reports, PS/2 mouse packets, d-pad events, native raster overlay | [`s32_lightgun.sv`](rtl/io/s32_lightgun.sv) and [`s32_lightgun_overlay.sv`](rtl/video/s32_lightgun_overlay.sv); descriptor-selected ADC channels and core-side Sinden border/crosshair controls |
+| Jurassic Park GunCon 2 | SNAC serial pins, normalized optical coordinates and buttons | [`s32_guncon_snac.sv`](rtl/io/s32_guncon_snac.sv); descriptor-gated Jurassic-only override |
+| NEC V25 protection | Program/cache and mailbox RAM | [`s32_v25_cpu.sv`](rtl/cpu/v25/s32_v25_cpu.sv); [s80x86 provenance](rtl/cpu/v25/s80x86/README.system32.md) |
+| FD1149 DBZ V.R.V.S. protection handler | V60 writes in `0xa00000-0xa7ffff`; work-RAM copy to `0x2080c8` | Descriptor-selected HLE in [`s32_prot.sv`](rtl/prot/s32_prot.sv); pinned MAME `segas32_m.cpp` reference |
+| Air Rescue reduced link/DSP profile | Main CPU 0x810000-0x810fff link RAM, ID 0x818000, DSP registers 0xa00000-0xa00007 | Title-gated FPGA abstraction in rtl/s32_core.sv and rtl/prot/s32_prot.sv, based on the pinned MAME System 32 segas32.cpp/segas32_m.cpp maps; peer PCB is intentionally omitted |
+| Z80 sound CPU | ~8.054 MHz | [`s32_soundsys.sv`](rtl/audio/s32_soundsys.sv); vendored [`T80`](rtl/audio/T80/) |
+| 2 × YM3438 | Z80 register bus | [`JT12`](rtl/audio/jt12/) |
+| RF5C68-family PCM | ~12.5 MHz, wave RAM | [`s32_rf5c68.sv`](rtl/audio/s32_rf5c68.sv) |
+| MiSTer memory services | HPS download, SDRAM, DDR3 | [`Arcade-SegaSystem32.sv`](Arcade-SegaSystem32.sv), [`sys/`](sys/) |
+
+## Credits
+
+- **Meathax** - System 32 RTL, integration, MRA generation, verification, and packaging.
+- **meathax/s32multi** - [pinned driving-control adapter source](https://github.com/meathax/s32multi/blob/1e89f67005ae0eb11ae0622cb52e8214c78ed76e/rtl/io/s32_driving_controls.sv), adapted here for the single-screen HPS paddle, spinner, and mouse-relative input path; the donor project is GPLv3.
+- **Sega, Nemesis1207, and System 32 researchers** - original hardware and
+  public schematic material used by this project.
+- **MAME developers** - [System 32 behavioural reference](https://github.com/mamedev/mame), including the uPD4701A trackball contract and SegaSonic ROM/input definitions.
+- **Air Rescue implementation evidence** - Pinned MAME System 32 map and DSP handler: https://github.com/mamedev/mame/blob/mame0282/src/mame/sega/segas32.cpp and https://github.com/mamedev/mame/blob/mame0282/src/mame/sega/segas32_m.cpp; the FPGA reduction keeps only the documented main-board contracts.
+- **SegaSonic and Dragon Ball Z V.R.V.S. documentation** - [SegaSonic 420-6095 service manual](https://arcade.segakore.fr/downloads/manuals/420-6095_segasonic_the_hedeghog_service_manual_1st.pdf), [DBZ V.R.V.S. System 32 service manual](https://www.segakore.fr/download.php?file=sys32_dbzvrvs_manual_j.pdf), and [Sudden Desu’s debug analysis](https://sudden-desu.net/entry/segasonic-the-hedgehog-stage-select-and-debug-tools/), used for control wiring, cabinet sync, stage order, and protection behavior.
+- **Jamie Iles** - [s80x86](https://github.com/jamieiles/80x86), used by the
+  V25 wrapper; pin and licence details are retained with the source.
+- **Jose Tejada Gomez / Jotego** - [JT12](https://github.com/jotego/jt12),
+  [JT8255](https://github.com/jotego/jt8255/tree/3bb5f7ea461fc7d72b847ec55ce997e5d5bc1754),
+  and audited [JTCORES](https://github.com/jotego/jtcores/tree/c990f843c7bd8eaf26179a0632bac1436cc05b52)
+  reference work, including the generic lightgun input/video contract used by
+  the project-owned adapter.
+- **jlrh** - [taito-fpga](https://github.com/jlrh/taito-fpga/tree/405a68eac741918e627cda563cc1a0c219ed18fd)
+  Operation Wolf lightgun integration, inspected for the core-side
+  `gun_1p_x/gun_1p_y` contract; no upstream RTL was copied.
+- **Daniel Wallner, MikeJ, Mike Johnson, TobiFlex, Sean Riddle, and Sorgelig**
+  - the vendored T80 Z80 core.
+- **furrtek / SiliconRE** - Sega 315-5242 and 315-5385 silicon research.
+- **Umberto Parisi (rmonic79) and Andrea Bogazzi (@asturur)** -
+  [MiSTer-CRT-Adjust](https://github.com/rmonic79/MiSTer-CRT-Adjust/tree/c682de9f4acc61d8f4c7779efb48149d3baa3a8e).
+- **misteraddons / SYSTEM11_MiSTer** - GunCon-only PSX/SNAC transport reference
+  ([pinned commit c2f2374](https://github.com/misteraddons/SYSTEM11_MiSTer/commit/c2f2374386c28923d98588d25d509ea075ef9746)); GPL-2.0-or-later source
+  attribution is retained in [`s32_guncon_snac.sv`](rtl/io/s32_guncon_snac.sv).
+- **MiSTer-devel and reference-core authors** - MiSTer framework, MRA tooling,
+  and the audited S32X, Irem M92, WonderSwan, and MegaCD integration references
+  used by this project.
+- Intel Quartus, Verilator, Icarus Verilog, ModelSim, and MAME tool authors.
+
+## License
+
+Original core source is licensed under [GNU GPLv3](LICENSE). Vendored
+components retain their own terms and notices:
+
+- s80x86: GPLv3 or later ([COPYING](rtl/cpu/v25/s80x86/COPYING))
+- JT12: GPLv3 ([LICENSE](rtl/audio/jt12/LICENSE))
+- JT8255 conformance reference: MIT ([LICENSE](verif/donors/LICENSE.jt8255))
+- T80: BSD-style terms in [`rtl/audio/T80/`](rtl/audio/T80/)
+- CRT Adjust: GPLv3 or later; provenance in [`verif/donors/README.md`](verif/donors/README.md)
+- JTFRAME/jlrh lightgun references: GPL-3.0-or-later upstream projects;
+  only interface semantics were adapted into the project-owned
+  [`s32_lightgun.sv`](rtl/io/s32_lightgun.sv) and
+  [`s32_lightgun_overlay.sv`](rtl/video/s32_lightgun_overlay.sv), with pinned
+  provenance in [`verif/donors/README.md`](verif/donors/README.md)
+- GunCon SNAC transport reference: GPL-2.0-or-later; pinned source and notice in [`rtl/io/s32_guncon_snac.sv`](rtl/io/s32_guncon_snac.sv)
+- SiliconRE material: upstream [SiliconRE project](https://github.com/furrtek/SiliconRE)
+  licence and notices
+- Driving-control adapter: GPLv3-compatible adaptation of the pinned
+  [s32multi source](https://github.com/meathax/s32multi/tree/1e89f67005ae0eb11ae0622cb52e8214c78ed76e).
+- MiSTer framework and Intel/Altera IP: retained upstream/vendor notices
+
+Linked reference projects and arcade ROMs remain under their respective terms.
+
+## How to install
+
+Copy the latest `Arcade-SegaSystem32_YYYYMMDD.rbf` and the MRA files to
+`/media/fat/_Arcade/`.
+Place the required MAME ROM ZIPs in `/media/fat/games/mame/`, then launch a
+game from the MiSTer Arcade menu.
+
+For automatic installation, add this to `/media/fat/downloader.ini` and run
+**Update All**:
+
+```ini
+[meathax/meatcores]
+db_url = https://raw.githubusercontent.com/meathax/meatcores/db/downloader_meathax_meatcores.zip
+```
+
+After adding the entry, run **Update All** to download the core and its MRAs
+automatically.
+
+## Development
+
+Quartus Prime 17.0.2 Build 602 is the pinned toolchain. Build the universal
+profile from the standard `Arcade-SegaSystem32.qpf`,
+`Arcade-SegaSystem32.qsf`, `files.qip`, and `clean.bat` project files. Local
+build and verification utilities are not part of the public core distribution.
