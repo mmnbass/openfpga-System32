@@ -1,0 +1,8 @@
+R1b verification 2026-10-28
+builder: experiments/M1-functional/m1_m11_microcode.py sha256 86f2a3025401185d1c24d47e01bc4c70e0f7e2354e8ad7e469b17f42fe4b6fbf (frozen HW-001 copy unchanged 5a9170cb...)
+control store words: production 197 -> 223 (+26), --smc-test 205 -> 221 (+16, guards only)
+run_r1.sh R1_PHASE=r1b: 35/35 groups, 38 CAUGHT + 1 EQUIV(jE) controls; mutants: 33 = 28 caught + 5 equivalent, 0 unexpected
+regression (build/M1/r1b/reg): refs 105/105; M1.1 refs 1051 V2 1043 x4 SMC 14/14 x4x2; M1.2 refs 1045 V2 1051 x4; dbcc 0 fail; D1 20/20 pass + all mutants caught; S0 selftest PASS; test_s0_compare 8/8; S1 vectors 122 PASS; ref_agreement 113/8/0/1
+HW-001: ALL OK 277 stores 5 neg controls, images 7/7
+S0 real GA2 ROM: reach 1, TRAP opcode ipc=00100506 (ldpr #100000,#5)
+costs: build/M1/r1b/costs_delta.txt ; jmp: costs_jmp.txt

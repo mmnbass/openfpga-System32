@@ -1,0 +1,16 @@
+v2_core.sv
+v2_useq.sv
+v2_regs.sv
+v2_alu.sv
+v2_shift.sv
+v2_shift_naive.sv
+v2_shift_iter.sv
+v2_muldiv.sv
+v2_agu.sv
+v2_bcd_bitfield.sv
+v2_fetch.sv
+v2_fetch_byteq.sv
+v2_psw_irq.sv
+v2_bus.sv
+v2_glue.sv
+v2_clz.sv

@@ -1,0 +1,452 @@
+--- a/rtl/mem/sdram.sv
++++ b/sp_sdram.sv
+@@ -1,4 +1,34 @@
+ //============================================================================
++//  DERIVED COPY (exp/sprite-path, experiments/SP-sprite-path) of upstream
++//  references/s32 rtl/mem/sdram.sv at accd644 (sha256 dca0d505...3edb).
++//  The pinned upstream file is not modified. sp_sdram.diff (same directory)
++//  is the exact unified diff against it; tools/check_derived.py verifies that
++//  the diff reproduces this file from the pinned upstream file.
++//
++//  SP additions (everything else is upstream's text and behaviour):
++//    * two framebuffer clients, both clk_ram-domain, level-request /
++//      done-pulse (no mailboxes: the client holds its parameters stable):
++//        fw: row-burst WRITE stream (one 16-bit word per cycle, each word its
++//            own column and DQM, so masked pixels cost nothing) or FILL
++//            (constant FFFF over a column range = erase);
++//        fr: row-burst READ (scanout), data returned with its column.
++//      Both stay inside one 1 KB page (= one 512-pixel line = one SDRAM row in
++//      upstream's address mapping), so a grant is one ACT + n commands + AP.
++//    * the arbitration decision is registered one cycle ahead of ST_IDLE
++//      (timing: the rotation left the command cone), the port in service masked.
++//    * arbitration: the FB pair is a 7th member of upstream's background
++//      round-robin (so it cannot starve and cannot starve anyone), plus an
++//      URGENT class for a late scanout read, served right after p1's deadline
++//      credit. p1's credit, refresh and the download port are unchanged.
++//    * preemption: a normal FB grant stops at the next word once p0, p1 or a
++//      refresh is pending and at least FB_MINW (write stream) / FB_MINW_RD
++//      (read, fill) words were issued (the stopping
++//      command carries auto-precharge), and never runs past FB_CAP words.
++//      An urgent read runs at most FB_URG_CAP words and is not preempted.
++//      Worst-case blocking of p1 by an FB grant is therefore bounded by a
++//      constant comparable to upstream's own 8-word p2 burst (README).
++//    * the state enum grows from 4 to 5 bits.
++//============================================================================
+ //  Sega System 32 for MiSTer — SDRAM controller
+ //  16-bit SDR SDRAM @ clk_ram (96.6 MHz), CL2, strictly serialized
+ //  transactions. ROM-download writes keep a row open for same-row words and
+@@ -20,9 +50,16 @@
+ //  single-outstanding: drop req after (or pulse it before) each ack, and
+ //  produce a fresh rising edge for the next transaction.  ack is stretched
+ //  to 2 clk_ram cycles so clk_sys-domain requesters sample it exactly once.
++//  (SP: the fw/fr ports use the level/done contract documented at the ports.)
+ //============================================================================
+ 
+-module sdram (
++module sp_sdram #(
++    parameter integer FB_CAP     = 64,  // SP: max words per normal FB grant
++    parameter integer FB_URG_CAP = 16,  // SP: max words per urgent read grant
++    parameter integer FB_MINW    = 4,   // SP: write words issued before preemption
++    parameter integer FB_MINW_RD = 16,  // SP: read / fill words issued before preemption
++    parameter bit     FB_PREEMPT = 1'b1 // SP: 0 = negative control only
++)(
+     input             clk,          // clk_ram
+     input             init,         // reset/init request
+     output reg        ready,
+@@ -81,7 +118,39 @@
+     input             p5_req,
+     input      [24:3] p5_addr,
+     output reg [63:0] p5_dout,
+-    output reg        p5_ack
++    output reg        p5_ack,
++
++    // SP fw: framebuffer write job (clk_ram). Hold fw_req and the job fields
++    // stable until fw_done (1-cycle pulse); drop fw_req for at least one
++    // cycle before the next job. Stream mode (fw_fill=0): a show-ahead
++    // stream of {fw_col, fw_data, fw_be, fw_last}; fw_pop (combinational)
++    // consumes the head on the clock edge it is high. The job ends with the
++    // word marked fw_last. Fill mode: columns fw_c0..fw_c1 <- FFFF.
++    input             fw_req,
++    input      [24:10] fw_page,
++    input             fw_fill,
++    input       [8:0] fw_c0,
++    input       [8:0] fw_c1,
++    input             fw_valid,
++    input       [8:0] fw_col,
++    input      [15:0] fw_data,
++    input       [1:0] fw_be,
++    input             fw_last,
++    output            fw_pop,
++    output reg        fw_done,
++
++    // SP fr: framebuffer read job (clk_ram). Hold fr_req and the fields
++    // until fr_done; words fr_c0 .. fr_c0+fr_n-1 (fr_n >= 1, same page)
++    // return on fr_dv with their column. fr_urgent may rise while pending.
++    input             fr_req,
++    input      [24:10] fr_page,
++    input       [8:0] fr_c0,
++    input       [9:0] fr_n,
++    input             fr_urgent,
++    output reg        fr_dv,
++    output reg  [8:0] fr_dcol,
++    output reg [15:0] fr_dout,
++    output reg        fr_done
+ );
+ 
+ reg [15:0] dq_out;
+@@ -116,9 +185,10 @@
+ reg [9:0]  ref_cnt;
+ reg        ref_pend;
+ 
+-typedef enum logic [3:0] {
++typedef enum logic [4:0] {
+     ST_IDLE, ST_DISPATCH, ST_ACT, ST_RCD1, ST_RCD2, ST_RD, ST_RDW,
+-    ST_WR, ST_WRRC, ST_PRE_XFER, ST_PRE_REF, ST_REF, ST_REFW
++    ST_WR, ST_WRRC, ST_PRE_XFER, ST_PRE_REF, ST_REF, ST_REFW,
++    ST_FBW, ST_FBW_END, ST_FBW_CLOSE, ST_FBR
+ } state_t;
+ state_t state = ST_IDLE;
+ 
+@@ -153,6 +223,27 @@
+ reg [15:0] wr_din_p;
+ reg  [1:0] wr_be_p;
+ 
++// SP: framebuffer job state. *_wait_low blocks a re-grant between a job's
++// done pulse and the client dropping its level request.
++reg        fw_wait_low, fr_wait_low;
++reg        fill_act;                 // fill job started (fill_ptr valid)
++reg  [8:0] fill_ptr;
++reg        fill_last;                // registered (fill_ptr == fw_c1)
++reg        rdj_act;                  // read job started (rd_ptr/rd_rem valid)
++reg  [8:0] rd_ptr;
++reg  [9:0] rd_rem;
++reg        fb_is_rd;                 // current FB grant: read (1) / write (0)
++reg        fb_urg;                   // current FB grant is an urgent read
++reg [24:10] fb_page;
++reg  [6:0] fb_cnt;                   // words issued in the current grant
++reg  [1:0] since_wr;                 // cycles since the last FB WRITE (sat.)
++reg        fb_last_w;                // FB slot alternation (read/write)
++reg  [3:0] fbr_v, fbr_last;          // FB read tags, aligned with cl_pipe
++reg  [8:0] fbr_col [0:3];
++wire       fw_pend = fw_req && !fw_wait_low && (fw_fill || fw_valid);
++wire       fr_pend = fr_req && !fr_wait_low;
++wire       fb_pend = fw_pend | fr_pend;
++
+ // Tile rendering has a hard scanline deadline: if p1 waits behind a complete
+ // six-port rotation, the renderer can miss the next line and the parity line
+ // buffer displays stale texture data. Give a newly pending p1 burst one
+@@ -160,31 +251,77 @@
+ // before p1 can use the credit again. Preserve the background round-robin
+ // pointer across a priority p1 grant so repeated tile traffic cannot keep
+ // restarting background selection at the same port.
+-reg       read_valid;
++// SP: the FB pair is background member 6 (after p5, before p0); an urgent
++// scanout read is served after p1's credit and before the rotation.
++// SP: the decision is REGISTERED (one cycle ahead of ST_IDLE) so the priority
++// rotation does not sit between the request flops and the command/address
++// registers. It is computed every cycle from the pending flags, with the port
++// currently in service masked out (its pend clears only on its own ack, which
++// can land on the very edge ST_IDLE is entered), so the registered decision
++// seen in ST_IDLE never names the transfer that just finished. A request
++// that arrives in the ST_IDLE cycle itself waits one cycle (counted in the
++// p1 bound, README).
++reg       read_valid;                // registered decision (used in ST_IDLE)
+ reg [2:0] read_grant;
+-reg       p1_was_last;
+ reg       p1_priority_grant;
+-wire      background_pend = p0_pend | p2_pend | p3_pend | p4_pend | p5_pend;
++reg       fb_urgent_grant;
++reg       fb_sel_rd;
++reg       p1_was_last;
++reg       rv_c, p1p_c, fbu_c, selrd_c;
++reg [2:0] rg_c;
++// a transfer is in service in every state except ST_IDLE and the refresh states
++// (refresh starts only from ST_IDLE, after the previous transfer's pend cleared)
++wire      in_svc   = !(state == ST_IDLE || state == ST_PRE_REF || state == ST_REF || state == ST_REFW);
++wire      p0_pm = p0_pend && !(in_svc && grant == 3'd0);
++wire      p1_pm = p1_pend && !(in_svc && grant == 3'd1);
++wire      p2_pm = p2_pend && !(in_svc && grant == 3'd2);
++wire      p3_pm = p3_pend && !(in_svc && grant == 3'd3);
++wire      p4_pm = p4_pend && !(in_svc && grant == 3'd4);
++wire      p5_pm = p5_pend && !(in_svc && grant == 3'd5);
++wire      fbsvc = in_svc && grant == 3'd6;
++wire      fw_pm = fw_pend && !fbsvc;
++wire      fr_pm = fr_pend && !fbsvc;
++wire      fb_pm = fw_pm | fr_pm;
++wire      background_pend = p0_pm | p2_pm | p3_pm | p4_pm | p5_pm | fb_pm;
+ wire      p1_fairness_block = p1_was_last & background_pend;
++wire [6:0] rr_pend = {fb_pm, p5_pm, p4_pm, p3_pm, p2_pm,
++                      p1_pm && !p1_fairness_block, p0_pm};
+ always @* begin
+-    read_valid = 1'b1;
+-    read_grant = rr_next;
+-    p1_priority_grant = 1'b0;
+-    if (p1_pend && !p1_was_last) begin
+-        read_grant = 3'd1;
+-        p1_priority_grant = 1'b1;
++    rv_c = 1'b1;
++    rg_c = rr_next;
++    p1p_c = 1'b0;
++    fbu_c = 1'b0;
++    if (p1_pm && !p1_was_last) begin
++        rg_c = 3'd1;
++        p1p_c = 1'b1;
+     end
++    else if (fr_pm && fr_urgent) begin
++        rg_c = 3'd6;
++        fbu_c = 1'b1;
++    end
+     else begin
+-        case (rr_next)
+-            3'd0: if (p0_pend) read_grant=0; else if (p1_pend && !p1_fairness_block) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else read_valid=0;
+-            3'd1: if (p1_pend && !p1_fairness_block) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else read_valid=0;
+-            3'd2: if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend && !p1_fairness_block) read_grant=1; else read_valid=0;
+-            3'd3: if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend && !p1_fairness_block) read_grant=1; else if (p2_pend) read_grant=2; else read_valid=0;
+-            3'd4: if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend && !p1_fairness_block) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else read_valid=0;
+-            default: if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend && !p1_fairness_block) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else read_valid=0;
+-        endcase
++        // Upstream's rotation (p0..p5 in order starting at rr_next) with the
++        // FB member inserted after p5. The lowest offset from rr_next wins.
++        // One constant-index priority chain per rr_next value (no modulo adder).
++        rv_c = 1'b0;
++        for (int r = 0; r < 7; r++)
++            if (rr_next == 3'(r))
++                for (int k = 6; k >= 0; k--)
++                    if (rr_pend[(r + k) % 7]) begin
++                        rg_c = 3'((r + k) % 7);
++                        rv_c = 1'b1;
++                    end
+     end
++    // FB member: an urgent grant is always the read; otherwise alternate when both pend.
++    selrd_c = fbu_c || (fr_pm && (!fw_pm || fb_last_w));
+ end
++always @(posedge clk) begin
++    read_valid <= rv_c && !init;
++    read_grant <= rg_c;
++    p1_priority_grant <= p1p_c;
++    fb_urgent_grant <= fbu_c;
++    fb_sel_rd <= selrd_c;
++end
+ 
+ // Latch each port on the RISING EDGE of its request.  The previous
+ // level-sampled guard (req && !pend && !ack) had a one-clk_ram drop window: a
+@@ -290,6 +427,7 @@
+ // into the response buffer one cycle later without a pin-to-core critical path.
+ reg [15:0] dq_in;
+ reg [3:0]  cl_pipe;
++reg        pipes_idle;               // SP: registered (cl_pipe == 0 && fbr_v == 0)
+ reg [15:0] cap_buf [0:7];
+ 
+ always @(posedge clk) dq_in <= SDRAM_DQ;
+@@ -314,9 +452,31 @@
+     endcase
+ endtask
+ 
++// SP: FB command fields for this cycle (used only in ST_FBW / ST_FBR).
++wire        fbw_fill  = fw_fill;
++wire        fbw_have  = fbw_fill ? 1'b1 : fw_valid;
++wire  [8:0] fbw_col   = fbw_fill ? fill_ptr : fw_col;
++wire [15:0] fbw_data  = fbw_fill ? 16'hFFFF : fw_data;
++wire  [1:0] fbw_be    = fbw_fill ? 2'b11 : fw_be;
++wire        fbw_last  = fbw_fill ? fill_last : fw_last;
++wire        fb_preq   = FB_PREEMPT && (p1_pend | p0_pend | ref_pend);
++wire        fb_min_ok = (fb_cnt >= 7'(FB_MINW - 1));
++wire        fbw_capst = (fb_cnt == 7'(FB_CAP - 1));
++wire        fbr_min_ok = (fb_cnt >= 7'(FB_MINW_RD - 1));
++// a fill (erase) has no stream bubbles and is as cheap per word as a read: same minimum run
++wire        fbw_stop  = fbw_last | fbw_capst | (fb_preq & (fbw_fill ? fbr_min_ok : fb_min_ok));
++wire        fbr_capst = fb_urg ? (fb_cnt == 7'(FB_URG_CAP - 1)) : (fb_cnt == 7'(FB_CAP - 1));
++wire        fbr_stop  = (rd_rem == 10'd1) | fbr_capst | (!fb_urg & fb_preq & fbr_min_ok);
++assign fw_pop = (state == ST_FBW) && !fw_fill && fw_valid;
++
+ always @(posedge clk) begin
+     cmd    <= CMD_NOP;
+     dq_oe  <= 1'b0;
++    fw_done <= 1'b0;
++    fr_done <= 1'b0;
++    fr_dv   <= 1'b0;
++    if (!fw_req) fw_wait_low <= 1'b0;
++    if (!fr_req) fr_wait_low <= 1'b0;
+ 
+     // acks: assert for 2 cycles so clk_sys (=clk/2, synchronous) always
+     // samples exactly one rising edge with ack high
+@@ -342,6 +502,10 @@
+         ack_stretch <= 0;
+         rr_next <= 3'd0;
+         p1_was_last <= 1'b0;
++        fw_wait_low <= 1'b0; fr_wait_low <= 1'b0;
++        fill_act <= 1'b0; rdj_act <= 1'b0;
++        fbr_v <= 4'b0000; fbr_last <= 4'b0000; pipes_idle <= 1'b1;
++        fb_last_w <= 1'b0; since_wr <= 2'd3;
+     end
+     else if (!ready) begin
+         init_cnt <= init_cnt - 1'd1;
+@@ -376,10 +540,26 @@
+                 ack_stretch <= 2'd1;   // hold ack this cycle + next
+             end
+         end
++        // SP: FB read data, same tap as cl_pipe[3].
++        fbr_v    <= {fbr_v[2:0], 1'b0};
++        fbr_last <= {fbr_last[2:0], 1'b0};
++        fbr_col[1] <= fbr_col[0]; fbr_col[2] <= fbr_col[1]; fbr_col[3] <= fbr_col[2];
++        if (fbr_v[3]) begin
++            fr_dv   <= 1'b1;
++            fr_dout <= dq_in;
++            fr_dcol <= fbr_col[3];
++            if (fbr_last[3]) begin
++                fr_done <= 1'b1;
++                fr_wait_low <= 1'b1;
++            end
++        end
++        if (since_wr != 2'd3) since_wr <= since_wr + 1'd1;
++        // next cycle's (cl_pipe == 0 && fbr_v == 0): only ST_RD / ST_FBR load a pipe
++        pipes_idle <= (cl_pipe[2:0] == 3'b000) && (fbr_v[2:0] == 3'b000) && !(state == ST_RD || state == ST_FBR);
+ 
+         case (state)
+         ST_IDLE: begin
+-            if (ref_pend && cl_pipe == 0) begin
++            if (ref_pend && pipes_idle) begin
+                 cmd <= CMD_PRE; SDRAM_A[10] <= 1'b1;
+                 row_open <= 1'b0;
+                 refw_cnt <= 3'd1;             // tRP >= 2 cycles before REF
+@@ -392,8 +572,8 @@
+                     grant <= read_grant;
+                     is_write <= 1'b0;
+                     p1_was_last <= (read_grant == 3'd1);
+-                    if (!p1_priority_grant)
+-                        rr_next <= (read_grant == 3'd5) ? 3'd0 : read_grant + 1'd1;
++                    if (!p1_priority_grant && !fb_urgent_grant)
++                        rr_next <= (read_grant == 3'd6) ? 3'd0 : read_grant + 1'd1;
+                     case (read_grant)
+                         3'd0: begin
+                             // Cache-line fills are exactly four aligned words;
+@@ -405,6 +585,24 @@
+                         3'd2: begin a = {p2_addr_p, 3'b000}; rd_total <= 4'd8; end
+                         3'd3: begin a = p3_addr_p;           rd_total <= 4'd1; end
+                         3'd4: begin a = p4_addr_p;           rd_total <= 4'd1; end
++                        3'd6: begin
++                            // SP: FB member. An urgent grant is always the
++                            // read; otherwise alternate when both pend.
++                            logic sel_rd;
++                            sel_rd = fb_sel_rd;
++                            fb_is_rd  <= sel_rd;
++                            fb_urg    <= fb_urgent_grant;
++                            fb_last_w <= !sel_rd;
++                            fb_page   <= sel_rd ? fr_page : fw_page;
++                            a = {(sel_rd ? fr_page : fw_page), 9'd0};
++                            rd_total <= 4'd0;
++                            if (sel_rd && !rdj_act) begin
++                                rdj_act <= 1'b1; rd_ptr <= fr_c0; rd_rem <= fr_n;
++                            end
++                            if (!sel_rd && fw_fill && !fill_act) begin
++                                fill_act <= 1'b1; fill_ptr <= fw_c0; fill_last <= (fw_c0 == fw_c1);
++                            end
++                        end
+                         default: begin a = {p5_addr_p, 2'b00}; rd_total <= 4'd4; end
+                     endcase
+                 end
+@@ -413,13 +611,16 @@
+                 // this arbitration boundary.  Register the row-reuse decision
+                 // here so ST_DISPATCH does not place the bank/row comparator in
+                 // the SDRAM command-output timing cone.
++                // SP: compared on wr_addr_p directly (a == wr_addr_p whenever
++                // wr_pend), keeping the 7-way address mux out of this cone.
+                 reuse_open_write_row <= wr_pend && row_open &&
+-                                        a[24:23] == open_bank &&
+-                                        a[22:10] == open_row;
++                                        wr_addr_p[24:23] == open_bank &&
++                                        wr_addr_p[22:10] == open_row;
+                 din_r     <= wr_din_p;
+                 be_r      <= wr_be_p;
+                 rd_issued   <= 0;
+                 rd_captured <= 0;
++                fb_cnt      <= 0;
+                 // Register arbitration before command generation.  The
+                 // dedicated dispatch cycle breaks the dense real-V25 path
+                 // from p5_pend through the six-port priority mux and row
+@@ -465,7 +666,8 @@
+         // tRCD >= 21ns = 3 cycles ACT->READ/WRITE
+         ST_RCD1: state <= ST_RCD2;
+         ST_RCD2: begin
+-            if (is_write) state <= ST_WR;
++            if (grant == 3'd6 && !is_write) state <= fb_is_rd ? ST_FBR : ST_FBW;
++            else if (is_write) state <= ST_WR;
+             else          state <= ST_RD;
+         end
+ 
+@@ -505,9 +707,74 @@
+         ST_RDW: begin
+             // wait for capture pipeline to finish (delivery in capture logic);
+             // also cover tRC for the single-read case with the drain cycles
+-            if (cl_pipe == 0) state <= ST_IDLE;
++            if (pipes_idle) state <= ST_IDLE;
+         end
+ 
++        // SP: framebuffer row-burst write / fill. One WRITE per cycle, each
++        // with its own column and DQM; the stopping WRITE auto-precharges.
++        ST_FBW: begin
++            if (fbw_have) begin
++                cmd      <= CMD_WRITE;
++                SDRAM_BA <= fb_page[24:23];
++                SDRAM_A  <= {2'b00, fbw_stop, fb_page[10], fbw_col};
++                dq_out   <= fbw_data;
++                dq_oe    <= 1'b1;
++                dqm      <= ~fbw_be;
++                since_wr <= 2'd0;
++                fb_cnt   <= fb_cnt + 1'd1;
++                if (fbw_fill) begin
++                    fill_ptr  <= fill_ptr + 1'd1;
++                    fill_last <= (fill_ptr + 1'd1 == fw_c1);
++                end
++                if (fbw_stop) begin
++                    row_open <= 1'b0;
++                    wrrc_cnt <= 3'd2;          // tWR + tRP before the next ACT
++                    state    <= ST_FBW_END;
++                    if (fbw_last) begin
++                        fw_done <= 1'b1;
++                        fw_wait_low <= 1'b1;
++                        fill_act <= 1'b0;
++                    end
++                end
++            end
++            else if (fb_preq || fbw_capst) begin
++                // stream bubble while someone waits: close the row explicitly
++                state <= ST_FBW_CLOSE;
++            end
++        end
++        ST_FBW_END: begin
++            if (wrrc_cnt == 0) state <= ST_IDLE;
++            else wrrc_cnt <= wrrc_cnt - 1'd1;
++        end
++        ST_FBW_CLOSE: begin
++            // tWR (2 cycles after the last WRITE; tRAS is covered because a
++            // grant issues its first WRITE before any bubble) then PRE, tRP.
++            if (since_wr >= 2'd2) begin
++                cmd <= CMD_PRE; SDRAM_BA <= fb_page[24:23]; SDRAM_A[10] <= 1'b0;
++                row_open <= 1'b0;
++                wrrc_cnt <= 3'd2;
++                state <= ST_FBW_END;
++            end
++        end
++
++        // SP: framebuffer row-burst read. The stopping READ auto-precharges.
++        ST_FBR: begin
++            cmd      <= CMD_READ;
++            SDRAM_BA <= fb_page[24:23];
++            SDRAM_A  <= {2'b00, fbr_stop, fb_page[10], rd_ptr};
++            fbr_v[0]    <= 1'b1;
++            fbr_col[0]  <= rd_ptr;
++            fbr_last[0] <= (rd_rem == 10'd1);
++            rd_ptr <= rd_ptr + 1'd1;
++            rd_rem <= rd_rem - 1'd1;
++            fb_cnt <= fb_cnt + 1'd1;
++            if (rd_rem == 10'd1) rdj_act <= 1'b0;
++            if (fbr_stop) begin
++                row_open <= 1'b0;
++                state <= ST_RDW;
++            end
++        end
++
+         ST_PRE_REF: begin
+             if (refw_cnt == 0) begin
+                 cmd      <= CMD_REF;

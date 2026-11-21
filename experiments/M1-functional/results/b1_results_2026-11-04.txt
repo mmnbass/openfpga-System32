@@ -1,0 +1,30 @@
+B1 (CPU batch 1) results 2026-11-04 (SIMULATION ONLY; V2 microcode and tables, no RTL change; exploratory standard: S0 lock-step + directed vectors + targeted regressions)
+builder: experiments/M1-functional/m1_m11_microcode.py (was 4ac7fa34... R3b, b810b8d8... R4b); new forms (production builds only; --smc-test builds unchanged):
+  mov.b [Rn+],[Rm+] (09), dbr Rn,disp16 (C6 A1), push #q (EE), movea.b <abs|disp32[PC]>,[-Rn] (40, Format II), retis #q (FA, ISP->L0SP stack switch), jsr /abs (E8)
+  addressing support: mode table bank 1 [Rn+] (0x80|r, descriptor 0x210) and [-Rn] (0xA0|r, 0x410); descriptor bit 4 = temporary register-based-memory-mode tag (ucond 22).
+  No DEC_EA, AGU field or CONSUME 9-11 is used (the R4 S-D tag remains isolated). movea gains one guard word (br 22 -> trap_mode) on its /abs path; jsr and movea_f1 add condition-23 users.
+words: production 257 -> 439 (+182: movb 43, dbr 16, movea_f1 24, retis 63, jsr 20, push 14, stub 1, movea abs guard 1); reset-native 253 -> 435; --smc-test 242 / 241 / 238 / 237 unchanged.
+S0 (build/M1/b1/reg_b2_s0final, upstream reference build/M1/b1/up_ref/up.log 140,001 records, default-mode s0_compare): reach 131,135, END instrs=131135, SIMCHECK 0/0,
+  TRAP opcode ipc=0013051f = movz.hw #A00, R9 (opcode 0x1D), the first unsupported operation (index 131,135). The jsr at 131,132 (and 131,133) and movea.b /abs,R19 (131,134) retire correctly.
+  Progression: R4b 7 (mov.b) -> 9 (dbr) -> 51 (push) -> 52 (movea [-SP]) -> 53 (retis) -> 131,132 (jsr) -> 131,135.
+directed vectors (m1_b1.py via run_m11.sh with M11_REF_FLAGS=--ext, build/M1/b1/reg_b2/dv): 51 programs = 28 agree + 19 unsupported + 4 probes (47 agree V60X == upstream == V2; 4 documented ref-vs-ref differences);
+  V2 51/51 at each of 4 fetch configs, SIMCHECK 0; lock-step records 233 per config. Edge cases: byte lanes and sign (movb), overlap, wrap/forward/far dbr, push to address 0, jsr alignments, retis counts/banks.
+targeted mutant (byte-lane merging): the MOV.B byte write replaced by a word store: 0/6 movb vectors match V60X (killed); control 6/6 (b1_lane_mutant.py).
+costs (+retire, default / +wide; results/b1_costs_2026-11-04.txt): mov.b 87/71 cycles, dbr taken 51/26, push 46/36, movea [-SP] 61/48, retis ISP->L0SP 150/102, retis same bank 135/88, jsr 90/48.
+regressions (build/M1/b1/reg_b2): R1 (r1b) 35/35 groups + 39/39 controls, mutants 28 caught + 5 equivalent + 0 unexpected, 2 structural facts superseded; R2 (r2b) 78/79 groups (pin group superseded) + 107/107;
+  R4 (r4b, live builder; includes the R3 programs on the live builder with the R4 supersession table) 74/88 groups, 79/87 controls: every failure is in the supersession table below; refs, withheld fetch, SMC (smc, smcm
+  identical to the pre-R4 pins), R3-live groups all pass; M1.1 251 refs agree, V2 243 pass (default, +wide); M1.2 245 refs agree, V2 251 pass; HW-001 ALL OK, image hashes 7/7, tree unchanged;
+  R3a digest 3720e1bab01c3959 MATCH, R4a digest f7c28d613a37723e MATCH; S0 self-test PASS (reach 3, trap mode at fffffffb); test_s0_compare 426/426.
+SUPERSESSION TABLE (one table; no frozen baseline or expectation file edited):
+  1. R4 V2 groups c7i_opc6_f2 (4 configs): opcode C6 is now dispatched (DBR); the program's `C6 A1 F2 ...` executes as DBR instead of trapping `opcode`.
+  2. R4 V2 S0 groups b10_ga2_prefix (4 configs) and the R4 S0 controls s0b / s0b3 / s0u7 (8 controls): the S0 stop moved from reach 7 (0010052d) to 131,135; `--r4b-check` fails by design on a B1 log.
+  3. R4 structural groups: tag scan (condition-23 words are now jmp, jsr, movea, movea_f1), dispatch table / mode table "identical to the pre-R4 fixture" (new dispatch entries 0x09 0xC6 0xE8 0xEE 0xFA, 64 new mode entries),
+     "4 words added", the memory-descriptor set (adds 64 bank-1 descriptors), the dtab pin (adds the five opcodes): all describe the R4b table state.
+  4. R1 structural facts: "every supported modm-1 entry is register direct" and the memory-descriptor set. R2 pre-R2 table pin (production configs; smc configs still identical).
+  5. builder assertions replaced in the same way (check_tables / check_tag: descriptor set, bit-4 tag, four condition-23 words).
+not run / limits: no Codex, hardware or fit; R3 suite on the pre-R4 fixture and R3b/R4b mutant campaigns were not rerun (not required; the R4 driver's live R3 stage ran); D1 not run (RTL unchanged);
+  unsupported variants trap before any side effect (mov.b validates both operands first, retis checks the bank case before any architectural write); same-register mov.b ([Rn+],[Rn+]) is not supported/tested (OI-4);
+  retis supports no-bank-change and ISP->L0SP only (others trap `mode`); L0SP/ISP cannot be set by LDPR (ids 2-5 only), L0SP stays 0 as in the references' reset.
+failed attempts (iterating on own microcode): push hazard (T0 read inside 3 words of its write: spaced); retis compared a temp with itself (one temp read port: bypass chain); retis branch polarity inverted; builder WR dict lacked PSW;
+  tag assertion count after jsr/movea_f1; check_upstream.py failed on another agent's untracked references/s32/.../jt12.raw (CHECK_UPSTREAM_IGNORE_UNTRACKED=1 added, default unchanged); first lane-mutant run read the wrong directory (lane_mut1, kept);
+  4 directed 'unsupported' programs reclassified as probes (refs disagree on the unsupported instruction); R2 pin comparison crashed on the new symbols (made a clean failure).

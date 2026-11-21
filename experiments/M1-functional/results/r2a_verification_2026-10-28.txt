@@ -1,0 +1,15 @@
+R2a verification 2026-10-28 (test infrastructure and vectors only; no R2 microcode, no CPU RTL change)
+builder: experiments/M1-functional/m1_m11_microcode.py sha256 86f2a3025401185d1c24d47e01bc4c70e0f7e2354e8ad7e469b17f42fe4b6fbf (unchanged; frozen HW-001 copy 5a9170cb... unchanged)
+vectors: 206 programs = 148 positive (130 M1 bench incl. 14 L6 withheld-byte, 18 S0 harness), 41 negative (36 V2-only N1-N4/N6/crafted + 5 EL-forced N5), 17 bench probes (TEST-ONLY image)
+run_r2.sh R2_PHASE=r2a (after Codex round 1): 79/79 result groups, 107/107 controls/catchers caught (0 MISSED, 0 EQUIV, 0 gaps); wall 13 s (rerun), first full run 30 s
+refs: V60X 148/148 and upstream 148/148 equal the generator; V60X == upstream lock-step 148/148; upstream events == V60X events minus unchanged-value writes
+V2 (expected pre-R2b state): every LDPR traps `opcode` at its own PC after the preceding instructions retire; S0 real ROM reach 1, TRAP opcode ipc=00100506
+SMC matrix: smc/smcm x (M1 bench 167 programs, S0 reset-native 13 incl. the 8 JMP-free wrap programs) x 4 fetch configs all pass; dispatch isolation over 8 builder option combinations 8/8, table pins recorded in results/r2a_table_pins_2026-10-28.json
+WR_ASEL=3 probe: E3 write address == operand 2's quick value for q=0..15 (be=f), file entry 5 holds the q=5 value -> plan fallback (per-ID branches) not needed
+regression (build/M1/r2a): run_r1.sh R1_PHASE=r1b 35/35 + 39/39 controls, mutants 33 = 28 caught + 5 equivalent; refs 105/105; M1.1 refs 1051 V2 1043 x4 SMC 14/14 x4x2; M1.2 refs 1045 V2 1051 x4; dbcc 0 fail; D1 rc 0; S0 selftest PASS; test_s0_compare 8/8; S1 vectors 122 PASS; ref_agreement 113/8/0/1
+HW-001: ALL OK 277 stores 5 neg controls, images 7/7
+identity: 768 bench log pairs (R1b-built vs R2a benches, default plusargs) 0 differ; m11/m12 raw logs 0 differ except 2 .ref.err traceback line numbers; refs/m11/m12/dbcc .sum identical to build/M1/r1b/reg
+sha256 of .sum: refs 195771289379f7cf... m11 840e5cd90fc7b041... m12 223638e47a9f3860... dbcc 534b4f74eb47a9ac...
+Codex round 1 fixes: probe image from frozen fixture results/r2a_pre_r2_fixture_2026-10-28.json; phase-aware structural checks; R2_PHASE=r2b R2_SIM_R2B=1 (in-memory table-only stub, m1_r2b_simbuilder.py) reaches validation: 43/79 groups pass (all structural), V2 LDPR groups fail as expected, 107/107 controls caught;
+ checker requires psw= fields, every written ID's PR line, trap END instrs; forced-EL replay is local (no shared state; 600 concurrent checks pass); SMC L6 withheld/released runs for smc and smcm x 4 configs (12 programs each); 8 wrap programs added to the S0 SMC runs
+identity re-spot-check after the fixes: 768 log pairs 0 differ

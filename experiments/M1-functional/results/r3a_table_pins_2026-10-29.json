@@ -1,0 +1,51 @@
+{
+ "builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+ "smc_test=0 smc_merged=0 reset_native=0": {
+  "tables_full": "53972d13936d9865ade634e05cac6589a9d19f12d7cca97c5d61bbcd5cd240a2",
+  "tables_except_dtab40": "cad168e33e26c7843f47909bf06872ec99a615ecd686e60d3368fbf695db9699",
+  "cstore_len": 244,
+  "cstore_sha": "b3b686a2a40beb3fcc3434ea8a2ae6eb4ced831c510e23f475be434b18b62ee9"
+ },
+ "smc_test=0 smc_merged=0 reset_native=1": {
+  "tables_full": "d41e1bdc309bb436e2943e85f18325d45414b6f000fe3b39c43e6c869bd46a30",
+  "tables_except_dtab40": "86c6c22850d093b3513d99358c15c4b9d0b4d771f0b5570690b2b39c6fb5c573",
+  "cstore_len": 240,
+  "cstore_sha": "439d399a77dc11f9caefeb8fa8141cc7e162179899ae5af4f85353fda28a3ce5"
+ },
+ "smc_test=0 smc_merged=1 reset_native=0": {
+  "tables_full": "53972d13936d9865ade634e05cac6589a9d19f12d7cca97c5d61bbcd5cd240a2",
+  "tables_except_dtab40": "cad168e33e26c7843f47909bf06872ec99a615ecd686e60d3368fbf695db9699",
+  "cstore_len": 244,
+  "cstore_sha": "b3b686a2a40beb3fcc3434ea8a2ae6eb4ced831c510e23f475be434b18b62ee9"
+ },
+ "smc_test=0 smc_merged=1 reset_native=1": {
+  "tables_full": "d41e1bdc309bb436e2943e85f18325d45414b6f000fe3b39c43e6c869bd46a30",
+  "tables_except_dtab40": "86c6c22850d093b3513d99358c15c4b9d0b4d771f0b5570690b2b39c6fb5c573",
+  "cstore_len": 240,
+  "cstore_sha": "439d399a77dc11f9caefeb8fa8141cc7e162179899ae5af4f85353fda28a3ce5"
+ },
+ "smc_test=1 smc_merged=0 reset_native=0": {
+  "tables_full": "31ad9f95875a7f7791e578ad6bd357ca7b60aacf0813028e5b594bb15626bf77",
+  "tables_except_dtab40": "1a13a54d606408788028d8b63e9ada3450e02cb58ff31afd915fd97785d14516",
+  "cstore_len": 242,
+  "cstore_sha": "9c10ce6689e87066dae9ee00509a6ecd391d03f3c4e88a0eb2b8c3f1e959a10f"
+ },
+ "smc_test=1 smc_merged=0 reset_native=1": {
+  "tables_full": "1d406df8e6bd9a25ee822029adfe6c3e6572eb506c3cf80580d549fc2c6b53d0",
+  "tables_except_dtab40": "f4edfbf390a8debc9c14e56fdaa493a8eb189edaff21357b0ead1039f84434a4",
+  "cstore_len": 238,
+  "cstore_sha": "3e3558a1bdfebc30f4839d90aa0683361e3b19cdd07989c295419a7026a65d7c"
+ },
+ "smc_test=1 smc_merged=1 reset_native=0": {
+  "tables_full": "97060706d4f7dd00b69c85c31aeb81b2c9545a8e91cea95194526d63a22c35c6",
+  "tables_except_dtab40": "6f0c0b4ec40be773b59380bd4e39b894580a25d221e240dd40ccef7363c05305",
+  "cstore_len": 241,
+  "cstore_sha": "5bdc0670237030ebe7416da2d6efe8a63fa0b55a4755d8df028b7a86b0137965"
+ },
+ "smc_test=1 smc_merged=1 reset_native=1": {
+  "tables_full": "939e3212c2818b36853473956adfc31f4f0c50aa598b6a31746102889b44e818",
+  "tables_except_dtab40": "927d3327e275b9a8bc27f3cbfedfd2b49e4eb55b09f8ce8e1dc48ee0219de021",
+  "cstore_len": 237,
+  "cstore_sha": "143a5ea01eba683eba3abd17a2a8d331ebb1be490f7f2c0e884a7c3cbbb603c8"
+ }
+}

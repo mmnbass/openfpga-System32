@@ -1,0 +1,24 @@
+C1 microcode compaction (2026-11-05), exploratory; microcode and builder only, no RTL change. Raw artefacts: build/M1/c1/.
+
+Words (production, --reset-native; the non-reset-native image is 4 words more; before: 2044 = the whole 2048-word control store):
+  1. generic two-operand families, one shared front end (fmt[9] = read-modify-write kind, fmt[8], fmt[10], fmt[11] = operation id; one-word execute slots chosen by small decision trees, leaves jump straight on): 2044 -> 1844  (-200)
+  2. MOVCU / MOVCD .B and .H as one routine (element size = the table's size1, pointer steps by the address unit +/- size, fmt[8] marks .H for the byte-count doubling): 1844 -> 1740  (-104)
+  3. SET1 / CLR1 / NOT1 as one routine (fmt[8] = CLR1, fmt[10] = NOT1): 1740 -> 1646  (-94)
+  4. UPDPSW.W / .H as one routine (fmt[8] = .H): 1646 -> 1618  (-28)
+  5. INC / DEC / TEST as one routine (fmt[8] = DEC, fmt[10] = TEST): 1618 -> 1586  (-32)
+  6. fix found by the bit-operation vectors: the SET1/CLR1/NOT1 decision tree sits BEFORE the old-value pass so the result forwarding chain is intact: 1586 -> 1588  (+2)
+  Total: 2044 -> 1588 (-456); 460 words of headroom in the 2048-word store. (IRQ stubs, EA subroutines, pushm/popm, jsr/jmp/movea were not touched.)
+  Reachability: b3_reach.py still lists only movb, movea_hw, mstub1o5 (47 words) dead in all 8 configurations; compact() still removes configuration-unreachable words.
+
+Cycles: S0 lockstep, 199,901 instructions: 7,765,462 cycles before (committed c71fa10 microcode) -> 7,791,730 after = 38.85 -> 38.98 cycles/instruction (+0.34%).
+        whole-chip run to 120 frames: 36.58 -> 37.04 cycles/instruction (+1.3%, includes the changed IRQ ordering below).
+
+First-screen acceptance (run_wcv2.sh --eeprom-model mame --v25 stub, VIDEO_DELAY=300000, 120 frames, 3,000,000 instructions; build/M1/c1/wc3 vs frozen build/WC/v2_run17_ms_vd):
+  * every one of the 82 V2-driven non-black frames of the compacted run is pixel-identical to a frame of the milestone run; the 30 distinct images occur in the same order,
+    including the final 71,680-pixel image; the compacted run reaches the same image sequence one video frame later (first non-black frame 40 vs 39) and covers frames up to 121 instead of 111.
+  * retire counts at the same vblank differ (vblank 111: 2,422,292 vs 2,449,635): cycle timing. The first interrupt arrives earlier relative to the video phase (vector 0 at instruction 625,204, then vector 4;
+    the milestone took vector 4 first at 640,212), which shifts the IRQ ordering and the frame at which the content appears.
+  * aligned comparison against the MAME state trace: 309,835 instructions compared, no divergence in any category before the first IRQ (milestone: 312,149).
+Regressions (build/M1/c1/reg_c1a): S0 lockstep 199,901 (limit), SIMCHECK 0; 643 directed programs at 3 fetch configurations: V2 equals upstream on 639 'agree' programs except the documented
+  shl.w count 33, updpsw.h (5) and set1/clr1/not1 on memory (15, byte vs word RMW); M1.1 7 and M1.2 2 superseded unsup_* programs only; HW-001 ALL OK; R3a 3720e1bab01c3959 and R4a f7c28d613a37723e MATCH;
+  S0 self-test PASS; test_s0_compare 426/426; byte-lane mutant killed. New vectors c1_movcb_* (7: byte-element MOVCU.B / MOVCD.B) equal upstream.

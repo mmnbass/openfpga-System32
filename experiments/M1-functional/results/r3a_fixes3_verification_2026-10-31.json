@@ -1,0 +1,144 @@
+{
+ "date": "2026-10-31",
+ "scope": {
+  "builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+  "v2_diff_empty": true,
+  "bench_changed": false,
+  "frozen": {
+   "match": "3720e1bab01c3959",
+   "expectations": 912,
+   "pins": "8/8"
+  }
+ },
+ "test_s0_compare": {
+  "passed": 261,
+  "failed": 0,
+  "before": 156,
+  "seconds": 10
+ },
+ "run_r3_r3a_no_negctl": {
+  "groups": "73/73",
+  "seconds": 29
+ },
+ "run_r3_stub_no_negctl": {
+  "groups": "54/60",
+  "expected_failing_groups": 6,
+  "seconds": 9
+ },
+ "negative_controls_r3a": {
+  "total": 353,
+  "caught": 353,
+  "equiv": 3,
+  "missed": 0,
+  "skipped_end_to_end_run_refs": 2,
+  "seconds": 94
+ },
+ "negative_controls_stub": {
+  "total": 342,
+  "caught": 342,
+  "equiv": 3,
+  "missed": 0,
+  "skipped_end_to_end_run_refs": 2,
+  "seconds": 94
+ },
+ "identity": {
+  "pairs": 20248,
+  "identical": 20248,
+  "differ": 0,
+  "failed": 0,
+  "bytes": 36476995,
+  "additive": "250/250",
+  "seconds": 99
+ },
+ "log_scan": {
+  "logs": 8376,
+  "problems_new_shared_parser": 0,
+  "problems_new_s0_log_facts": 0
+ },
+ "ab_s0_compare": {
+  "pairs": 309,
+  "default_identical": 309,
+  "r2b_identical": 309,
+  "seconds": 80
+ },
+ "ab_shared_evaluator": {
+  "r3a_logs": 8376,
+  "identical": 8376,
+  "r1b_logs": 993,
+  "r1b_identical": 993,
+  "r2b_logs": 1272,
+  "r2b_identical": 1272
+ },
+ "not_rerun": [
+  "run_r1.sh",
+  "run_r2.sh",
+  "run_refs.sh 100",
+  "run_d1.sh",
+  "M1.1",
+  "M1.2",
+  "DBcc",
+  "HW-001",
+  "S1",
+  "the two run_refs.sh end-to-end negative controls",
+  "a single complete run_r3.sh (with controls)"
+ ],
+ "disk": {
+  "reg4_mb": 534,
+  "free_start_gb": 2.9,
+  "free_end_gb": 1.15
+ },
+ "update_2026_11_01": {
+  "run_r3_r3a_full": {
+   "groups": "77/77",
+   "controls": "355/355",
+   "equiv": 3,
+   "missed": 0,
+   "rc": 0,
+   "seconds": 164
+  },
+  "run_r3_stub_full": {
+   "groups": "58/64 (same six by-design failures)",
+   "controls": "344/344",
+   "equiv": 3,
+   "missed": 0,
+   "rc": 1,
+   "seconds": 145
+  },
+  "run_r1_r1b": {
+   "groups": "35/35",
+   "controls": "39/39",
+   "mutants": "33 = 28 caught + 5 equivalent",
+   "seconds": 46
+  },
+  "run_r2_r2b": {
+   "groups": "79/79",
+   "controls": "107/107",
+   "seconds": 33
+  },
+  "run_refs_100": {
+   "agree": "105/105",
+   "D1": "reproduces, rc 0",
+   "seconds": 22
+  },
+  "not_run": [
+   "run_d1.sh (hard-coded output dir build/M1/d1, would overwrite evidence; its inputs contain no changed file)",
+   "M1.1",
+   "M1.2",
+   "DBcc",
+   "HW-001",
+   "S1"
+  ],
+  "supersedes_not_run": [
+   "run_r1.sh",
+   "run_r2.sh",
+   "run_refs.sh",
+   "single complete run_r3.sh",
+   "the two run_refs end-to-end controls"
+  ],
+  "disk": {
+   "reg4_mb": 996,
+   "free_start_gb": 4.5,
+   "free_end_gb": 3.55
+  }
+ }
+}

@@ -1,0 +1,29 @@
+R1a final verification 2026-10-28 (phase r1a, after the +ackrel observer fix)
+free_disk_start=7.4G free_disk_end=7.2G (no new multi-GB copies; reg2, after2, run overwritten)
+hw001: images_sha256_match=7/7 run_hwt=ALL OK stores=277 negative_controls_failing_as_intended=5 gen_hwt_imports=hw001_microcode(frozen) hw001_microcode_vs_live_builder=byte-identical sha256=5a9170cb0d47f6871ed021e1184a9adfab3b6dd6bcf73d2830af0640d39f4f36
+builder: frozen_vs_live=8/8 combos identical; live_vs_pre-R1a hashes identical (hash_before/builder.sha256)
+run_r1: cmd=experiments/M1-functional/run_r1.sh ; result groups 35/35 PASS ; controls: 38 CAUGHT(incl 5 baseline/sanity controls a0,b0,c0,d0,g2) + 1 EQUIVALENT(jE: BR8 CONSUME=1) = 39
+run_r1 groups: refs 98/99/99 + S0 adapter 15/15, upstream M1 99 S0 15, V2 140 x4 configs, J12/BR8 withheld 8 x4, V2 S0 15 x4 configs, SMC isolation 42 M1 + 3 S0 per config x4 x {smc,smcm}
+regression (reg2): refs=105/105 ; M1.1 refs 1051/1051 V2 1043 x4 configs SMC 14/14 smc+smcm x4 ; M1.2 refs 1045/1045 V2 1051 x4 ; dbcc 0 failures ; s0_selftest PASS ; test_s0_compare 8/8
+default identity: bench HEAD-vs-modified 768 pairs 0 differ ; m11/m12 base-vs-after 2856 logs 0 differ ; dbcc/m11/m12 .sum identical
+git: no changes in V2-datapath-floor, m1_m11_microcode.py, references, HW-cpu-test/verified (pre-existing uncommitted gen_hwt.py/run_hwt.sh/hw001_microcode.py = HW-001 freeze); no commits
+sha256 of key logs:
+beaf27e373c080c3f8324f2a7452911d9337e4a94f7b31592cc913c7b8679ef4  final_run_r1.log
+72b3d19e28b6b41c2ddf06c37985d89477dd93624f96d913cbd3ebb01be2badd  final_hwt.log
+195771289379f7cfa50f1257fba6d73e361308912bc723e8dd36dd39c39ca939  reg2/refs.sum
+3af33f393ed0b77322f63f213216efa32536bf6ced09165c75425c921df113ef  reg2/m11.sum
+26fe91e210cb771d0dafcbc8e7e943a1345b614ac355dcaba03e2cfd97557bfc  reg2/m12.sum
+534b4f74eb47a9ac8d425fe6b07d7d97ff5cc5879cc58afac35d9fe41ba3aa3d  reg2/dbcc.sum
+
+=== 2026-10-28 after rel_hit nonblocking (observer line 202 '<=') ===
+run_r1 (R1_REBUILD=1): 35/35 groups PASS; J12/BR8 withheld 8/8 x4 configs; controls 38 CAUGHT (5 baselines) + 1 EQUIV (jE CONSUME=1); no rel_hit warnings in obj_v2/obj_s0v2 logs (only clang -Wno-unnecessary-virtual-specifier noise)
+bench identity HEAD vs modified: 768 pairs, 0 differ
+reg2: refs 105/105; M1.1 refs 1051 V2 1043 x4 SMC 14/14 x4 x{smc,smcm}; M1.2 refs 1045 V2 1051 x4; dbcc 0 failures; S0 selftest PASS
+HW-001: ALL OK, 277 stores, 5 neg controls fail as intended, images 7/7 match
+m11/m12 default identity: 2856 files = progs/*.up(157+151) *.ref(157+151) *.cmp(499+453) *.v2_*(684+604, incl 342+302 .v2_*.cmp), .sum files NOT included (3 .sum compared separately, identical); 0 differ. Raw sim/ref logs only (no .cmp): 1260
+db962df7c0fb8ba9098f0205c9d921eba09051b2fc99fd49d4f608c26d291074  final2_run_r1.log
+72b3d19e28b6b41c2ddf06c37985d89477dd93624f96d913cbd3ebb01be2badd  final2_hwt.log
+3af33f393ed0b77322f63f213216efa32536bf6ced09165c75425c921df113ef  reg2/m11.sum
+26fe91e210cb771d0dafcbc8e7e943a1345b614ac355dcaba03e2cfd97557bfc  reg2/m12.sum
+195771289379f7cfa50f1257fba6d73e361308912bc723e8dd36dd39c39ca939  reg2/refs.sum
+534b4f74eb47a9ac8d425fe6b07d7d97ff5cc5879cc58afac35d9fe41ba3aa3d  reg2/dbcc.sum

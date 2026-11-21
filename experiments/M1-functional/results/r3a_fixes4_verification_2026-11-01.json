@@ -1,0 +1,95 @@
+{
+ "round": "R3a fixes 4 + shared-evaluator closure",
+ "date": "2026-11-01",
+ "base": "276ccea",
+ "baseline_record": "r3a_fixes3_verification_2026-10-31",
+ "files_changed_sha256": {
+  "experiments/M1-functional/m1_r1_check.py": "6f04a7f064e4271e4a257f9b37055bfab196e8f162088f1fa4965114ed45acac",
+  "experiments/M1-functional/m1_r2_check.py": "6d433500bc554618383e33c82a73625a5604f63b1da8146cfad110e0d8d6cafe",
+  "experiments/M1-functional/m1_r3_check.py": "dea8d8d85bdbc3e00c190602ce9b3f306e3e4d82513fd824f15f3a52b7dcea1c",
+  "experiments/M1-functional/m1_r1_run.py": "ead1c09df4eba21b0c725e542abf5bc6f0a867b781b0d37d22a7293527192c2c",
+  "experiments/M1-functional/m1_r2_run.py": "1bc40bb00eb2e29dbb6444e2ced686d249aa2b4844bfa2adabfcd78d00d9befc",
+  "experiments/M1-functional/m1_r3a_negctl.py": "011729dfdb0a5b74cf55f49edcdcd3fa56161660d9b63d72fb3bd8bc7ac16fbd",
+  "experiments/M1-functional/m1_r3a_s0.py": "18255cfe4737bbf5fe146bb3573a032d00422a329ca4c9d1eab256279e03d7de",
+  "experiments/S0-boot/s0_compare.py": "b126e1adedd03682a97d3a448f89b8675fce0ad773293d3f9fca7ba2bd3a6dd5",
+  "experiments/S0-boot/test_s0_compare.py": "650db85fb38b002f241ab2b137f6c8553c16e49d0d25c15d0bfe46acce86fae0",
+  "docs/r3-movea-plan.md": "25fde0bd8f0d48bb3bb021341a384b9b8a1f82764d3c0ee6ce6fdddfa40bd3aa"
+ },
+ "runs": [
+  {
+   "cmd": "python3 experiments/S0-boot/test_s0_compare.py",
+   "rc": 0,
+   "result": "374 passed, 0 failed (baseline baf6272: 261)",
+   "secs": 12
+  },
+  {
+   "cmd": "R3_OUT=reg5/r3full bash run_r3.sh (all controls)",
+   "rc": 0,
+   "result": "R3a PASS: 77/77 groups, 461/461 controls (0 missed; baseline 355)",
+   "secs": 269,
+   "sha256": "e1ebc87933f5fb2e57e277cc98b4407c5408fdd344112ae9f17c822b8df58391",
+   "file": "build/M1/r3a/reg5/run_r3_r3a_full3.sum"
+  },
+  {
+   "cmd": "R3_PHASE=r3b R3_SIM_R3B=1 R3_OUT=reg5/stubfull bash run_r3.sh",
+   "rc": 1,
+   "result": "58/64 groups (the same six V2-production groups fail by design), 450/450 controls (baseline 344)",
+   "secs": 240,
+   "sha256": "71bac4467914138281d4499329774efb9b5d0c4ff80b969b00c489eb79fec2e1",
+   "file": "build/M1/r3a/reg5/run_r3_stub_full3.sum"
+  },
+  {
+   "cmd": "R1_PHASE=r1b R1_OUT=reg5/r1c bash run_r1.sh",
+   "rc": 0,
+   "result": "35/35 groups, 39/39 controls; mutants 33 = 28 caught + 5 equivalent (= baseline)",
+   "secs": 58,
+   "sha256": "f99d003b0e2b5fa3e3e63f13f490acb9566c61db7e7871c2d2777f581b8dae8b",
+   "file": "build/M1/r3a/reg5/run_r1c3.sum"
+  },
+  {
+   "cmd": "R2_PHASE=r2b R2_OUT=reg5/r2c bash run_r2.sh",
+   "rc": 0,
+   "result": "79/79 groups, 107/107 controls (= baseline)",
+   "secs": 31,
+   "sha256": "61f2ee8392f37a07361fa693c702c0191179cbe9465e94069220d2ef3344b5fc",
+   "file": "build/M1/r3a/reg5/run_r2c3.sum"
+  },
+  {
+   "cmd": "bash run_refs.sh 100 reg5/refs",
+   "rc": 0,
+   "result": "105 agree, 0 disagree; D1 reproduces (= baseline)",
+   "secs": 12,
+   "sha256": "3820a3bf3cd0a5afcc4775b374800a2f75cf3b06d508074e14a3dce6f5c8e146",
+   "file": "build/M1/r3a/reg5/run_refs3.sum"
+  },
+  {
+   "cmd": "python3 m1_r3a_identity.py build/M1/r3a/pre reg5/r3full reg5/r3full",
+   "rc": 0,
+   "result": "20248/20248 identical, 0 failed, DRAINREC 250/250 (= baseline)",
+   "secs": 135,
+   "sha256": "1ff9d8ff44475d77fc9319ea220c213086033b37e0bf44e2870686d60279739a",
+   "file": "build/M1/r3a/reg5/identity3.sum"
+  },
+  {
+   "cmd": "python3 m1_r3.py reg5/fz --verify-frozen results/r3a_frozen_expectations_2026-10-29.json",
+   "rc": 0,
+   "result": "MATCH 3720e1bab01c3959 vs 3720e1bab01c3959, 912 expectations"
+  }
+ ],
+ "scans": [
+  "shared evaluator (closed grammar for R1/R2/R3) old HEAD 276ccea vs new: 10641 archived logs (8376 R3 + 993 R1 + 1272 R2), 0 differing failure lists; the same 8 fail in both (excluded k7 ack runs); 0 lines outside the grammar",
+  "line shapes of all 10641 logs enumerated and compared with the emitters (tb_m1_*, tb_s0_*, observer, checks, m1_mem/s0_mem, m1_ref.py); see docs section 12d",
+  "S0 log_facts: 333 S0-bench logs in the M1 archives + 59 real S0-dir logs, 0 errors",
+  "s0_compare default and --r2b-check old vs new: 595 pairs (376 compare_tests + 219 real-log pairs), 1190 runs, rc+stdout+stderr identical; --r3b-check on the 219 real-log pairs identical old/new",
+  "per-line mutation fuzz (17 mutations per line, build/M1/r3a/reg5/mutation_fuzz.txt): shared 3325 mutated lines, 4 survive; S0 3954, 9 survive; all survivors yield another well-formed line (last digit dropped; double space inside the banner host path). Before the closed grammar the shared evaluator had 4 survivors on COUNTERS/REDIRECTS spacing"
+ ],
+ "not_run": [
+  "run_d1.sh (hard-coded output dir build/M1/d1 = existing evidence; none of its inputs changed)",
+  "M1.1 / M1.2 / DBcc / HW-001 / S1 (import check of an earlier round found no changed module reachable; not re-verified now; they were not rerun)",
+  "Codex (owner runs it)",
+  "heavy.lock not taken (coordinator: holder stalled, lock untouched)",
+  "free disk dipped to 0.97 GB from other processes while I was paused; no suite was started under 3 GB (a stop and message occurred before r1; resumed at 3.2 GB)",
+  "Earlier same-day runs (first 430/419 control counts) were superseded by the final run above"
+ ],
+ "accepted": "not claimed"
+}

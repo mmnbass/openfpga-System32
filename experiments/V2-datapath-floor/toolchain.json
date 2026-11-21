@@ -1,0 +1,20 @@
+{
+  "_comment": [
+    "Quartus per toolchain key, read by ci_quartus.sh.",
+    "'pocket': Quartus Prime Lite 25.1std.0 b1129, ghcr.io/nikleberg/quartus 25.1 (base)",
+    "and 25.1-cyclonev (data-only device files), pinned by OCI index digest.",
+    "Audited in docs/quartus-25.1-image-evaluation.md. Adopted by the owner on",
+    "2026-10-23 after validation run 39892007513 (substantive checks passed; the",
+    "run is FAIL overall on its original negative control). Third-party",
+    "redistribution remains an unresolved licensing question. Not mirrored,",
+    "modified or republished.",
+    "'de10': unchanged E1/Q1 image (string = run as in E1/Q1)."
+  ],
+  "pocket": {
+    "base": "ghcr.io/nikleberg/quartus@sha256:75f1830713e99d911c977252cf1925a120de0076cbd88a24c1c43a3c2990c9b5",
+    "devinfo": "ghcr.io/nikleberg/quartus@sha256:e92c929609b04727aeaa8ae28ef22cfd83f7aa25008aa12710e12d84b35f1441",
+    "devinfo_path": "/opt/quartus_lite/quartus/common/devinfo/cyclonev",
+    "expect_version": "25.1std.0 Build 1129 10/21/2025 SC Lite Edition"
+  },
+  "de10": "raetro/quartus:17.1"
+}

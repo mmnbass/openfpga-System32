@@ -1,0 +1,48 @@
+{
+ "manifest_sha256": "3720e1bab01c39590cc9d9eef19a19ab07063bef736612dbb8db5f6c351972cb",
+ "programs": 912,
+ "classes": {
+  "pos/low": 164,
+  "pos/s0": 16,
+  "neg/low": 572,
+  "neg/s0": 1,
+  "probe3/low": 159
+ },
+ "generator_sha256": "c13e4ba933e6cfb4b96bb4efedea64bef23332742fd81502b7c435115103ed76",
+ "a1_addresses": [
+  "00000000",
+  "00000001",
+  "000000ff",
+  "00000100",
+  "7fffffff",
+  "80000000",
+  "ffffffff",
+  "00210000",
+  "00208000",
+  "00e00000",
+  "deadbeef",
+  "aaaaaaaa",
+  "55555555",
+  "00000080",
+  "00008000",
+  "00ff0000",
+  "ff000000",
+  "12345678",
+  "000000fe"
+ ],
+ "a10_pair": [
+  {
+   "addr": "00210000",
+   "rd": 31,
+   "bytes": "40 3F F3 00 00 21 00"
+  },
+  {
+   "addr": "00208000",
+   "rd": 25,
+   "bytes": "40 39 F3 00 80 20 00"
+  }
+ ],
+ "note": "expectations frozen before any MOVEA microcode exists (dtab[0x40] = trap in the builder); computed from the encoding only (m1_r3.py imports no reference or RTL model)",
+ "builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+ "dtab_0x40_0x42_0x44_is_trap": true
+}

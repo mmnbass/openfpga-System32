@@ -1,0 +1,59 @@
+R4b results 2026-11-04 (SIMULATION ONLY; V2 microcode + mode-table entry; no CPU RTL change; nothing hardware-proven, no fit, no Codex checkpoint)
+scope: MOVEA.B disp32[PC], Rn only (opcode 0x40, Format I d = 1, mode byte F2 with m = 0, S-D descriptor tag); F0 / F1 / Format II / d = 0 / 0x42 / 0x44 / every other mode still trap; no other instruction family
+builder: experiments/M1-functional/m1_m11_microcode.py sha256 b810b8d8837bee03fd13f6dfb270b23cf5c9354c3c98d303d498381a68913df8 (pre-R4 / R3b: 4ac7fa340674fc73ce4166adf07b01efde7c417e1c409c00c40913a40f94c510)
+
+== R4a (written and frozen BEFORE any microcode; builder still 4ac7fa34..., mtab[0x0F2] = trap_mode) ==
+ generator m1_r4.py (imports no reference or RTL model; value = (start + signed disp32) mod 2^32 decoded from the emitted bytes): 832 programs = 190 pos/low + 18 pos/s0 + 622 neg/low + 2 neg/s0
+   (B1-B11, GA2 shapes at 0x0010051c / 0x0013346e and the S0 prefix, C1-C10, C7a-C7j, the 510-entry sweep (all but m=0 F3 / F2), operand-2 coverage siblings, the supersession replacements)
+ frozen record results/r4a_frozen_expectations_2026-11-04.json: manifest sha256 f7c28d613a37723edad1b26d6d2cd189ceccc3ae402751d1263b5cc66387f31f (f7c28d613a37723e), generator sha256 29e0df3c...
+ pre-R4 fixture results/r4a_pre_r4_fixture_2026-11-04.json (all 8 builder configurations; builder sha256 4ac7fa34... asserted) and table pins results/r4a_table_pins_2026-11-04.json
+ tag scan on the pre-R4 builder (m1_r4_tagscan.py): 8/8 configurations: zero bit-11 entries, zero condition-23 words, zero DEC_EA / AGU / MAR_LD / CONSUME 9-11 words (results/r4a_tagscan_pre_r4_builder_2026-11-04.json)
+ references: V60X (corrected) and upstream agree with the generator on all positives: 186/186 + 18/18 each (M1 bench / S0 harness), V60X == upstream lock-step
+ run_r4.sh R4_PHASE=r4a (today's V2, run dir build/M1/r4/r4a_run3): 78/78 result groups, 68/68 negative controls/catchers (0 missed). V2 production 812/812 at each of 4 fetch configs, S0 harness 20/20 x4, withheld-fetch 12/12 + 12/12 per
+   config, SMC (smc, smcm) 1537/1537 + 19/19 per config (+A7 12/12), the R3 programs on the live (= pre-R4) builder 736/736 + 17/17 x4, pins 8/8, tag scan 8/8. Every PC-relative positive traps `mode` at its own start PC; the C-cases behave as plan 6.2.
+   the r4b expectations REJECT today's V2 on 60/60 PC-relative positives. S0 on the real GA2 prefix: today's V2 FAILS --r4b-check for exactly the expected reasons (reach 4 != 7, not TRAP opcode at 0010052d) and still PASSES --r3b-check.
+   (two earlier r4a runs, kept: run1 22/23 and run2 67/68 -- each a defect in one of MY controls (a sweep entry (m=1, F2) counted as superseded; a wrong substring in the upstream-prefix control), fixed once each; run3 clean.)
+ s0_compare.py --r4b-check (new flag, closed grammar, replayed state; the upstream zero-access window is records 0-6 only): test_s0_compare.py 426/426 (379 + 47 new, every rejection names its message); A/B identity of --r3b-check, --r2b-check and the default mode against git HEAD:
+   387 input triples x 3 modes = 1,161 runs, stdout + stderr + exit status identical in all 1,161.
+
+== R4b ==
+ microcode (appended / inserted; production only; --smc-test builds unchanged): movea: `br C_TAG(23) -> movea_pcrel` after the C_IMM guard (1 word); movea_pcrel (2 words): execute word
+   ASEL=PC(ipc) BSEL=IMM ALU_OP=ADD RES_SEL=ALU IMM_LD=1 IMM_OFS=1 IMM_SZ=2 CONSUME=5 WR_DST=GPR WR_ASEL=1 (no FLAG_UPD, no bus; =0x46500008240040006400000) then jmp disp; jmp: `br C_TAG -> trap_mode` after its C_IMM guard
+   (1 word, before the REDIRECT word). mtab[0x0F2] = (0x88C << 12) | mret (production only). Words: production 253 -> 257 (+4), --reset-native 249 -> 253, --smc-test 242 / 241 / 238 / 237 unchanged (all 8 configurations pass the builder assertions).
+   The jmp guard word relocates the trap labels and every later routine (their symbol addresses +1): the dispatch / mode tables are identical to the pre-R4 fixture BY SYMBOL (asserted), dtab entries and jump targets are not byte-identical.
+ builder assertions (5.5): mtab[0x0F2] exact; tagged entries exactly {0x0F2} (production) / none (smc); exactly two condition-23 words (jmp -> trap_mode, movea -> movea_pcrel), each after an operand() call, polarity 0; no DEC_EA / AGU / MAR_LD / AGU RES_SEL / CONSUME 9-11 word;
+   memory descriptors exactly {0x0F3: 0x14c, 0x0F2: 0x88c} (replaces odd == [0x0F3]); extended check_movea. Test-only knobs pc_* (off by default).
+ run_r4.sh R4_PHASE=r4b on the LIVE builder's images (run dir build/M1/r4/r4b_run2): 88/88 result groups, 99/99 negative controls/catchers. V2 812/812 x4 configs, S0 20/20 x4, withheld 10/10 + 12/12 per config, SMC 1537/1537 + 19/19, R3 programs 736/736 + 17/17 x4
+   with the supersession table applied (3 uses, below), structural groups 8/8 each (tag scan, dispatch table by symbol, mode table differs in exactly mtab[0x0F2], the control store below the jmp routine identical modulo symbol relocation, +4 words, descriptor set, trap_mode entries, dtab[0x42]/[0x44]/[0x40]).
+   (an earlier r4b run, run1 87/88, failed my control-store-prefix check: it compared raw words, but the added jmp word relocates the trap labels; compared by symbol in run2.)
+ S0 (real GA2 prefix; results/r4b_s0_result_2026-11-04.json): s0_compare.py --r4b-check PASS with upstream prefix (+maxinstr=7), +maxinstr=200 and +maxinstr=20000 runs, against the 16-line and the full 199,999-line MAME head:
+   reach 7 (jmp, ldpr, movea SP, movea R25, movea R10 (PC-relative), movea R11, mov.w #8,R1), V2 end TRAP opcode ipc=0010052d (mov.b [R10+],[R11+], opcode 0x09); R31 00210000, R25 00208000, R10 0010058c, R11 00e00000, R1 00000008,
+   PSW 10000000, SBR 00100000 (P 1 id=5 / PR id=5), every other GPR and privileged register zero; G events 2 -> R31, 3 -> R25, 4 -> R10, 5 -> R11, 6 -> R1 (be=f); C 2..6 dr=dw=priv=psw=0 gpr=1; CU 7 all zero; no W line; MEMSTAT reads rom 36 / mirror 8 only;
+   MEMDRAIN outstanding_wr=0 nonrom_reqs=0; DRAIN d_starts=0; END instrs=7; SIMCHECK 0/0; upstream records 0-6 carry no W / M line. 62 corruptions (31 of the synthesised log, 31 of the real V2 log) fail, the index-7 store is accepted and the same effect at index 6 rejected;
+   --r3b-check fails the R4b log by design (reach 7 != 4). run_s0.sh (output dir now an argument) with +maxinstr=20000 in its own new dir: reach 7, TRAP opcode ipc=0010052d.
+ mutants (m1_r4b_mutants.py; build/M1/r4/r4b_mutants_2.json; results/r4b_mutants_2026-11-04.json): baseline 1,708 production + 814 smc runs, 0 failing; 71 behavioural mutants: 62 KILLED by a program of their designated catcher tag, 9 EQUIVALENT with a reason (swap_operands: ADD is commutative;
+   imm_sx: a disp32 is not changed by sign extension; tag_on_regdir / tag_on_quick / tag_on_imm: the C_REGDIR / C_IMM guards precede the tag test; f2_dsz1 / f2_base5: the descriptor's size / base fields are never read; third_c23 and dec_ea_word: behaviourally identical);
+   the last seven are killed by the builder assertions (structural mutant of the same name), swap_operands / imm_sx are architecturally equivalent; 0 survivors. 28/28 structural mutants raise AssertionError in build(). consume4: availability checker fired on 27 runs; nowrite also fails via GPR events on b5_same.
+   (a first mutants run: pc_cond25 / pc_cond27 / pc_cond6 and the two smc mutants were killed by non-designated programs because I named the wrong catcher tags; tags corrected, rerun clean.)
+ regression (build/M1/r4/reg_b1, one new directory per run): R1 (r1b) 35/35 + 39/39, mutants 33 = 28 caught + 5 equivalent; R2 (r2b) 79/79 + 107/107 (r2fix run; the first attempt 78/79 because the pre-R2 table pin compared absolute addresses: now de-relocated by symbol);
+   R3 suite phase r3b against the pre-R4 FIXTURE (R3_MCGEN / R3_BUILDER_MODULE = m1_r4_fixbuilder): 78/78 groups, 484/484 controls; run_refs.sh 100: 105 agree, D1 probe_movea_value reproduces; run_v2.sh (M1.0 V2 side) rc 0; M1.1 refs 1051, V2 1043 x4, SMC 14/14; M1.2 refs 1045, V2 1051 x4;
+   DBcc 0 failures; run_d1.sh (output dir argument): rc 0, 20 D1 PASS, 23 mutants caught; S0 self-test PASS (reach 3, trap mode at fffffffb); test_s0_compare 426/426; S1 run_vectors 122 PASS, ext mutants 31 (26 + 5, 0 missed), ref_agreement 113/8/0/1;
+   m1_probe_movea.py D1 reproduces (R1 = 0x5a dr = 1 / 0x20 dr = 0); HW-001 run_hwt.sh ALL OK, image hashes 7/7, HW-cpu-test tree unchanged.
+ default-output identity (m1_r4_identity.py; pre = frozen fixture images, new = R4b, same benches, +lockstep, 4 fetch configs, production / smc / smcm / S0): 24,172 log pairs: 22,112 byte-identical; 844 PC-relative programs (execute now, trapped `mode` before: by design);
+   1,113 /abs-MOVEA / JMP programs with ARCHITECTURAL identity (every L / P / G / W / R / PSW / PR record, trap kind and PC, counters' dr dw priv psw gpr, SIMCHECK) and a different END cycles; 95 R4 negative programs that carry F2 as an operand and trap with the same kind and PC but a different cycle count;
+   0 unexpected (run 2 flagged 8 S0 programs only for MEMSTAT prefetch read counts; the normaliser was corrected and those 8 re-evaluated: classified timing). Every program without a MOVEA, JMP or F2 operand is byte-identical. Cost: results/r4b_costs_2026-11-04.txt.
+ cost: production 253 -> 257 words; PC-relative MOVEA 14 advancing execute cycles (25 cycles default, 14 +wide); /abs MOVEA 13 -> 14; JMP 14 -> 15 (default total 45 -> 60 cycles in one program: the added word interacts with the redirect refill; +wide 29 -> 29); 102-program cost table identical in both configs.
+ frozen digests after the microcode change: R3a 3720e1bab01c3959 MATCH (912); R4a f7c28d613a37723e MATCH (832).
+
+== supersession table (every use; plan 7.1; no R3 file edited) ==
+ 1. R3 programs n3_m0_f2, n6_mode_bit0 (mode byte F2 after 0x40) and a10_s0_prefix_trap (the reach-4 end): R3b expectation `mode` -> R4b expectation (they execute); checked on sup_n3_m0_f2, sup_n6_mode_bit0, sup_a10_s0_prefix: 3 uses in the live-builder R3 stage (also asserted: these three are EXACTLY the R3 programs
+    whose trapping 0x40 has mode byte F2 with m = 0 and kind `mode`).
+ 2. s0_compare.py --r3b-check on an R4b V2 log fails (reach 7 != 4), by design; it keeps passing the R3b logs (A/B identity).
+ 3. builder assertion odd == [0x0F3] and the R1b structural invariant (m1_r1b_mutants.structural) replaced by the descriptor-set invariant {0x0F3, 0x0F2}; R3b's structural mutant "a second memory descriptor" no longer a mutant (mtab[0x0F2] now carries 0x88C).
+ 4. m1_r2_run.py pre-R2 table pins: dtab[0x40] and mtab[0x0F2] normalised to trap / trap_mode and production addresses mapped back by symbol (the jmp word relocates later routines).
+ 5. the R3 suite is reproduced on the pre-R4 fixture (not the live builder): its S0 controls and invariants describe the R3b state. The R3b mutants (m1_r3b_mutants.py) were NOT rerun on the live R4b builder (their baseline would fail the three superseded programs).
+
+== not run / limits ==
+ no Codex, no hardware, no fit; the model-only mutants of R4a-5 and the optional probe image (Q6) were not written (the mutants are real microcode); F0 / F1 widths, Format II, R5 and everything else are out of scope; the AGU header comment (D9) was not corrected.
+ the manual's PC definition was not searched (plan 2.2a unchanged). The first reading of base = instruction start rests on MAME, upstream, V60X and the ROM's printed targets.
+ evidence rules: every run wrote into a NEW directory under build/M1/r4/ (run_d1.sh, run_s0.sh, test_s0_compare.py, test_ext_mutants.py got output-directory arguments / environment variables, defaults unchanged); nothing deleted.

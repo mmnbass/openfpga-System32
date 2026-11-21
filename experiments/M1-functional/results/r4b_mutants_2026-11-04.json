@@ -1,0 +1,1702 @@
+{
+ "runs_per_mutant": null,
+ "mutants": {
+  "base_next_pc": {
+   "desc": "wrong base = next PC (start + 7)",
+   "knobs": {
+    "pc_addk": 7
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "base_field": {
+   "desc": "wrong base = field address (start + 3)",
+   "knobs": {
+    "pc_addk": 3
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "base_head": {
+   "desc": "wrong base = fetch head after the format byte (start + 2)",
+   "knobs": {
+    "pc_addk": 2
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "base_zero": {
+   "desc": "wrong base = 0 (the /abs behaviour: the raw displacement)",
+   "knobs": {
+    "pc_base0": true
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 205,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "sub": {
+   "desc": "SUB instead of ADD",
+   "knobs": {
+    "pc_sub": true
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 205,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "swap_operands": {
+   "desc": "ASEL / BSEL swapped on the ADD",
+   "knobs": {
+    "pc_swap": true
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "ADD is commutative: ipc + imm == imm + ipc (the swapped word is architecturally identical)",
+   "structural_catcher": null
+  },
+  "imm_ofs0": {
+   "desc": "IMM_OFS 0 (reads the mode byte and three field bytes)",
+   "knobs": {
+    "pc_imm_ofs": 0
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "imm_ofs2": {
+   "desc": "IMM_OFS 2 (field skewed by one byte)",
+   "knobs": {
+    "pc_imm_ofs": 2
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 206,
+   "designated_failing": 69,
+   "first": "b1_v01",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "imm_sz0": {
+   "desc": "IMM_SZ 0 (displacement read as 8 bits)",
+   "knobs": {
+    "pc_imm_sz": 0
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 189,
+   "designated_failing": 64,
+   "first": "b1_v02",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "imm_sz1": {
+   "desc": "IMM_SZ 1 (displacement read as 16 bits)",
+   "knobs": {
+    "pc_imm_sz": 1
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 125,
+   "designated_failing": 53,
+   "first": "b1_v02",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "imm_sx": {
+   "desc": "IMM_SX set with IMM_SZ = 2",
+   "knobs": {
+    "pc_imm_sx": true
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "v2_immx returns all 32 bits unchanged for a word-size immediate (v2_glue.sv imm_val): sign extension of a disp32 is a no-op in 32-bit arithmetic (plan 2.2)",
+   "structural_catcher": null
+  },
+  "mask8": {
+   "desc": "result zero-extended from 8 bits",
+   "knobs": {
+    "pc_mask": 8
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 188,
+   "designated_failing": 62,
+   "first": "b1_v06",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "mask16": {
+   "desc": "result zero-extended from 16 bits",
+   "knobs": {
+    "pc_mask": 16
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 132,
+   "designated_failing": 50,
+   "first": "b1_v08",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "consume4": {
+   "desc": "CONSUME 4 on the execute word",
+   "knobs": {
+    "pc_consume": 4
+   },
+   "designated_tags": [
+    "B9",
+    "B2",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 86,
+   "first": "b2_at100",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null,
+   "availability_checker_fired_runs": 27
+  },
+  "consume6": {
+   "desc": "CONSUME 6 on the execute word",
+   "knobs": {
+    "pc_consume": 6
+   },
+   "designated_tags": [
+    "B9",
+    "B2",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 86,
+   "first": "b2_at100",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped opcode at 00000108, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "consume8": {
+   "desc": "CONSUME 8 on the execute word",
+   "knobs": {
+    "pc_consume": 8
+   },
+   "designated_tags": [
+    "B9",
+    "B2",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 86,
+   "first": "b2_at100",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "fmt_consume1": {
+   "desc": "missing CONSUME on the format word (CONSUME 1)",
+   "knobs": {
+    "mv_fmt_consume": 1
+   },
+   "designated_tags": [
+    "B9",
+    "B2",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 210,
+   "designated_failing": 87,
+   "first": "b2_at100",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at 00000100, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_dst_temp": {
+   "desc": "WR_DST temp instead of GPR",
+   "knobs": {
+    "pc_wr_dst": 2
+   },
+   "designated_tags": [
+    "B4"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 32,
+   "first": "b4_r00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_dst_priv": {
+   "desc": "WR_DST privileged instead of GPR",
+   "knobs": {
+    "pc_wr_dst": 3
+   },
+   "designated_tags": [
+    "B4"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 32,
+   "first": "b4_r00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_const": {
+   "desc": "WR_ASEL const (RCONST 0)",
+   "knobs": {
+    "pc_wr_asel": 0,
+    "pc_rconst": 0
+   },
+   "designated_tags": [
+    "B4"
+   ],
+   "runs": 688,
+   "failing_programs": 207,
+   "designated_failing": 31,
+   "first": "b4_r01",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_fld2": {
+   "desc": "WR_ASEL field 2 (the mode byte's low five bits = R18)",
+   "knobs": {
+    "pc_wr_asel": 2
+   },
+   "designated_tags": [
+    "B4"
+   ],
+   "runs": 688,
+   "failing_programs": 207,
+   "designated_failing": 31,
+   "first": "b4_r00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_mreg": {
+   "desc": "WR_ASEL mode-byte register (R18)",
+   "knobs": {
+    "pc_wr_asel": 3
+   },
+   "designated_tags": [
+    "B4"
+   ],
+   "runs": 688,
+   "failing_programs": 207,
+   "designated_failing": 31,
+   "first": "b4_r00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "nowrite": {
+   "desc": "omitted GPR write (the value goes to a temp); destination already equal to the result = the omitted-unchanged write",
+   "knobs": {
+    "pc_nowrite": true
+   },
+   "designated_tags": [
+    "B4",
+    "B5"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 39,
+   "first": "b4_r00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null,
+   "b5_gpr_event_failures": [
+    "b5_same"
+   ]
+  },
+  "dup_write": {
+   "desc": "duplicate GPR write in the executed word sequence",
+   "knobs": {
+    "pc_dup": true
+   },
+   "designated_tags": [
+    "B5",
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 31,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "transient_write": {
+   "desc": "transient GPR write (a constant, then the address): two events, final state correct",
+   "knobs": {
+    "pc_transient": true
+   },
+   "designated_tags": [
+    "B5",
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 31,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "GPR write events of instruction 2: got [(5,7,f), (5,e,f)] expected [(5,e,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "flag_upd": {
+   "desc": "FLAG_UPD on the execute word",
+   "knobs": {
+    "pc_flag_upd": 15
+   },
+   "designated_tags": [
+    "B8"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 11,
+   "first": "b8_el1",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "value_read": {
+   "desc": "a data-bus read of the target (value instead of address; the v60_ref defect)",
+   "knobs": {
+    "pc_value_read": true
+   },
+   "designated_tags": [
+    "B7"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 15,
+   "first": "b3_s0_regs",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dummy_read": {
+   "desc": "an extra bus READ of the target whose result is discarded",
+   "knobs": {
+    "pc_dummy_read": true
+   },
+   "designated_tags": [
+    "B7"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 15,
+   "first": "b3_s0_regs",
+   "first_evidence": [
+    "default",
+    "std",
+    "counters: instruction 1 dr=1 expected 0"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dummy_store": {
+   "desc": "an extra bus WRITE (a store of a constant) to the target",
+   "knobs": {
+    "pc_dummy_store": true
+   },
+   "designated_tags": [
+    "B7"
+   ],
+   "runs": 688,
+   "failing_programs": 208,
+   "designated_failing": 15,
+   "first": "b3_s0_regs",
+   "first_evidence": [
+    "default",
+    "std",
+    "counters: instruction 1 dw=1 expected 0"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_f1_guard": {
+   "desc": "C_F1 guard removed",
+   "knobs": {
+    "mv_no_f1_guard": true
+   },
+   "designated_tags": [
+    "C3",
+    "f2"
+   ],
+   "runs": 688,
+   "failing_programs": 5,
+   "designated_failing": 3,
+   "first": "c3_bf",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('opcode', '0000000e') expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_d_guard": {
+   "desc": "C_D guard removed",
+   "knobs": {
+    "mv_no_d_guard": true
+   },
+   "designated_tags": [
+    "C4",
+    "d0"
+   ],
+   "runs": 688,
+   "failing_programs": 5,
+   "designated_failing": 3,
+   "first": "c4_d0_00",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_regdir_guard": {
+   "desc": "C_REGDIR guard removed",
+   "knobs": {
+    "mv_no_regdir_guard": true
+   },
+   "designated_tags": [
+    "C2",
+    "sweep",
+    "C7"
+   ],
+   "runs": 1708,
+   "failing_programs": 32,
+   "designated_failing": 32,
+   "first": "c2_m1_60",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_imm_guard": {
+   "desc": "C_IMM guard removed",
+   "knobs": {
+    "mv_no_imm_guard": true
+   },
+   "designated_tags": [
+    "C2",
+    "sweep"
+   ],
+   "runs": 1708,
+   "failing_programs": 18,
+   "designated_failing": 17,
+   "first": "c2_m0_e0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_cond22": {
+   "desc": "movea branch tests condition 22 (double displacement) instead of 23",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_cond": 22
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 205,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_cond24": {
+   "desc": "movea branch tests condition 24 (C_F1) instead of 23",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_cond": 24
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 205,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_cond25": {
+   "desc": "movea branch tests condition 25 (C_D) instead of 23",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_cond": 25
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3",
+    "B6",
+    "B10"
+   ],
+   "runs": 688,
+   "failing_programs": 26,
+   "designated_failing": 22,
+   "first": "b10_ga2_prefix",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step: 7 records, first 7 expected to equal the independent prefix"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_cond26": {
+   "desc": "movea branch tests condition 26 (quick) instead of 23",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_cond": 26
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 205,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_cond27": {
+   "desc": "movea branch tests condition 27 (decode ready) instead of 23",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_cond": 27
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3",
+    "B6",
+    "B10"
+   ],
+   "runs": 688,
+   "failing_programs": 26,
+   "designated_failing": 22,
+   "first": "b10_ga2_prefix",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step: 7 records, first 7 expected to equal the independent prefix"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_cond6": {
+   "desc": "movea branch tests condition 6 (result zero) instead of 23",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_cond": 6
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3",
+    "B6",
+    "B10"
+   ],
+   "runs": 688,
+   "failing_programs": 60,
+   "designated_failing": 24,
+   "first": "b10_ga2_prefix",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step: 7 records, first 7 expected to equal the independent prefix"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_pol_inverted": {
+   "desc": "movea branch polarity inverted (/abs takes the PC-relative word, the tagged descriptor takes /abs)",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_pol": 1
+   },
+   "designated_tags": [
+    "B1",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 209,
+   "designated_failing": 68,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "pc_never_taken": {
+   "desc": "movea branch removed (the tagged descriptor falls through to the /abs word: the raw displacement)",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_no_branch": true
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 688,
+   "failing_programs": 205,
+   "designated_failing": 70,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_guard_removed": {
+   "desc": "jmp guard removed (jmp d[PC] executes as /abs and jumps to the raw displacement)",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_no_jmp_guard": true
+   },
+   "designated_tags": [
+    "C7a"
+   ],
+   "runs": 688,
+   "failing_programs": 3,
+   "designated_failing": 2,
+   "first": "c7a_jmp_f2",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_cond22": {
+   "desc": "jmp guard tests condition 22",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_cond": 22
+   },
+   "designated_tags": [
+    "C7a"
+   ],
+   "runs": 688,
+   "failing_programs": 3,
+   "designated_failing": 2,
+   "first": "c7a_jmp_f2",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_cond24": {
+   "desc": "jmp guard tests condition 24",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_cond": 24
+   },
+   "designated_tags": [
+    "C7a"
+   ],
+   "runs": 688,
+   "failing_programs": 18,
+   "designated_failing": 1,
+   "first": "c7a_jmp_f2_s0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('mode', 'fffffff0') expected ('mode', '0010050e')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_cond25": {
+   "desc": "jmp guard tests condition 25",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_cond": 25
+   },
+   "designated_tags": [
+    "C7a"
+   ],
+   "runs": 688,
+   "failing_programs": 18,
+   "designated_failing": 1,
+   "first": "c7a_jmp_f2_s0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('mode', 'fffffff0') expected ('mode', '0010050e')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_cond26": {
+   "desc": "jmp guard tests condition 26",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_cond": 26
+   },
+   "designated_tags": [
+    "C7a"
+   ],
+   "runs": 688,
+   "failing_programs": 3,
+   "designated_failing": 2,
+   "first": "c7a_jmp_f2",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_cond27": {
+   "desc": "jmp guard tests condition 27",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_cond": 27
+   },
+   "designated_tags": [
+    "C7a"
+   ],
+   "runs": 688,
+   "failing_programs": 18,
+   "designated_failing": 1,
+   "first": "c7a_jmp_f2_s0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('mode', 'fffffff0') expected ('mode', '0010050e')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_pol_inverted": {
+   "desc": "jmp guard polarity inverted (jmp /abs traps, jmp d[PC] executes)",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_pol": 1
+   },
+   "designated_tags": [
+    "C7a",
+    "C7j",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 20,
+   "designated_failing": 7,
+   "first": "b6_jmp_neighbours",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at 0000000e, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "jmp_guard_early": {
+   "desc": "jmp guard placed BEFORE operand(): it reads the previous instruction's descriptor",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_jmp_guard_early": true
+   },
+   "designated_tags": [
+    "C7a",
+    "C7j"
+   ],
+   "runs": 688,
+   "failing_programs": 5,
+   "designated_failing": 4,
+   "first": "c7a_jmp_f2",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "tag_on_abs": {
+   "desc": "tag (bit 11) also on the /abs descriptor mtab[0x0F3]",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf3": "0x94c000"
+    }
+   },
+   "designated_tags": [
+    "B6",
+    "B2",
+    "B10"
+   ],
+   "runs": 688,
+   "failing_programs": 40,
+   "designated_failing": 31,
+   "first": "b10_ga2_10051c",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at fffffff0, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "tag_on_regdir": {
+   "desc": "tag on a register-direct entry (mtab[0x160])",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0x160": "0x801000"
+    }
+   },
+   "designated_tags": [
+    "C2",
+    "sweep",
+    "B1"
+   ],
+   "runs": 1708,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the C_REGDIR guard precedes the tag test in movea and jmp and no other routine tests condition 23: behaviourally unreachable (plan 6.3); killed by the structural assertion only",
+   "structural_catcher": "struct_tag_on_regdir"
+  },
+  "tag_on_quick": {
+   "desc": "tag on a #q entry (mtab[0x0E0])",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xe0": "0x802000"
+    }
+   },
+   "designated_tags": [
+    "C2",
+    "sweep"
+   ],
+   "runs": 1708,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the C_IMM guard precedes the tag test: behaviourally unreachable; killed by the structural assertion only",
+   "structural_catcher": "struct_tag_on_quick"
+  },
+  "tag_on_imm": {
+   "desc": "tag on the #imm32 entry (mtab[0x0F4])",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf4": "0x80e000"
+    }
+   },
+   "designated_tags": [
+    "C2",
+    "sweep"
+   ],
+   "runs": 1708,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the C_IMM guard precedes the tag test: behaviourally unreachable; killed by the structural assertion only",
+   "structural_catcher": "struct_tag_on_imm"
+  },
+  "tag_removed": {
+   "desc": "tag removed from mtab[0x0F2] (bit 11 clear): movea_pcrel is never taken",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf2": "0x8c000"
+    }
+   },
+   "designated_tags": [
+    "B1",
+    "B10"
+   ],
+   "runs": 688,
+   "failing_programs": 207,
+   "designated_failing": 27,
+   "first": "b10_ga2_10051c",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "f2_marked_reg": {
+   "desc": "mtab[0x0F2] carries the tag and the register-direct bit (0x88D)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf2": "0x88d000"
+    }
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 223,
+   "designated_failing": 24,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at 0000000e, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "f2_marked_imm": {
+   "desc": "mtab[0x0F2] carries the tag and the immediate bit (0x88E)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf2": "0x88e000"
+    }
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 223,
+   "designated_failing": 24,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at 0000000e, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "f2_dsz1": {
+   "desc": "mtab[0x0F2] descriptor displacement-size field 16 bits (0x884)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf2": "0x884000"
+    }
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the routine's IMM_SZ is explicit, so the descriptor's size / base fields are never read (and no DEC_EA word exists): identical V2 behaviour; killed by the structural assertion only",
+   "structural_catcher": "struct_f2_dsz1"
+  },
+  "f2_base5": {
+   "desc": "mtab[0x0F2] descriptor AGU base 5 (0x8CC)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf2": "0x8cc000"
+    }
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the AGU base field is never read (no DEC_EA word): identical V2 behaviour; killed by the structural assertion only",
+   "structural_catcher": "struct_f2_base5"
+  },
+  "f0_populated": {
+   "desc": "mtab[0x0F0] (disp8[PC]) populated with the tagged descriptor",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf0": "0x88c000"
+    }
+   },
+   "designated_tags": [
+    "C1",
+    "C2"
+   ],
+   "runs": 1708,
+   "failing_programs": 7,
+   "designated_failing": 6,
+   "first": "c1_f0_neg",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "f1_populated": {
+   "desc": "mtab[0x0F1] (disp16[PC]) populated with the tagged descriptor",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf1": "0x88c000"
+    }
+   },
+   "designated_tags": [
+    "C1",
+    "C2"
+   ],
+   "runs": 1708,
+   "failing_programs": 6,
+   "designated_failing": 5,
+   "first": "c1_f1_r10",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "f8_populated": {
+   "desc": "mtab[0x0F8] ([disp[PC]], PC indirect) populated with the tagged descriptor",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0xf8": "0x88c000"
+    }
+   },
+   "designated_tags": [
+    "C2",
+    "sweep"
+   ],
+   "runs": 1708,
+   "failing_programs": 1,
+   "designated_failing": 1,
+   "first": "c2_m0_f8",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "m1_f2_populated": {
+   "desc": "mtab[0x1F2] (F2 with m = 1) populated with the tagged descriptor",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_mtab": {
+     "0x1f2": "0x88c000"
+    }
+   },
+   "designated_tags": [
+    "C5",
+    "C2"
+   ],
+   "runs": 1708,
+   "failing_programs": 4,
+   "designated_failing": 3,
+   "first": "c2_m1_f2",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "third_c23": {
+   "desc": "a third word branching on condition 23 (a guard in movw_d1)",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_third_c23": true
+   },
+   "designated_tags": [
+    "C7c"
+   ],
+   "runs": 688,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the added guard branches to trap_mode exactly where the existing C_IMM guard already traps a memory descriptor: identical V2 behaviour; killed by the structural assertion (condition-23 words == 2)",
+   "structural_catcher": "struct_third_c23"
+  },
+  "dec_ea_word": {
+   "desc": "a DEC_EA word added (the 0x88C base / size / step bits become live)",
+   "knobs": {
+    "mv_no_checks": true,
+    "pc_dec_ea_word": true
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 0,
+   "designated_failing": 0,
+   "first": null,
+   "first_evidence": null,
+   "status": "EQUIVALENT",
+   "equivalence_reason": "the added word is unreachable (it follows the routine's last jmp): identical V2 behaviour; killed by the structural assertion",
+   "structural_catcher": "struct_dec_ea_word"
+  },
+  "pc_no_disp_jmp": {
+   "desc": "missing final jmp disp on movea_pcrel",
+   "knobs": {
+    "pc_no_disp_jmp": true
+   },
+   "designated_tags": [
+    "B1",
+    "B6"
+   ],
+   "runs": 688,
+   "failing_programs": 189,
+   "designated_failing": 67,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dtab42": {
+   "desc": "dtab[0x42] = movea",
+   "knobs": {
+    "mv_dtab42": true
+   },
+   "designated_tags": [
+    "C6",
+    "N1"
+   ],
+   "runs": 688,
+   "failing_programs": 7,
+   "designated_failing": 4,
+   "first": "c6_42_d0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('mode', '00000007') expected ('opcode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dtab44": {
+   "desc": "dtab[0x44] = movea",
+   "knobs": {
+    "mv_dtab44": true
+   },
+   "designated_tags": [
+    "C6",
+    "N1"
+   ],
+   "runs": 688,
+   "failing_programs": 6,
+   "designated_failing": 4,
+   "first": "c6_44_d0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('mode', '00000007') expected ('opcode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dtab40_wrong": {
+   "desc": "dtab[0x40] at a wrong routine (the NOP routine)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_dtab40_wrong": true
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 246,
+   "designated_failing": 24,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped opcode at 0000000f, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dtab40_trap": {
+   "desc": "dtab[0x40] left trap",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_dtab40_trap": true
+   },
+   "designated_tags": [
+    "B1"
+   ],
+   "runs": 688,
+   "failing_programs": 246,
+   "designated_failing": 24,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped opcode at 0000000e, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "smc_dispatch": {
+   "desc": "dtab[0x40] = movea in the --smc-test builds (behavioural, assertions bypassed)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_smc_dispatch": true
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 814,
+   "failing_programs": 740,
+   "designated_failing": 63,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "smc",
+    "TRAP ('mode', '0000000e') expected ('opcode', '0000000e')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "smc_f2_tagged": {
+   "desc": "mtab[0x0F2] = 0x88C and dtab[0x40] = movea in the --smc-test builds (behavioural, assertions bypassed)",
+   "knobs": {
+    "mv_no_checks": true,
+    "mv_smc_dispatch": true,
+    "mv_mtab": {
+     "0xf2": "0x88c000"
+    }
+   },
+   "designated_tags": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "runs": 814,
+   "failing_programs": 742,
+   "designated_failing": 63,
+   "first": "b1_v00",
+   "first_evidence": [
+    "default",
+    "smc",
+    "TRAP None expected ('opcode', '0000000e')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  }
+ },
+ "structural": {
+  "struct_tag_on_abs": {
+   "desc": "bit 11 on mtab[0x0F3]",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F3] (both fields)"
+  },
+  "struct_tag_on_regdir": {
+   "desc": "bit 11 on a register-direct entry",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: tagged (bit 11) supported entries ['0xf2', '0x160'], expected exactly [0x0F2]"
+  },
+  "struct_tag_on_quick": {
+   "desc": "bit 11 on a #q entry",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: tagged (bit 11) supported entries ['0xe0', '0xf2'], expected exactly [0x0F2]"
+  },
+  "struct_tag_on_imm": {
+   "desc": "bit 11 on the #imm32 entry",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: tagged (bit 11) supported entries ['0xf2', '0xf4'], expected exactly [0x0F2]"
+  },
+  "struct_tag_removed": {
+   "desc": "mtab[0x0F2] without the tag",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F2] (R4b disp32[PC]: base 2, disp32, not register / immediate, tag bit 11)"
+  },
+  "struct_f2_marked_reg": {
+   "desc": "mtab[0x0F2] marked register",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F2] (R4b disp32[PC]: base 2, disp32, not register / immediate, tag bit 11)"
+  },
+  "struct_f2_marked_imm": {
+   "desc": "mtab[0x0F2] marked immediate",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F2] (R4b disp32[PC]: base 2, disp32, not register / immediate, tag bit 11)"
+  },
+  "struct_f2_dsz1": {
+   "desc": "mtab[0x0F2] displacement-size field 16",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F2] (R4b disp32[PC]: base 2, disp32, not register / immediate, tag bit 11)"
+  },
+  "struct_f2_base5": {
+   "desc": "mtab[0x0F2] AGU base 5",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F2] (R4b disp32[PC]: base 2, disp32, not register / immediate, tag bit 11)"
+  },
+  "struct_f2_trap_mode": {
+   "desc": "mtab[0x0F2] left trap_mode in production",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F2] (R4b disp32[PC]: base 2, disp32, not register / immediate, tag bit 11)"
+  },
+  "struct_f0_populated": {
+   "desc": "mtab[0x0F0] populated",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: non-register non-immediate entries [240, 242, 243]"
+  },
+  "struct_f1_populated": {
+   "desc": "mtab[0x0F1] populated",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: non-register non-immediate entries [241, 242, 243]"
+  },
+  "struct_f8_populated": {
+   "desc": "mtab[0x0F8] populated",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: non-register non-immediate entries [242, 243, 248]"
+  },
+  "struct_m1_f2_populated": {
+   "desc": "mtab[0x1F2] populated",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: non-register non-immediate entries [242, 243, 498]"
+  },
+  "struct_f3_m1_accepted": {
+   "desc": "mtab[0x1F3] accepted",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: non-register non-immediate entries [242, 243, 499]"
+  },
+  "struct_second_descriptor_rn": {
+   "desc": "a second memory descriptor ([R5], modm 0 0x65) added",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: non-register non-immediate entries [101, 242, 243]"
+  },
+  "struct_f3_changed": {
+   "desc": "mtab[0x0F3] descriptor offset size 16",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: mtab[0x0F3] (both fields)"
+  },
+  "struct_third_c23": {
+   "desc": "a third condition-23 word",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: 3 condition-23 words [25, 211, 253], expected exactly two (jmp guard, movea branch)"
+  },
+  "struct_no_jmp_guard": {
+   "desc": "jmp guard removed (condition-23 words == 1)",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: 1 condition-23 words [251], expected exactly two (jmp guard, movea branch)"
+  },
+  "struct_jmp_guard_early": {
+   "desc": "jmp guard before operand()",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "condition-23 word 206 in jmp is not preceded by an operand() call"
+  },
+  "struct_jmp_pol_inverted": {
+   "desc": "jmp guard polarity inverted",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "condition-23 word 210 (jmp) has inverted polarity"
+  },
+  "struct_movea_cond22": {
+   "desc": "movea branch on condition 22 (condition-23 words == 1)",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: 1 condition-23 words [210], expected exactly two (jmp guard, movea branch)"
+  },
+  "struct_movea_pol_inverted": {
+   "desc": "movea branch polarity inverted",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "condition-23 word 252 (movea) has inverted polarity"
+  },
+  "struct_dec_ea_word": {
+   "desc": "a DEC_EA word",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "words that could consume the tagged descriptor's base/size/step bits: [257] (retire the S-D tag first)"
+  },
+  "struct_smc_dispatch": {
+   "desc": "dtab[0x40] = movea in an --smc-test build",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "smc_test: dtab[0x40] must stay trap (R3b variant isolation)"
+  },
+  "struct_smc_f2_tagged": {
+   "desc": "mtab[0x0F2] = 0x88C in an --smc-test build",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "smc_test: mtab[0x0F2] must stay trap_mode (R4b variant isolation)"
+  },
+  "struct_dtab40_trap": {
+   "desc": "dtab[0x40] left trap in production",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: dtab[0x40] = movea"
+  },
+  "struct_dtab40_wrong": {
+   "desc": "dtab[0x40] at a wrong routine in production",
+   "status": "KILLED_STRUCTURAL",
+   "assertion": "production: dtab[0x40] = movea"
+  }
+ },
+ "baseline": {
+  "runs": 1708,
+  "failing_programs": []
+ },
+ "baseline_smc": {
+  "runs": 814,
+  "failing_programs": []
+ },
+ "all_ok": true
+}

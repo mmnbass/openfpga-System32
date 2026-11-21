@@ -1,0 +1,976 @@
+{
+ "phase": "r2b",
+ "builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+ "pre_builder_sha256": "86f2a3025401185d1c24d47e01bc4c70e0f7e2354e8ad7e469b17f42fe4b6fbf",
+ "programs": 206,
+ "result_groups": [
+  {
+   "status": "PASS",
+   "name": "V60X (ref_ext) (M1 bench)",
+   "passed": 130,
+   "total": 130
+  },
+  {
+   "status": "PASS",
+   "name": "upstream s32_v60 (M1 bench)",
+   "passed": 130,
+   "total": 130
+  },
+  {
+   "status": "PASS",
+   "name": "V60X (ref_ext) (S0 harness)",
+   "passed": 18,
+   "total": 18
+  },
+  {
+   "status": "PASS",
+   "name": "upstream s32_v60 (S0 harness)",
+   "passed": 18,
+   "total": 18
+  },
+  {
+   "status": "PASS",
+   "name": "V60X == upstream (lock-step records)",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "upstream events == V60X events minus unchanged-value writes",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [default]",
+   "passed": 174,
+   "total": 174
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=2]",
+   "passed": 174,
+   "total": 174
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=5 +memjit=4]",
+   "passed": 174,
+   "total": 174
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+wide]",
+   "passed": 174,
+   "total": 174
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [default] S0 harness",
+   "passed": 18,
+   "total": 18
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=2] S0 harness",
+   "passed": 18,
+   "total": 18
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=5 +memjit=4] S0 harness",
+   "passed": 18,
+   "total": 18
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+wide] S0 harness",
+   "passed": 18,
+   "total": 18
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [default] withheld fetch, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [default] withheld fetch, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=2] withheld fetch, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=2] withheld fetch, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=5 +memjit=4] withheld fetch, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+memwait=5 +memjit=4] withheld fetch, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+wide] withheld fetch, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "V2 production [+wide] withheld fetch, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [default]",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+memwait=2]",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+memwait=5 +memjit=4]",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+wide]",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [default] withheld fetch, never released",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [default] withheld fetch, released by cycle count",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+memwait=2] withheld fetch, never released",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+memwait=2] withheld fetch, released by cycle count",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+memwait=5 +memjit=4] withheld fetch, never released",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+memwait=5 +memjit=4] withheld fetch, released by cycle count",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+wide] withheld fetch, never released",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "V2 probe image [+wide] withheld fetch, released by cycle count",
+   "passed": 6,
+   "total": 6
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, M1 bench] [default]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [default] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [default] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, M1 bench] [+memwait=2]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [+memwait=2] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [+memwait=2] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, M1 bench] [+memwait=5 +memjit=4]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [+memwait=5 +memjit=4] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [+memwait=5 +memjit=4] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, M1 bench] [+wide]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [+wide] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smc] [+wide] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, S0 reset-native] [default]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, S0 reset-native] [+memwait=2]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, S0 reset-native] [+memwait=5 +memjit=4]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smc, S0 reset-native] [+wide]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, M1 bench] [default]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [default] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [default] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, M1 bench] [+memwait=2]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [+memwait=2] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [+memwait=2] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, M1 bench] [+memwait=5 +memjit=4]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [+memwait=5 +memjit=4] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [+memwait=5 +memjit=4] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, M1 bench] [+wide]",
+   "passed": 167,
+   "total": 167
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [+wide] withheld, never released",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix L6 [smcm] [+wide] withheld, released by cycle count",
+   "passed": 14,
+   "total": 14
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, S0 reset-native] [default]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, S0 reset-native] [+memwait=2]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, S0 reset-native] [+memwait=5 +memjit=4]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "SMC matrix [smcm, S0 reset-native] [+wide]",
+   "passed": 13,
+   "total": 13
+  },
+  {
+   "status": "PASS",
+   "name": "dispatch isolation (dtab[0x12] is the ldpr routine with the privileged flag; trap_priv / trap_regid exist)",
+   "passed": 8,
+   "total": 8
+  },
+  {
+   "status": "PASS",
+   "name": "mode tables: #q, #imm32 present (modm 0, immediate descriptors); no modm-1 immediate",
+   "passed": 8,
+   "total": 8
+  },
+  {
+   "status": "PASS",
+   "name": "tables (dtab except 0x12, mtab) unchanged vs the pre-R2 pins",
+   "passed": 8,
+   "total": 8
+  },
+  {
+   "status": "PASS",
+   "name": "R1 isolation unchanged (production D6 = jmp; --smc-test D6 = trap)",
+   "passed": 8,
+   "total": 8
+  },
+  {
+   "status": "PASS",
+   "name": "privileged dispatch flag: only dtab[0x12] has it",
+   "passed": 8,
+   "total": 8
+  },
+  {
+   "status": "PASS",
+   "name": "file layout: ISP, L0SP-L3SP, SBR in manual ID order (SBR = entry 5); the vector address is SBR + 4*vector from the privileged file",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "WR_ASEL = 3 probe: E3 write address == operand 2's quick value for q = 0..15, byte enables f, file entry 5 holds the q = 5 value",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "guard reach [regid_quick]: the guard mutant is caught by a crafted case (production table)",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "guard reach [regid_quick]: the guard mutant is caught by a crafted case (--smc-test table)",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "guard reach [src_imm]: the guard mutant is caught by a crafted case (production table)",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "guard reach [src_imm]: the guard mutant is caught by a crafted case (--smc-test table)",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "guard reach [src_quick]: the guard mutant is caught by a crafted case (production table)",
+   "passed": 1,
+   "total": 1
+  },
+  {
+   "status": "PASS",
+   "name": "guard reach [src_quick]: the guard mutant is caught by a crafted case (--smc-test table)",
+   "passed": 1,
+   "total": 1
+  }
+ ],
+ "groups_pass": 79,
+ "groups_total": 79,
+ "controls_caught": 107,
+ "controls": [
+  {
+   "kind": "a",
+   "desc": "V60X mutant: value read from byte offset 2 instead of 3"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: value truncated to 16 bits"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: writes the wrong register ID"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: no privileged write"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: the write happens twice"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: instruction length 7"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: CY toggled"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: R6 changed"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: an extra data read"
+  },
+  {
+   "kind": "a",
+   "desc": "V60X mutant: an additional write to another register"
+  },
+  {
+   "kind": "b0",
+   "desc": "control: the ext log of l2_ow_zero_to_zero passes"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: final register dump wrong"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: PSW changed on the LDPR"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: wrong PC"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: retired count + 1"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: extra event for another register"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: event value changed"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: event ID changed"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: event dropped"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: event duplicated"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_zero_to_zero corrupted: event moved to the wrong instruction"
+  },
+  {
+   "kind": "b0",
+   "desc": "control: the up log of l2_ow_zero_to_zero passes"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_zero_to_zero corrupted: final register dump wrong"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_zero_to_zero corrupted: PSW changed on the LDPR"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_zero_to_zero corrupted: wrong PC"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_zero_to_zero corrupted: retired count + 1"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_zero_to_zero corrupted: extra event for another register"
+  },
+  {
+   "kind": "b0",
+   "desc": "control: the ext log of l2_ow_three passes"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: final register dump wrong"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: PSW changed on the LDPR"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: wrong PC"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: retired count + 1"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: extra event for another register"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: event value changed"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: event ID changed"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: event dropped"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: event duplicated"
+  },
+  {
+   "kind": "b",
+   "desc": "ext log of l2_ow_three corrupted: event moved to the wrong instruction"
+  },
+  {
+   "kind": "b0",
+   "desc": "control: the up log of l2_ow_three passes"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: final register dump wrong"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: PSW changed on the LDPR"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: wrong PC"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: retired count + 1"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: extra event for another register"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: event value changed"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: event ID changed"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: event dropped"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: event duplicated"
+  },
+  {
+   "kind": "b",
+   "desc": "up log of l2_ow_three corrupted: event moved to the wrong instruction"
+  },
+  {
+   "kind": "b",
+   "desc": "upstream checked against V60X's FULL event list (unchanged-value writes) is rejected: the caveat is real"
+  },
+  {
+   "kind": "b",
+   "desc": "V60X's log checked with upstream's (value-change) expectation is rejected"
+  },
+  {
+   "kind": "b0",
+   "desc": "control: V2's log of n1_id0 passes the phase-r2b expectation"
+  },
+  {
+   "kind": "b",
+   "desc": "wrong expected V2 trap: trap PC + 1"
+  },
+  {
+   "kind": "b",
+   "desc": "wrong expected V2 trap: trap kind opcode instead of regid"
+  },
+  {
+   "kind": "b",
+   "desc": "wrong expected V2 trap: retired count + 1"
+  },
+  {
+   "kind": "b",
+   "desc": "V2 trap exit: a privileged write by the trapped instruction (P)"
+  },
+  {
+   "kind": "b",
+   "desc": "V2 trap exit: a privileged write by the trapped instruction (CU priv=1)"
+  },
+  {
+   "kind": "b",
+   "desc": "V2 trap exit: a PSW update by the trapped instruction (CU psw)"
+  },
+  {
+   "kind": "b",
+   "desc": "V2 trap exit: a data write"
+  },
+  {
+   "kind": "g",
+   "desc": "phase r2a expectation rejects the current V2 (phase r2b) on the LDPR positives"
+  },
+  {
+   "kind": "b",
+   "desc": "L6 wait exit: control passes; a leaked privileged write of the unretired instruction is rejected"
+  },
+  {
+   "kind": "h",
+   "desc": "FLAG_UPD probe mutant: rejected with complete output, and still rejected with the psw= fields removed"
+  },
+  {
+   "kind": "h",
+   "desc": "l1_v01.ext with the SBR PR line deleted is rejected"
+  },
+  {
+   "kind": "h",
+   "desc": "trap log with END instrs=999 is rejected"
+  },
+  {
+   "kind": "h",
+   "desc": "concurrent forced-EL checks (EL 0 and EL 1/2/3 interleaved, 600 checks on 8 threads) all pass"
+  },
+  {
+   "kind": "c1",
+   "desc": "upstream bench without events (rebuilt copy): every program with an expected change is rejected"
+  },
+  {
+   "kind": "c2",
+   "desc": "V2 observer without events (rebuilt copy): the WR_ASEL = 3 probe is rejected"
+  },
+  {
+   "kind": "m0",
+   "desc": "control: the UNmutated model passes every program in r2b (production tables, 171 programs)"
+  },
+  {
+   "kind": "m0",
+   "desc": "control: the UNmutated model passes every program in r2b (--smc-test tables, 167 programs)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant imm_ofs0: IMM_OFS 0 on the immediate word (reads the descriptor byte and 3 value bytes)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant imm_ofs2: IMM_OFS 2 (value skewed by one byte; includes the regID byte)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant imm_sz1: IMM_SZ 1 (16-bit immediate)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant consume4: CONSUME 4 on the immediate word"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant consume6: CONSUME 6 on the immediate word"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_final_consume: missing final CONSUME 1 (the #q byte)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant wr_asel_const0: WR_ASEL const (RCONST 0) instead of operand 2's register"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant wr_asel_const5: WR_ASEL const with RCONST 5 (right for SBR only)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant wr_asel_fld1: WR_ASEL field 1 (the format byte's register field)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant wr_dst_gpr: WR_DST general register instead of privileged"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant wr_dst_temp: WR_DST temp instead of privileged"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant flag_upd_check: FLAG_UPD on the ID-check word"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant flag_upd_write: FLAG_UPD on the value / write word"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant id_lo: ID check off by one (allows 1)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant id_hi: ID check off by one (allows 6)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_id_check: ID check removed"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_regid_quick_guard: C_QUICK regID guard removed"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_src_imm_guard: C_IMM source guard removed"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_src_quick_guard: C_QUICK source guard removed"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_priv_check: privilege check removed"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant dtab_flag_cleared: dtab privileged flag cleared"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant dtab_wrong_routine: dtab[0x12] at a wrong routine (the NOP routine)"
+  },
+  {
+   "kind": "m",
+   "desc": "model mutant no_f1_guard: format-I (byte 1 bit 7 = 0) guard removed [extra]"
+  },
+  {
+   "kind": "m",
+   "desc": "catcher precision, source C_QUICK guard mutant: the ordinary short form (n3_quick_short) is not enough, the crafted one (n3_quick_crafted) catches it"
+  },
+  {
+   "kind": "m",
+   "desc": "catcher precision, source C_IMM guard (Rn) mutant: the ordinary short form (n3_rn_short) is not enough, the crafted one (n3_rn_crafted) catches it"
+  },
+  {
+   "kind": "m",
+   "desc": "N5 pairing under no_priv_check: the EL 0 success passes, every EL 1/2/3 case fails"
+  },
+  {
+   "kind": "m",
+   "desc": "N5 pairing under dtab_flag_cleared: the EL 0 success passes, every EL 1/2/3 case fails"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: IMM_OFS 0"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: IMM_OFS 2"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: IMM_SZ 1"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: CONSUME 4 on the immediate word"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: CONSUME 6 on the immediate word"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: missing final CONSUME 1"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: WR_ASEL const (RCONST 0)"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: WR_ASEL field 1"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: WR_DST general register"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: WR_DST temp"
+  },
+  {
+   "kind": "p",
+   "desc": "probe-image mutant on the real V2: FLAG_UPD 15 on the write word"
+  }
+ ],
+ "real_mutants": {
+  "total": 28,
+  "all_ok": true,
+  "runs_per_mutant": 430
+ },
+ "cost": {
+  "default_identical": true,
+  "wide_identical": true,
+  "programs": 102,
+  "ldpr_l1_first": {
+   "default": {
+    "cycles": 30,
+    "exec": 25,
+    "fetch": 5
+   },
+   "wide": {
+    "cycles": 27,
+    "exec": 25,
+    "fetch": 2
+   }
+  }
+ },
+ "s0": {
+  "reach": 2,
+  "trap": "opcode",
+  "trap_pc": "0x0010050e",
+  "v2_sbr": "0x00100000",
+  "upstream_sbr": "0x00100000",
+  "psw": "0x10000000",
+  "retired": 2
+ },
+ "microcode_words": {
+  "default": [
+   223,
+   244
+  ],
+  "reset_native": [
+   219,
+   240
+  ],
+  "smc": [
+   221,
+   242
+  ],
+  "smc_merged": [
+   220,
+   241
+  ],
+  "smc_reset_native": [
+   217,
+   238
+  ]
+ },
+ "identity": {
+  "pairs": 6888,
+  "identical": 4792,
+  "differ": 2096,
+  "differ_r2a_ldpr_programs": 2092,
+  "differ_other_ldpr_program_nv_ldpr": 4,
+  "differ_without_ldpr": 0
+ }
+}

@@ -1,0 +1,32 @@
+== positive: archived up2.log + v2.log
+rc=0 R2B S0 CHECK PASS
+== neg1: both V2 SBR records (P and PR) = deadbeef (Codex scenario)
+rc=1 R2B S0 CHECK FAIL: v2 final SBR deadbeef != 00100000; v2 never wrote SBR = 00100000 (no P id=5 record); reach 0 != 2; V2 end is not TRAP opcode at 0010050e: incorrect {'index': 0, 'pc': 'fffffff0', 'mnemonic': 'jmp 100506', 'upstream': {'pc': 'fffffff0', 'op': 'd6', 'regs': (), 'writes': (), 'priv': ((5, 1048576),)}, 'v2': {'pc': 'fffffff0', 'op': 'd6', 'regs': (), 'writes': (), 'priv': ((5, 37359
+== neg2: missing V2 P record
+rc=1 R2B S0 CHECK FAIL: v2 log has no P records (run with +privev); v2 never wrote SBR = 00100000 (no P id=5 record); reach 0 != 2; V2 end is not TRAP opcode at 0010050e: incorrect {'index': 0, 'pc': 'fffffff0', 'mnemonic': 'jmp 100506', 'upstream': {'pc': 'fffffff0', 'op': 'd6', 'regs': (), 'writes': (), 'priv': ((5, 1048576),)}, 'v2': {'pc': 'fffffff0', 'op': 'd6', 'regs': (), 'writes': (), 'priv': (
+== neg3: extra V2 privileged write (P 2 id=7)
+rc=1 R2B S0 CHECK FAIL: reach 1 != 2; V2 end is not TRAP opcode at 0010050e: incorrect {'index': 1, 'pc': '00100506', 'mnemonic': 'ldpr #100000, #5', 'upstream': {'pc': '00100506', 'op': '12', 'regs': (), 'writes': (), 'priv': ()}, 'v2': {'pc': '00100506', 'op': '12', 'regs': (), 'writes': (), 'priv': ((7, 112),)}}
+== back-compat: up.log + v2.log default == archived s0_result.json
+True
+== long-run strict (up.log has no P records): expected FAIL
+rc=1 R2B S0 CHECK FAIL: upstream log has no P records (run with +privev); upstream log has no PR id=5 (SBR) record; upstream never wrote SBR = 00100000 (no P id=5 record); reach 0 != 2; V2 end is not TRAP
+== compare tests
+S0 COMPARE TESTS: 20 passed, 0 failed
+== selftest
+S0 SELFTEST PASS: reach 3, end unsupported {'trap': 'mode', 
+
+######## after Codex R2b round 2 (P n belongs to instruction n, not n-1; unchecked V2 events beyond the trap rejected)
+== positive: archived up2.log + v2.log
+R2B S0 CHECK PASS
+}
+rc=0
+== Codex round-2 repro: extra P 0 (JMP) write
+R2B S0 CHECK FAIL: reach 0 != 2; V2 end is not TRAP opcode at 0010050e: incorrect {'index': 0, 'pc': 'fffffff0', 'mnemonic': 'jmp 100506', 'upstream': {'pc': 'fffffff0', 'op': 'd6', 'regs': (), 'writes': (), 'priv': ()}, 'v2': {'pc': 'fffffff0', 'op': 'd6', 'regs': (), 'writes': (), 'priv': ((7, 112),)}}
+}
+== extra P 4 (beyond the trap)
+R2B S0 CHECK FAIL: V2 end is not TRAP opcode at 0010050e: incorrect {'unchecked_v2_priv_events_at': [4], 'v2': {4: [(7, 112)]}}
+}
+== back-compat: up.log + v2.log default vs archived s0_result.json
+True
+== tests
+S0 COMPARE TESTS: 22 passed, 0 failed

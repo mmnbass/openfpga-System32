@@ -1,0 +1,462 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// v2_core: structural skeleton of a microcoded V60 (V2 "datapath floor").
+//
+// Port list = upstream s32_v60's ports (so it could drop into s32_core
+// unchanged) plus the control-store / decode-table load ports used when the
+// control store is writable RAM. No instruction semantics live here: what an
+// instruction does is entirely the control store's contents. The hardware a
+// complete V60 needs to execute the full integer ISA is all present and
+// reachable from the control word.
+//
+// Microinstruction pipeline (one issue per cycle, frozen as a whole on stall):
+//   E0  control word from the sequencer; register-file read addresses; fetch
+//       consume; immediate/displacement latch from the fetch window
+//   E1  register data arrives; A- and B-bus source muxes -> operand latches
+//       (with result bypass)
+//   E2  ALU / shifter / address unit / BCD / bit-field / mul-div; result-bus
+//       mux -> result register; MAR load
+//   E3  write-back (GPR / temp / privileged / PSW / MAR / MDR), fetch
+//       redirect (REDIRECT), flag update, bus operation, interrupt acknowledge
+//
+// Parameters: CS_DEPTH (2048/4096), CS_ROM (0 writable RAM, 1 fixed ROM),
+// SHIFT_ITER (0 barrel/funnel shifter, 1 iterative shifter), UNIT_STYLE
+// (0 standard fetch/shifter/bit-field construction, 1 naive construction of
+// the same capability, kept to show how much the floor depends on it).
+
+`include "v2_pkg.svh"
+
+module v2_core #(
+    parameter CS_DEPTH   = 2048,
+    parameter CS_ROM     = 1'b0,
+    parameter SHIFT_ITER = 1'b0,
+    parameter UNIT_STYLE = 0        // 0 standard units, 1 naive units (sensitivity)
+) (
+    input             clk,
+    input             ce,
+    input             rst,
+    input             fast_ifetch,
+    output            if_req,
+    output     [23:0] if_addr,
+    input      [63:0] if_data,
+    input             if_ack,
+    output            bus_req,
+    output            bus_we,
+    output     [31:0] bus_addr,
+    output      [1:0] bus_size,
+    output     [31:0] bus_wdata,
+    input      [31:0] bus_rdata,
+    input             bus_ack,
+    input             irq_n,
+    input       [7:0] irq_vector,
+    output            irq_ack,
+    input             nmi_n,
+    // control store / decode table load (CS_ROM = 0 only)
+    input             cs_we,
+    input      [11:0] cs_waddr,
+    input      [`CW_W-1:0] cs_wdata,
+    input             tbl_we,
+    input             tbl_sel,
+    input       [8:0] tbl_addr,
+    input      [23:0] tbl_wdata
+);
+
+// ------------------------------------------------------------------ wiring
+wire [`CW_W-1:0] cw;               // E0
+reg  [`CW_W-1:0] cw1, cw2, cw3;    // E1, E2, E3
+wire [11:0] upc;
+
+wire [63:0] window;
+wire  [5:0] avail;
+wire [31:0] head_pc;
+wire [23:0] disp_entry, mode_entry;
+wire  [4:0] fld1, fld2, mreg;
+wire  [1:0] size1, size2;
+wire  [3:0] cc;
+wire  [4:0] dflags;                // decoded: {trailing, op2 written, op1 written, two-operand, privileged}
+wire  [7:0] ifl;                   // F1/F2 format byte (byte 1) of the current instruction
+wire        op0;                   // opcode bit 0 (short-format modm)
+reg  [31:0] ipc;                   // instruction-start PC (M1.1 N5)
+reg   [7:0] rdy_q;                 // decode-ready per window offset (M1.1 N3), see ucond[27]
+wire [11:0] ea_desc;               // latched addressing-mode descriptor
+
+wire [31:0] ra_data, rb_data, rp_data, rt_data, sp;
+wire [31:0] psw;
+wire [15:0] pcond;
+wire        irq_pending, nmi_pending;
+wire  [7:0] vector;
+
+wire [31:0] mdr_in;
+wire        mdr_in_valid, data_busy;
+wire        pf_req, pf_ack;
+wire [31:0] pf_addr, pf_rdata;
+wire        dwr_valid;
+wire [31:0] dwr_addr;
+wire  [1:0] dwr_size;
+
+reg  [31:0] opa, opb, opt, opi, imm, mar, mdr, res_q;   // opt/opi: temp and index operands
+reg         rz, rs, rov, rcy;
+
+wire        md_busy, md_done, md_dz;
+wire [31:0] md_lo, md_hi;
+wire        sh_busy;
+wire [31:0] ucond;
+reg   [1:0] size_e1, size_e2, size_e3;
+reg   [4:0] wr_addr1, wr_addr2, wr_addr3;
+reg   [3:0] wr_be3;
+// bus operations start one cycle after their microinstruction enters E3,
+// from flip-flops, so the stall path has no combinational loop
+reg         bus_start_q;
+reg         e2_fresh;            // cw2 was loaded on the last edge (start iterative units once)
+reg   [1:0] bus_op_q;
+
+// global advance: the whole pipeline freezes while the bus or an iterative
+// unit owns the step, or the fetch queue cannot supply the bytes consumed
+wire  [3:0] consume_eff;           // from v2_immx (CONSUME 9-11 are decoded counts)
+wire fetch_short = ({2'b0, consume_eff} > avail);
+wire stall  = data_busy | sh_busy | fetch_short;
+wire adv    = ce & ~stall;
+
+// operand size for this step
+function automatic [1:0] pick_size(input [1:0] sel, input [1:0] s1, input [1:0] s2, input [4:0] rc);
+    case (sel)
+        2'd0: pick_size = s1;
+        2'd1: pick_size = s2;
+        2'd2: pick_size = 2'd2;
+        default: pick_size = rc[1:0];
+    endcase
+endfunction
+
+function automatic [4:0] pick_reg(input [1:0] sel, input [4:0] rc, input [4:0] f1,
+                                  input [4:0] f2, input [4:0] mr);
+    case (sel)
+        2'd0: pick_reg = rc;
+        2'd1: pick_reg = f1;
+        2'd2: pick_reg = f2;
+        default: pick_reg = mr;
+    endcase
+endfunction
+
+// ------------------------------------------------------------------ E0
+v2_useq #(.CS_DEPTH(CS_DEPTH), .CS_ROM(CS_ROM)) useq (
+    .clk(clk), .rst(rst), .ce(ce), .stall(stall),
+    .ucond(ucond), .disp_uaddr(disp_entry[11:0]), .mode_uaddr(mode_entry[11:0]),
+    .size(size1),
+    .cs_we(cs_we), .cs_waddr(cs_waddr), .cs_wdata(cs_wdata),
+    .cw(cw), .upc(upc)
+);
+
+v2_decode #(.CS_ROM(CS_ROM)) dec (
+    .clk(clk), .rst(rst), .window(window), .mode_ofs(cw[`CW_IMM_OFS]), .modm_sel(cw[`CW_MODM_SEL]),
+    .dispatch(adv && cw[`CW_NXT] == 3'd5), .mode_dispatch(adv && cw[`CW_NXT] == 3'd6),
+    .tbl_we(tbl_we), .tbl_sel(tbl_sel), .tbl_addr(tbl_addr), .tbl_wdata(tbl_wdata),
+    .disp_entry(disp_entry), .mode_entry(mode_entry),
+    .fld1(fld1), .fld2(fld2), .mreg(mreg), .ifl(ifl), .op0(op0), .size1(size1), .size2(size2), .cc(cc),
+    .dflags(dflags), .ea_desc(ea_desc)
+);
+
+wire [31:0] redirect_pc = res_q;
+generate if (UNIT_STYLE == 1) begin : fq
+v2_fetch_byteq fetch (
+    .clk(clk), .rst(rst), .fast_ifetch(fast_ifetch),
+    .consume(adv ? consume_eff : 4'd0),
+    .redirect(adv && cw3[`CW_REDIRECT]), .redirect_pc(redirect_pc),
+    .dwr_valid(dwr_valid), .dwr_addr(dwr_addr), .dwr_size(dwr_size),
+    .if_req(if_req), .if_addr(if_addr), .if_data(if_data), .if_ack(if_ack),
+    .pf_req(pf_req), .pf_addr(pf_addr), .pf_rdata(pf_rdata), .pf_ack(pf_ack),
+    .window(window), .avail(avail), .head_pc(head_pc)
+);
+end else begin : fl
+v2_fetch fetch (
+    .clk(clk), .rst(rst), .fast_ifetch(fast_ifetch),
+    .consume(adv ? consume_eff : 4'd0),
+    .redirect(adv && cw3[`CW_REDIRECT]), .redirect_pc(redirect_pc),
+    .dwr_valid(dwr_valid), .dwr_addr(dwr_addr), .dwr_size(dwr_size),
+    .if_req(if_req), .if_addr(if_addr), .if_data(if_data), .if_ack(if_ack),
+    .pf_req(pf_req), .pf_addr(pf_addr), .pf_rdata(pf_rdata), .pf_ack(pf_ack),
+    .window(window), .avail(avail), .head_pc(head_pc)
+);
+end endgenerate
+
+wire [1:0] size0 = pick_size(cw[`CW_SIZE_SEL], size1, size2, cw[`CW_RCONST]);
+
+// immediate / displacement from the window, and the effective consume count
+wire        imm_load;
+wire [31:0] imm_val;
+v2_immx immx (
+    .window(window), .imm_ld(cw[`CW_IMM_LD]), .imm_ofs(cw[`CW_IMM_OFS]), .imm_sz(cw[`CW_IMM_SZ]),
+    .imm_sx(cw[`CW_IMM_SX]), .consume(cw[`CW_CONSUME]), .dec_ea(cw[`CW_DEC_EA]),
+    .size0(size0), .ea_desc(ea_desc),
+    .imm_load(imm_load), .imm_val(imm_val), .consume_eff(consume_eff)
+);
+
+v2_regs regs (
+    .clk(clk),
+    .ra_addr(cw[`CW_RIDX] ? rt_data[4:0] : pick_reg(cw[`CW_RA_SEL], cw[`CW_RCONST], fld1, fld2, mreg)),
+    .rb_addr(cw[`CW_RIDX] ? rt_data[4:0] : pick_reg(cw[`CW_RB_SEL], cw[`CW_RCONST], fld1, fld2, mreg)),
+    .rp_addr(cw[`CW_RCONST]),
+    .rt_addr(cw[`CW_TADDR]),
+    .ra_data(ra_data), .rb_data(rb_data), .rp_data(rp_data), .rt_data(rt_data),
+    .sp(sp),
+    .gpr_we(adv && cw3[`CW_WR_DST] == 3'd1),
+    .priv_we(adv && cw3[`CW_WR_DST] == 3'd3),
+    .temp_we(adv && cw3[`CW_WR_DST] == 3'd2),
+    .w_addr(wr_addr3), .wt_addr(cw3[`CW_TADDR]),
+    .w_be(wr_be3), .w_data(res_q)
+);
+
+// ------------------------------------------------------------------ E1
+wire [31:0] a_next, b_next, result;
+v2_opmux opmux (
+    .asel(cw1[`CW_ASEL]), .bsel(cw1[`CW_BSEL]), .fwd_en(cw1[`CW_FWD_EN]),
+    .ra(ra_data), .rb(rb_data), .rp(rp_data), .rt(rt_data), .pc(ipc), .mdr(mdr),
+    .imm(imm), .psw(psw), .sp(sp), .mar(mar), .md_hi(md_hi), .md_lo(md_lo), .res_q(res_q),
+    .rconst(cw1[`CW_RCONST]), .vector(vector), .result(result),
+    .a_next(a_next), .b_next(b_next)
+);
+
+// ------------------------------------------------------------------ E2 units
+wire [31:0] alu_res, sh_res_b, sh_res_i, agu_addr, agu_step;
+wire        alu_z, alu_s, alu_ov, alu_cy;
+wire        sh_cy_b, sh_ov_b, sh_cy_i, sh_ov_i;
+wire  [7:0] bcd_res, bcd_pack;
+wire [15:0] bcd_unpack;
+wire        bcd_cout;
+wire [31:0] bf_mask, bf_ins, bf_ext, bf_boff;
+wire  [5:0] bf_first;
+
+v2_alu alu (
+    .a(opa), .b(opb), .op(cw2[`CW_ALU_OP]), .size(size_e2), .cin(psw[3]),
+    .res(alu_res), .z(alu_z), .s(alu_s), .ov(alu_ov), .cy(alu_cy)
+);
+
+generate if (SHIFT_ITER) begin : shi
+    // the pipeline also holds in the start cycle, so the shift's own result
+    // (not the previous one) is what E2 hands to the result register
+    wire sh_start = e2_fresh && cw2[`CW_RES_SEL] == 4'd1;
+    wire sh_run;
+    v2_shift_iter sh (
+        .clk(clk), .start(sh_start),
+        .a(opa), .count(opb[7:0]), .op(cw2[`CW_SH_OP]), .size(size_e2), .cin(psw[3]),
+        .res(sh_res_i), .cy(sh_cy_i), .ov(sh_ov_i), .busy(sh_run)
+    );
+    assign sh_busy = sh_run | sh_start;
+    assign sh_res_b = sh_res_i;
+    assign sh_cy_b  = sh_cy_i;
+    assign sh_ov_b  = sh_ov_i;
+end else if (UNIT_STYLE == 1) begin : shn
+    v2_shift_naive sh (
+        .a(opa), .count(opb[7:0]), .op(cw2[`CW_SH_OP]), .size(size_e2), .cin(psw[3]),
+        .res(sh_res_b), .cy(sh_cy_b), .ov(sh_ov_b)
+    );
+    assign sh_busy = 1'b0;
+    assign sh_res_i = 32'd0;
+    assign sh_cy_i = 1'b0;
+    assign sh_ov_i = 1'b0;
+end else begin : shb
+    v2_shift sh (
+        .a(opa), .count(opb[7:0]), .op(cw2[`CW_SH_OP]), .size(size_e2), .cin(psw[3]),
+        .res(sh_res_b), .cy(sh_cy_b), .ov(sh_ov_b)
+    );
+    assign sh_busy = 1'b0;
+    assign sh_res_i = 32'd0;
+    assign sh_cy_i = 1'b0;
+    assign sh_ov_i = 1'b0;
+end endgenerate
+
+// DEC_EA: the address unit follows the latched addressing-mode descriptor
+// (base, index, step; offset = the displacement when the mode has one)
+wire       dec2     = cw2[`CW_DEC_EA];
+wire [2:0] agu_base = dec2 ? ea_desc[8:6] : cw2[`CW_AGU_BASE];
+wire [2:0] agu_off  = dec2 ? ((ea_desc[3:2] != 2'd0) ? 3'd1 : 3'd0) : cw2[`CW_AGU_OFF];
+wire       agu_idx  = dec2 ? ea_desc[5] : cw2[`CW_AGU_IDX];
+wire [1:0] agu_stp  = dec2 ? ea_desc[10:9] : cw2[`CW_AGU_STEP];
+
+v2_agu agu (
+    .abus(opa), .bbus(opb), .pc(ipc), .mar(mar), .sp(sp), .tdata(opt),
+    .mdr(mdr), .imm(imm), .index(opi), .vector(vector),
+    .base_sel(agu_base), .off_sel(agu_off), .idx_en(agu_idx),
+    .size(size_e2), .step_sel(agu_stp),
+    .addr(agu_addr), .stepped(agu_step)
+);
+
+v2_bcd bcd (
+    .a(opa[7:0]), .b(opb[7:0]), .cin(psw[3]), .sub(cw2[`CW_BCD_SUB]),
+    .res(bcd_res), .cout(bcd_cout), .unpack(bcd_unpack), .pack(bcd_pack)
+);
+
+generate if (UNIT_STYLE == 1) begin : bfn
+v2_bitfield_naive bf (
+    .src(opa), .dst(opb), .offset(opb[4:0]), .length({1'b0, opt[4:0]} + 6'd1),
+    .bitoff(opb), .mask(bf_mask), .inserted(bf_ins), .extracted(bf_ext),
+    .first_set(bf_first), .byte_addr_off(bf_boff)
+);
+end else begin : bfs
+v2_bitfield bf (
+    .src(opa), .dst(opb), .offset(opb[4:0]), .length({1'b0, opt[4:0]} + 6'd1),
+    .bitoff(opb), .mask(bf_mask), .inserted(bf_ins), .extracted(bf_ext),
+    .first_set(bf_first), .byte_addr_off(bf_boff)
+);
+end endgenerate
+
+v2_muldiv md (
+    .clk(clk), .start(adv && cw2[`CW_MD_START]),
+    .is_div(cw2[`CW_ALU_OP] == 4'd2), .signed_op(cw2[`CW_MD_SIGNED]),
+    .wide(cw2[`CW_ALU_OP] == 4'd3),
+    .a(opa), .b(opb), .hi_in(opt),
+    .lo(md_lo), .hi(md_hi), .busy(md_busy), .done(md_done), .dz(md_dz)
+);
+
+// result bus
+wire nz, ns, nov, ncy;
+v2_resmux resmux (
+    .sel(cw2[`CW_RES_SEL]),
+    .alu_res(alu_res), .alu_z(alu_z), .alu_s(alu_s), .alu_ov(alu_ov), .alu_cy(alu_cy),
+    .sh_res(sh_res_b), .sh_cy(sh_cy_b), .sh_ov(sh_ov_b),
+    .agu_addr(agu_addr), .agu_step(agu_step),
+    .bcd_res(bcd_res), .bcd_cout(bcd_cout), .bcd_unpack(bcd_unpack), .bcd_pack(bcd_pack),
+    .bf_ins(bf_ins), .bf_ext(bf_ext), .bf_mask(bf_mask), .bf_boff(bf_boff), .bf_first(bf_first),
+    .md_lo(md_lo), .md_hi(md_hi), .md_dz(md_dz), .opa(opa), .mdr(mdr),
+    .result(result), .nz(nz), .ns(ns), .nov(nov), .ncy(ncy)
+);
+
+// ------------------------------------------------------------------ pipeline registers
+wire [4:0] wr_addr0 = cw[`CW_RIDX] ? rt_data[4:0] : pick_reg(cw[`CW_WR_ASEL], cw[`CW_RCONST], fld1, fld2, mreg);
+
+always @* begin
+    case (cw3[`CW_BE_MODE])
+        2'd0: wr_be3 = (size_e3 == 2'd0) ? 4'b0001 : (size_e3 == 2'd1) ? 4'b0011 : 4'b1111;
+        2'd1: wr_be3 = 4'b1111;
+        2'd2: wr_be3 = 4'b0011;
+        default: wr_be3 = 4'b1100;
+    endcase
+end
+
+always @(posedge clk) begin
+    if (rst) begin
+        cw1 <= '0; cw2 <= '0; cw3 <= '0;
+        opa <= 32'd0; opb <= 32'd0; opt <= 32'd0; opi <= 32'd0; res_q <= 32'd0; mar <= 32'd0; mdr <= 32'd0;
+        imm <= 32'd0; {rz, rs, rov, rcy} <= 4'd0;
+    end else if (adv) begin
+        cw1 <= cw;  cw2 <= cw1;  cw3 <= cw2;
+        size_e1 <= size0; size_e2 <= size_e1; size_e3 <= size_e2;
+        wr_addr1 <= wr_addr0; wr_addr2 <= wr_addr1; wr_addr3 <= wr_addr2;
+        // E0
+        if (imm_load) imm <= imm_val;
+        // E1 -> operand latches (bypass from the result being produced in E2)
+        opa <= a_next;
+        opb <= b_next;
+        opt <= rt_data;                  // temp operand for E2 (AGU base, divider hi, field length)
+        opi <= rb_data;                  // index operand for the AGU
+        // E2 -> result register, MAR
+        res_q <= result;
+        {rz, rs, rov, rcy} <= {nz, ns, nov, ncy};
+        if (cw2[`CW_MAR_LD]) mar <= agu_addr;
+        // E3 write-back to MAR / MDR
+        if (cw3[`CW_WR_DST] == 3'd6) mar <= res_q;
+        if (cw3[`CW_WR_DST] == 3'd7) mdr <= res_q;
+    end
+    bus_start_q <= rst ? 1'b0 : (adv && cw2[`CW_BUS_OP] != 2'd0);
+    e2_fresh    <= rst ? 1'b0 : adv;
+    if (adv) bus_op_q <= cw2[`CW_BUS_OP];
+    if (mdr_in_valid) mdr <= mdr_in;
+end
+
+// ------------------------------------------------------------------ E3 units
+v2_psw pswu (
+    .clk(clk), .rst(rst),
+    .flag_upd(adv ? cw3[`CW_FLAG_UPD] : 4'd0),
+    .nz(rz), .ns(rs), .nov(rov), .ncy(rcy),
+    .psw_we(adv && cw3[`CW_WR_DST] == 3'd4), .psw_wdata(res_q),
+    .psw(psw), .cond(pcond)
+);
+
+v2_irq irq (
+    .clk(clk), .rst(rst), .irq_n(irq_n), .irq_vector(irq_vector), .nmi_n(nmi_n),
+    .psw_ie(psw[18]), .ack(adv && cw3[`CW_IRQ_ACK]),
+    .pending(irq_pending), .nmi_pending(nmi_pending), .vector(vector), .irq_ack(irq_ack)
+);
+
+wire [1:0] bus_sz = (cw3[`CW_BUS_SIZE] == 2'd0) ? size_e3 : cw3[`CW_BUS_SIZE] - 2'd1;
+v2_bus busu (
+    .clk(clk), .rst(rst),
+    .op(bus_start_q ? bus_op_q : 2'd0), .size(bus_sz), .sx(cw3[`CW_IMM_SX]),
+    .mar(mar), .mdr_out(mdr), .mdr_in(mdr_in), .mdr_in_valid(mdr_in_valid),
+    .data_busy(data_busy),
+    .pf_req(pf_req), .pf_addr(pf_addr), .pf_rdata(pf_rdata), .pf_ack(pf_ack),
+    .dwr_valid(dwr_valid), .dwr_addr(dwr_addr), .dwr_size(dwr_size),
+    .bus_req(bus_req), .bus_we(bus_we), .bus_addr(bus_addr), .bus_size(bus_size),
+    .bus_wdata(bus_wdata), .bus_rdata(bus_rdata), .bus_ack(bus_ack)
+);
+
+// ------------------------------------------------------------------ micro-conditions
+assign ucond[0]  = 1'b1;
+assign ucond[1]  = pcond[cc];             // instruction's own condition (Bcc/DBcc/TB)
+assign ucond[2]  = psw[0];
+assign ucond[3]  = psw[3];
+assign ucond[4]  = psw[1];
+assign ucond[5]  = psw[2];
+assign ucond[6]  = (res_q == 32'd0);      // loop count / result zero
+assign ucond[7]  = (avail >= 6'd8);       // a whole short instruction is queued
+assign ucond[8]  = ~data_busy;
+assign ucond[9]  = md_done | ~md_busy;
+assign ucond[10] = irq_pending;
+assign ucond[11] = nmi_pending;
+assign ucond[12] = (opb == 32'd0);        // string length / count exhausted
+assign ucond[13] = (size1 == 2'd2);
+assign ucond[14] = ea_desc[0];            // addressing mode is register direct
+assign ucond[15] = (bf_first == 6'd32);   // bit search: none found
+// decoded instruction properties (dispatch table) and addressing mode (mode table)
+assign ucond[16] = dflags[0] & (psw[25:24] != 2'd0);   // privileged instruction at EL != 0
+assign ucond[17] = dflags[1];             // two general operands
+assign ucond[18] = dflags[2];             // operand 1 is written
+assign ucond[19] = dflags[3];             // operand 2 is written
+assign ucond[20] = dflags[4];             // trailing operand byte
+assign ucond[21] = ea_desc[1];            // immediate operand
+assign ucond[22] = ea_desc[4];            // double displacement
+assign ucond[23] = ea_desc[11];           // deferred (memory indirect)
+assign ucond[24] = ifl[7];                // F1 (both operands are specifiers)
+assign ucond[25] = ifl[5];                // F2 D: the register field is operand 2
+assign ucond[26] = ea_desc[1] & (ea_desc[3:2] == 2'd0);   // immediate quick
+assign ucond[27] = rdy_q[cw[`CW_IMM_OFS]];   // decode-ready for this word's IMM_OFS: see below
+assign ucond[31:28] = 4'd0;               // spare condition codes
+
+// Decode-ready (M1.1 N3). The dispatch and mode tables are registered reads
+// of the current window, so a dispatch (NXT 5/6) uses what the window held
+// in the previous cycle. rdy_q[k] = in the previous cycle window bytes 0..k
+// were queued and the head could not move: no consume, no redirect, and no
+// data access active OR still on its way to the bus (BUS_OP in E0-E3, or a
+// bus start queued). An SMC flush happens only when a data write is
+// acknowledged, so after a successful poll none can flush the queue before
+// the dispatch that follows it, however the microcode schedules the store
+// (review C2-1: a store still in E2 when the poll passed flushed the queue
+// under the dispatch; round 2: the issuing word E0 must count too, for a
+// store word that also jumps to the poll).
+// ucond[27] selects the bit for the CURRENT word's IMM_OFS, so a poll tests
+// its own offset from its first cycle (a single bit computed from the
+// previous word's IMM_OFS let a poll pass one cycle early: found by
+// v2_sim_checks in M1.1d). Microcode polls it with the lookup's IMM_OFS /
+// MODM_SEL, then dispatches; this replaces the coarse "8 bytes queued" wait
+// (defect D2). It is a registered condition, not a stall term, so the stall
+// path is unchanged.
+wire settled = (consume_eff == 4'd0) && !(adv && cw3[`CW_REDIRECT]) && !data_busy
+               && cw[`CW_BUS_OP] == 2'd0
+               && cw1[`CW_BUS_OP] == 2'd0 && cw2[`CW_BUS_OP] == 2'd0 && cw3[`CW_BUS_OP] == 2'd0
+               && !bus_start_q;
+integer rk;
+always @(posedge clk) begin
+    for (rk = 0; rk < 8; rk = rk + 1)
+        rdy_q[rk] <= !rst && settled && (avail > rk[5:0]);
+end
+
+// Instruction-start PC (M1.1 N5): the queue head at opcode dispatch, which is
+// the opcode's address (microcode dispatches only once the previous
+// instruction's bytes are consumed and the head has settled). It is the
+// "PC" source of the operand buses and the address unit: V60 PC-relative
+// operands and branch displacements are relative to the instruction start.
+always @(posedge clk) begin
+    if (rst) ipc <= 32'hFFFF_FFF0;
+    else if (adv && cw[`CW_NXT] == 3'd5) ipc <= head_pc;
+end
+
+endmodule

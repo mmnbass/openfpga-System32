@@ -1,0 +1,24 @@
+{
+ "v2_reach": 1,
+ "v2_end": "unsupported",
+ "v2_end_detail": {
+  "trap": "opcode",
+  "pc": "00100506",
+  "mnemonic": "ldpr #100000, #5",
+  "upstream_next": "00100506 op=12"
+ },
+ "upstream_vs_mame_agree": 20003,
+ "upstream_vs_mame_divergence": null,
+ "upstream_records": 20003,
+ "mame_instructions_in_head": 199999,
+ "upstream_nonmodel_accesses": {
+  "interrupt-ctl": {
+   "reads": 0,
+   "writes": 12
+  },
+  "unmapped-e": {
+   "reads": 0,
+   "writes": 16
+  }
+ }
+}

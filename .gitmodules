@@ -1,0 +1,4 @@
+[submodule "references/s32"]
+	path = references/s32
+	url = https://github.com/mmnbass/openfpga-System32.git
+	branch = upstream/s32-accd644

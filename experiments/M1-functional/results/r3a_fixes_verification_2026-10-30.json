@@ -1,0 +1,50 @@
+{
+ "date": "2026-10-30",
+ "base": "201bb90",
+ "builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+ "frozen_manifest_sha256_prefix": "3720e1bab01c3959",
+ "run_r3_r3a": {
+  "groups": "77/77",
+  "controls_total": 229,
+  "caught": 226,
+  "equivalent": 3,
+  "missed": 0
+ },
+ "run_r3_r3b_stub": {
+  "groups": "58/64 (6 by design)",
+  "controls": "219/219"
+ },
+ "test_s0_compare": {
+  "before": 47,
+  "after": 94,
+  "new_failing_cases": 45,
+  "accepted_by_201bb90": 40
+ },
+ "probe_movea_controls": {
+  "before": 14,
+  "after": 30,
+  "new": 16,
+  "accepted_by_201bb90": 12
+ },
+ "identity": {
+  "pairs": 20248,
+  "normalised_identical": 20248,
+  "differ": 0,
+  "failed_or_incomplete": 0,
+  "bytes": 36476995
+ },
+ "regression": {
+  "r1b": "35/35+39/39, mutants 33=28+5",
+  "r2b": "79/79+107/107",
+  "refs": "105 agree, D1 rc 0",
+  "m11_m12_dbcc_footer_removed_sha256": [
+   "840e5cd90fc7b041",
+   "223638e47a9f3860",
+   "534b4f74eb47a9ac"
+  ],
+  "d1": "rc 0",
+  "s0_selftest": "PASS",
+  "s1": "122 PASS; 31 mutants 0 missed; 113/8/0/1",
+  "hw001": "ALL OK, 277 stores"
+ }
+}

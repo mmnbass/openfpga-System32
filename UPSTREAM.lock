@@ -1,0 +1,9 @@
+# Pinned upstream revisions. tools/check_upstream.py and the E1 generator
+# refuse to run if a submodule differs from this file or has local changes.
+# url = where the pinned commit is fetched from. s32: the original meathax/s32 became unavailable
+# (HTTP 404, noticed 2026-11-05). The pinned commit is a history-free snapshot on branch
+# upstream/s32-accd644 of this repository: its tree is the tree of upstream commit
+# accd644d139eb74110668b004abe2b48d8e4b07c (git tree 1f410d4ad0418c15c450e127df60e06bcb25ae1e) with exactly
+# one file removed, the diagnostic image verif/modelsim_romboot/dump80.png (snapshot tree d06cd5281ce6fc956c000136f209df99e3123348).
+# name   path             url                                commit
+s32      references/s32   https://github.com/mmnbass/openfpga-System32.git     2b9c265d6278440fcbefe107773d1dd62b257791

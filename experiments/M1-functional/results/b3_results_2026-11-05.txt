@@ -1,0 +1,34 @@
+B3 results (2026-11-05), exploratory standard. Raw artefacts under build/M1/b3/ and build/M1/b2/reg_b3z/.
+
+1. Control-store reachability (experiments/M1-functional/b3_reach.py; builder pass m1_m11_microcode.compact)
+   Roots: reset (address 0), disp, irq_entry, every dispatch-table and mode-table uaddr. Edges: fall-through (NXT 0/5/6), jump (1), conditional and call (2/3: target and next word).
+   Per configuration (smc_test, smc_merged, reset_native): words / reachable
+     (False, False, False): 2279 / 2048
+     (False, False, True): 2275 / 2044
+     (False, True, False): 2279 / 2048
+     (False, True, True): 2275 / 2044
+     (True, False, False): 242 / 240
+     (True, False, True): 238 / 236
+     (True, True, False): 241 / 239
+     (True, True, True): 237 / 235
+   Dead in ALL 8 configurations (deletable under the strict reading): movb (43 words), movea_hw (3 words), mstub1o5 (1 words) = 47 words.
+   Dead in the production configurations only (the M1.1/M1.2 word-form routines movw/addw/subw/cmpw/andw and their helpers are LIVE in the four --smc-test configurations, where the
+   generic B2 families are not emitted): 231 words in 54 labels. compact() removes unreachable words per configuration, so
+   production loses them and the smc configurations keep them. The builder asserts that no kept word or table entry refers to a deleted word and that no deleted label stays in sym.
+   Externally referenced symbols: grep over experiments/ and tools/ found no tool reading production symbols movb/movw/dst/addw...; the mutant tools patch the builder SOURCE text (kept) and HW-001 has its own builder.
+   Words: production reset-native 2275 -> 2044, non-reset-native 2279 -> 2048 (the whole control store); smc configurations 237-242 (2 words removed in each).
+
+2. RTL change (3 files, +1 control bit): see git diff experiments/V2-datapath-floor/ : CW_RIDX = bit 100, CW_W 100 -> 101; ra_addr / rb_addr / wr_addr0 take rt_data[4:0] when RIDX is set.
+   Existing microcode assembles to the same words (numerically identical control store, HW-001 dispatch/mode images byte-identical; only the hex text width of the control store file grows 25 -> 26 digits).
+   Checks: V2 smoke 33/33 in 3 variants (two new RIDX stores), wiring mutations caught 19/19 (3 new RIDX mutations), HW-001 ALL OK, R3a 3720e1bab01c3959 and R4a f7c28d613a37723e MATCH.
+
+3. pushm/popm (microcode, RIDX): order as MAME op3.hxx and upstream (they agree): PUSHM: bit 31 pushes the full PSW first, then R30 down to R0; POPM: R0 up to R30, then bit 31 pops the low half into the PSW. Bit 31 names the PSW, never R31.
+   26 directed programs (masks 1FFFFFFF, 0, R0, R28, R30, sparse, odd, 7FFFFFFF, 11, 70000000, 80000000 (PSW), 80000123, FFFFFFFF, nested round trips, register and #quick masks):
+   V60X == upstream on all 26 and V2 equals both at default, +memwait=5 +memjit=4 and +wide.
+
+4. Whole-chip (V25 stub, MAME EEPROM model): build/M1/b3/wcs24 retires 6,000,001 instructions without a trap; build/M1/b3/wcs25 (100 frames) writes 63 non-black v2driven frames, each equal to a MAME snapshot with 0 differing pixels (5-bit quantised).
+   Side by side: build/M1/b3/wcs25/side_v2f91_mame85.png (also f39/mame33, f63/mame57). Files side_v2f*_mame28.png and side_by_side_v2f83_mame28.png are mis-paired early drafts: ignore.
+
+5. Superseded expectations (frozen tools untouched): R1 24 programs (G1 /abs operands, n1_regind, n1_disp8, n2_d7_abs now execute) + table pins; R2 table pins (3 groups); R4 212 expected-trap programs (no positive program fails) + table pins; M1.1 7 and M1.2 2 unsup_* programs; S0 self-test (expects mov.w R0,/abs to trap; it now executes, V2 equals upstream for all 5 records).
+   V2 vs upstream on the 632 directed 'agree' programs: equal except shl.w count 33 (CY), updpsw.h (5, V2 follows MAME), set1/clr1/not1 on memory (15, upstream byte RMW vs V2 word RMW, same results).
+6. Supersession (S0 self-test): its 4th instruction was `2D E0 13 00 00 20 00`, labelled "mov.w R0,/200000" but really a double-displacement dd8[R19] operand, which trapped until B3 implemented dd8; re-pointed to BRK (0xC8, upstream skips it, V2 traps opcode): PASS reach 3, unsupported at fffffffb (build/M1/b3/s0selftest2); test_s0_compare 426/426.

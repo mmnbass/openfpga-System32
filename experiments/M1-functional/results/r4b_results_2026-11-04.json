@@ -1,0 +1,87 @@
+{
+ "phase": "r4b",
+ "simulation_only": true,
+ "builder_sha256": "b810b8d8837bee03fd13f6dfb270b23cf5c9354c3c98d303d498381a68913df8",
+ "pre_builder_sha256": "4ac7fa340674fc73ce4166adf07b01efde7c417e1c409c00c40913a40f94c510",
+ "words": {
+  "production": [
+   253,
+   257
+  ],
+  "reset_native": [
+   249,
+   253
+  ],
+  "smc": [
+   242,
+   242
+  ],
+  "smc_merged": [
+   241,
+   241
+  ],
+  "smc_reset": [
+   238,
+   238
+  ],
+  "smc_merged_reset": [
+   237,
+   237
+  ]
+ },
+ "r4a": {
+  "frozen_digest": "f7c28d613a37723e",
+  "programs": 832,
+  "run3": "78/78 groups, 68/68 controls",
+  "test_s0_compare": "426/426",
+  "ab_s0_compare": "1161/1161 identical"
+ },
+ "r4b_run2": "88/88 groups, 99/99 controls",
+ "mutants": {
+  "behavioural_killed": 62,
+  "equivalent": 9,
+  "survived": 0,
+  "structural": "28/28",
+  "baseline_runs": [
+   1708,
+   814
+  ]
+ },
+ "s0": {
+  "reach": 7,
+  "trap": "opcode ipc=0010052d",
+  "R10": "0010058c",
+  "R11": "00e00000",
+  "R1": "00000008",
+  "R31": "00210000",
+  "R25": "00208000",
+  "SBR": "00100000",
+  "PSW": "10000000",
+  "check": "PASS"
+ },
+ "regression": {
+  "r1b": "35/35 + 39/39, mutants 28+5",
+  "r2b": "79/79 + 107/107",
+  "r3b_on_fixture": "78/78 + 484/484",
+  "refs": "105 agree",
+  "m11": "1051 refs, 1043 x4",
+  "m12": "1045 refs, 1051 x4",
+  "dbcc": 0,
+  "d1": "rc 0",
+  "s0_selftest": "PASS",
+  "s1": "122 / 31 / 113-8-0-1",
+  "hw001": "ALL OK, images 7/7"
+ },
+ "identity": {
+  "pairs": 24172,
+  "identical": 22112,
+  "pcrel_by_design": 844,
+  "timing_only": 1113,
+  "f2_operand": 95,
+  "unexpected": 0
+ },
+ "frozen": {
+  "r3a": "3720e1bab01c3959 MATCH",
+  "r4a": "f7c28d613a37723e MATCH"
+ }
+}

@@ -1,0 +1,68 @@
+{
+ "v2_reach": 4,
+ "v2_end": "unsupported",
+ "v2_end_detail": {
+  "trap": "mode",
+  "pc": "0010051c",
+  "mnemonic": "movea.b 10058C[PC], R10",
+  "upstream_next": "0010051c op=40"
+ },
+ "upstream_vs_mame_agree": 20003,
+ "upstream_vs_mame_divergence": null,
+ "upstream_records": 20003,
+ "mame_instructions_in_head": 199999,
+ "upstream_nonmodel_accesses": {
+  "interrupt-ctl": {
+   "reads": 0,
+   "writes": 12
+  },
+  "unmapped-e": {
+   "reads": 0,
+   "writes": 16
+  }
+ },
+ "r3b_check": {
+  "pass": true,
+  "failures": [],
+  "state_source": "replay of the first 4 records of each log",
+  "upstream_log_is_long_run": true,
+  "v2_gpr_events_checked": true
+ },
+ "priv_compared": true,
+ "r3b_expected": {
+  "reach": 4,
+  "R31": "00210000",
+  "R25": "00208000",
+  "SBR": "00100000",
+  "PSW": "10000000",
+  "first_difference": "TRAP mode ipc=0010051c",
+  "note": "addressing-mode trap (movea.b 10058C[PC], R10: mode byte F2 = PC disp32), not opcode, not a memory failure"
+ },
+ "v2_log_lines": [
+  "G 2 id=31 be=f val=00210000",
+  "G 3 id=25 be=f val=00208000",
+  "C 2 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "C 3 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "R31=00210000",
+  "R25=00208000",
+  "PR id=5 val=00100000",
+  "PSW=10000000",
+  "CU 4 dr=0 dw=0 priv=0 psw=0 gpr=0",
+  "TRAP mode ipc=0010051c",
+  "END halted=0 instrs=4 cycles=488",
+  "SIMCHECK errors=0 ipc_errors=0",
+  "MEMSTAT read rom 28",
+  "MEMSTAT read rom-mirror 6",
+  "MEMDRAIN reqs=34 acks=34 rd_reqs=34 wr_reqs=0 wr_acks=0 outstanding=0 outstanding_wr=0 nonrom_reqs=0 m_req=0 busy=0",
+  "DRAIN data_busy=0 d_active=0 owner=0 d_starts=0 d_acks=0 d_wr_acks=0 pf_acks=17 at_trap_data_busy=0 at_trap_d_starts=0 at_trap_d_acks=0 settle=312"
+ ],
+ "checks": {
+  "prefix_run": "PASS (12-line MAME head, upstream +maxinstr=5)",
+  "long_run": "PASS (full MAME head 199999 lines, upstream +maxinstr=20000: 20003 records agree with MAME)"
+ },
+ "all_other_gprs_zero": true,
+ "w_lines": 0,
+ "simulation_only": true,
+ "source": "build/M1/r3b/run3/s0 (git-ignored); m1_r3a_s0.py run, then s0_compare.py --r3b-check",
+ "builder_sha256": "4ac7fa340674fc73ce4166adf07b01efde7c417e1c409c00c40913a40f94c510"
+}

@@ -1,0 +1,66 @@
+{
+ "smc_test=0 smc_merged=0 reset_native=0": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 253,
+  "problems": []
+ },
+ "smc_test=0 smc_merged=0 reset_native=1": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 249,
+  "problems": []
+ },
+ "smc_test=0 smc_merged=1 reset_native=0": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 253,
+  "problems": []
+ },
+ "smc_test=0 smc_merged=1 reset_native=1": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 249,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=0 reset_native=0": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 242,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=0 reset_native=1": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 238,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=1 reset_native=0": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 241,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=1 reset_native=1": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 237,
+  "problems": []
+ }
+}

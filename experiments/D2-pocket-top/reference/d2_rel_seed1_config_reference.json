@@ -1,0 +1,1251 @@
+{
+ "au3_sdc_append": {
+  "path": "experiments/D2-pocket-top/pocket/d2_au3_constraints.sdc",
+  "sha256": "37426115195909b6bf1a8b8c8f3d773c524194a70994a22a026d532d8d58c941"
+ },
+ "au_sdc_append": {
+  "path": "experiments/D2-pocket-top/pocket/d2_au_constraints.sdc",
+  "sha256": "b89291d6840715e1f83b944d655291774893d8f6c9babcf739c78437e7f947e5"
+ },
+ "git_objects": {
+  "UPSTREAM.lock": "3cc03455be3c0e16de65508f71fee00b67961a4f",
+  "experiments/D2-pocket-top/gen_d2.py": "6948af96ebea75a3180718c4e5ed50fcd63ea754",
+  "experiments/D2-pocket-top/make_d2_derived.py": "70f4788b3e8fef1340eea28552bf50a0a931feda",
+  "experiments/D2-pocket-top/pll_plan.py": "3c0b3e7538190a31d3747ca3d368bbecbbd1ac8d",
+  "experiments/D2-pocket-top/pocket/d2_au3_constraints.sdc": "5198bd6fc34063f30a07d08db9a16b2bd7e8dd6b",
+  "experiments/D2-pocket-top/pocket/d2_au3_io.tcl": "d1d0ef91e255ae6d82dd608b5629192f1c1b3d4f",
+  "experiments/D2-pocket-top/pocket/d2_au_constraints.sdc": "1c856beb6d84a767ddc3ff57f1763b21b0f1e549",
+  "experiments/D2-pocket-top/pocket/d2_au_io.tcl": "b646acec2457f8ca8539b6c5e620629493910ee9",
+  "experiments/D2-pocket-top/pocket/d2_core_constraints.sdc": "371f02498b42a45b59bc45078cf597fbcba8862d",
+  "experiments/D2-pocket-top/pocket/d2_pocket_io.py": "ba7fd650b121fdae920c3b0af86368caed378009",
+  "experiments/D2-pocket-top/pocket/d2_timing.tcl": "f1a8f40edb76db40d4e0cfc03775681fee93b756",
+  "experiments/D2-pocket-top/pocket/prepare_quartus_d2.py": "ef32dd0b65c0cdd9695bcaf3f40a3e40ae6ac807",
+  "experiments/D2-pocket-top/rtl": "3ed0531b8ac20ffc447d6551066d3e5bd4f1fe9d",
+  "experiments/F2-fullchip/rtl": "eb0923e6d7ccfc5a221da62b165a6a4e33613fa2",
+  "experiments/M1-functional": "33fc798e95a138426a4be472000e91ddf08f1daa",
+  "experiments/P1-pocket-top/BASELINE_S2.md": "dd6e32ca285851b934bda6f38c8f5388a18fd97e",
+  "experiments/P1-pocket-top/rtl": "7fd3dbe2eca28b13754eadc002d57fa37384fc53",
+  "experiments/SM1-spidman/rtl": "44172bffdc0c77288cbb1f5ac3fbacc1600c10f3",
+  "experiments/SP-sprite-path/rtl": "bffe200a2448fe10c360e2d8a618779bbd708542",
+  "experiments/U1-universal/games": "fb423a0a7f57fccf64d75524fe4c0de6fb6a31fb",
+  "experiments/U1-universal/pocket/u1_fit_hold.sdc": "62cbeb95b5faa14fae241ee32527a251f34b2a5c",
+  "experiments/U1-universal/rtl": "5b5c069ef70404c33b0e8f926eccc8bc62338799",
+  "experiments/V2-datapath-floor/ci_quartus.sh": "7e3bbe891801505e83544d83e71cbb0b5544816a",
+  "experiments/V2-datapath-floor/rtl": "93826276fd6850f43fb07932abe98d3dd80e0f68",
+  "experiments/V2-datapath-floor/toolchain.json": "4a49d3d1e33821277334acfb82f09686cb780c64",
+  "experiments/WC-sim/rtl": "f193239f74fee40ad422f4b866e4ab7b15156832",
+  "references/s32": "accd644d139eb74110668b004abe2b48d8e4b07c",
+  "tools/d2_gate.py": "b18a0c23ca2636e466256cb0053d95dcbfa4f8f5",
+  "tools/pll_gate.py": "13660b92961ea34cf3610d595892124737c57dfa"
+ },
+ "microcode_pin": {
+  "path": "experiments/D2-pocket-top/reference/microcode_pin_rel.json",
+  "sha256": "90c4a222d4b26c49c071cf4830cd3b8fe39d878f8a3ab2e1e94e77dc2b2519cb",
+  "source": {
+   "m1_functional_tree": "33fc798e95a138426a4be472000e91ddf08f1daa",
+   "repo_commit": "17ac6bc0b12c5d85485e871ef997ad9b07312d3d"
+  }
+ },
+ "qsf_sha256": "289832bdeb42892d6e05b1890ebd486ad0dd16e927e7c4e96878aea471990731",
+ "quartus_version": "25.1std.0 Build 1129 10/21/2025 SC Lite Edition",
+ "result": {
+  "fit_summary": [
+   "Fitter Status : Successful",
+   "Quartus Prime Version : 25.1std.0 Build 1129 10/21/2025 SC Lite Edition",
+   "Revision Name : ga2_d2",
+   "Top-level Entity Name : apf_top",
+   "Family : Cyclone V",
+   "Device : 5CEBA4F23C8",
+   "Timing Models : Final",
+   "Logic utilization (in ALMs) : 10,970 / 18,480 ( 59 % )",
+   "Total registers : 12499",
+   "Total pins : 224 / 224 ( 100 % )",
+   "Total virtual pins : 0",
+   "Total block memory bits : 1,824,988 / 3,153,920 ( 58 % )",
+   "Total RAM Blocks : 244 / 308 ( 79 % )",
+   "Total DSP Blocks : 20 / 66 ( 30 % )",
+   "Total HSSI RX PCSs : 0",
+   "Total HSSI PMA RX Deserializers : 0",
+   "Total HSSI TX PCSs : 0",
+   "Total HSSI PMA TX Serializers : 0",
+   "Total PLLs : 1 / 4 ( 25 % )",
+   "Total DLLs : 0 / 4 ( 0 % )"
+  ],
+  "pll_usage": [
+   "+-------------------------------------------------------------------------------------------------------------------------------------------------------+",
+   "; PLL Usage Summary                                                                                                                                     ;",
+   "+--------------------------------------------------------------------------------------------------------------------------+----------------------------+",
+   ";                                                                                                                          ;                            ;",
+   "+--------------------------------------------------------------------------------------------------------------------------+----------------------------+",
+   "; core_top:ic|mf_pll_ga2:mp|mf_pll_ga2_0002:pll_inst|altera_pll:altera_pll_i|general[0].gpll~FRACTIONAL_PLL                ;                            ;",
+   ";     -- PLL Type                                                                                                          ; Fractional PLL             ;",
+   ";     -- PLL Location                                                                                                      ; FRACTIONALPLL_X54_Y1_N0    ;",
+   ";     -- PLL Feedback clock type                                                                                           ; Global Clock               ;",
+   ";     -- PLL Bandwidth                                                                                                     ; Auto                       ;",
+   ";         -- PLL Bandwidth Range                                                                                           ; 2100000 to 1400000 Hz      ;",
+   ";     -- Reference Clock Frequency                                                                                         ; 74.25 MHz                  ;",
+   ";     -- Reference Clock Sourced by                                                                                        ; Dedicated Pin              ;",
+   ";     -- PLL VCO Frequency                                                                                                 ; 676.442268 MHz             ;",
+   ";     -- PLL Operation Mode                                                                                                ; Normal                     ;",
+   ";     -- PLL Freq Min Lock                                                                                                 ; 65.859279 MHz              ;",
+   ";     -- PLL Freq Max Lock                                                                                                 ; 142.695104 MHz             ;",
+   ";     -- PLL Enable                                                                                                        ; On                         ;",
+   ";     -- PLL Fractional Division                                                                                           ; 473879157 / 4294967296     ;",
+   ";     -- M Counter                                                                                                         ; 9                          ;",
+   ";     -- N Counter                                                                                                         ; 1                          ;",
+   ";     -- IOPLL Self RST                                                                                                    ; Off                        ;",
+   ";     -- PLL Refclk Select                                                                                                 ;                            ;",
+   ";             -- PLL Refclk Select Location                                                                                ; PLLREFCLKSELECT_X54_Y7_N0  ;",
+   ";             -- PLL Reference Clock Input 0 source                                                                        ; clk_0                      ;",
+   ";             -- PLL Reference Clock Input 1 source                                                                        ; ref_clk1                   ;",
+   ";             -- ADJPLLIN source                                                                                           ; N/A                        ;",
+   ";             -- CORECLKIN source                                                                                          ; N/A                        ;",
+   ";             -- IQTXRXCLKIN source                                                                                        ; N/A                        ;",
+   ";             -- PLLIQCLKIN source                                                                                         ; N/A                        ;",
+   ";             -- RXIQCLKIN source                                                                                          ; N/A                        ;",
+   ";             -- CLKIN(0) source                                                                                           ; clk_74a~input              ;",
+   ";             -- CLKIN(1) source                                                                                           ; N/A                        ;",
+   ";             -- CLKIN(2) source                                                                                           ; N/A                        ;",
+   ";             -- CLKIN(3) source                                                                                           ; N/A                        ;",
+   ";     -- PLL Output Counter                                                                                                ;                            ;",
+   ";         -- core_top:ic|mf_pll_ga2:mp|mf_pll_ga2_0002:pll_inst|altera_pll:altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER ;                            ;",
+   ";             -- Output Clock Frequency                                                                                    ; 96.634609 MHz              ;",
+   ";             -- Output Clock Location                                                                                     ; PLLOUTPUTCOUNTER_X54_Y0_N1 ;",
+   ";             -- C Counter Odd Divider Even Duty Enable                                                                    ; On                         ;",
+   ";             -- Duty Cycle                                                                                                ; 50.0000                    ;",
+   ";             -- Phase Shift                                                                                               ; 0.000000 degrees           ;",
+   ";             -- C Counter                                                                                                 ; 7                          ;",
+   ";             -- C Counter PH Mux PRST                                                                                     ; 0                          ;",
+   ";             -- C Counter PRST                                                                                            ; 1                          ;",
+   ";         -- core_top:ic|mf_pll_ga2:mp|mf_pll_ga2_0002:pll_inst|altera_pll:altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER ;                            ;",
+   ";             -- Output Clock Frequency                                                                                    ; 48.317304 MHz              ;",
+   ";             -- Output Clock Location                                                                                     ; PLLOUTPUTCOUNTER_X54_Y7_N1 ;",
+   ";             -- C Counter Odd Divider Even Duty Enable                                                                    ; Off                        ;",
+   ";             -- Duty Cycle                                                                                                ; 50.0000                    ;",
+   ";             -- Phase Shift                                                                                               ; 0.000000 degrees           ;",
+   ";             -- C Counter                                                                                                 ; 14                         ;",
+   ";             -- C Counter PH Mux PRST                                                                                     ; 0                          ;",
+   ";             -- C Counter PRST                                                                                            ; 1                          ;",
+   ";         -- core_top:ic|mf_pll_ga2:mp|mf_pll_ga2_0002:pll_inst|altera_pll:altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER ;                            ;",
+   ";             -- Output Clock Frequency                                                                                    ; 12.079326 MHz              ;",
+   ";             -- Output Clock Location                                                                                     ; PLLOUTPUTCOUNTER_X54_Y5_N1 ;",
+   ";             -- C Counter Odd Divider Even Duty Enable                                                                    ; Off                        ;",
+   ";             -- Duty Cycle                                                                                                ; 50.0000                    ;",
+   ";             -- Phase Shift                                                                                               ; 0.000000 degrees           ;",
+   ";             -- C Counter                                                                                                 ; 56                         ;",
+   ";             -- C Counter PH Mux PRST                                                                                     ; 0                          ;",
+   ";             -- C Counter PRST                                                                                            ; 1                          ;",
+   ";         -- core_top:ic|mf_pll_ga2:mp|mf_pll_ga2_0002:pll_inst|altera_pll:altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER ;                            ;",
+   ";             -- Output Clock Frequency                                                                                    ; 12.079326 MHz              ;",
+   ";             -- Output Clock Location                                                                                     ; PLLOUTPUTCOUNTER_X54_Y6_N1 ;",
+   ";             -- C Counter Odd Divider Even Duty Enable                                                                    ; Off                        ;",
+   ";             -- Duty Cycle                                                                                                ; 50.0000                    ;",
+   ";             -- Phase Shift                                                                                               ; 90.000000 degrees          ;",
+   ";             -- C Counter                                                                                                 ; 56                         ;",
+   ";             -- C Counter PH Mux PRST                                                                                     ; 0                          ;",
+   ";             -- C Counter PRST                                                                                            ; 15                         ;",
+   ";         -- core_top:ic|mf_pll_ga2:mp|mf_pll_ga2_0002:pll_inst|altera_pll:altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER ;                            ;",
+   ";             -- Output Clock Frequency                                                                                    ; 24.158652 MHz              ;",
+   ";             -- Output Clock Location                                                                                     ; PLLOUTPUTCOUNTER_X54_Y8_N1 ;",
+   ";             -- C Counter Odd Divider Even Duty Enable                                                                    ; Off                        ;",
+   ";             -- Duty Cycle                                                                                                ; 50.0000                    ;",
+   ";             -- Phase Shift                                                                                               ; 0.000000 degrees           ;",
+   ";             -- C Counter                                                                                                 ; 28                         ;",
+   ";             -- C Counter PH Mux PRST                                                                                     ; 0                          ;",
+   ";             -- C Counter PRST                                                                                            ; 1                          ;",
+   ";                                                                                                                          ;                            ;",
+   "+--------------------------------------------------------------------------------------------------------------------------+----------------------------+"
+  ],
+  "sta_summary_rows": [
+   [
+    "Slow 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.385",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "2.102",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Setup 'dram_clk_out'",
+    "2.435",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Setup 'clk_74a'",
+    "2.841",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "6.341",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Setup 'bridge_spiclk'",
+    "11.141",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "19.355",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.299",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.300",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.355",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'clk_74a'",
+    "0.394",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.476",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'bridge_spiclk'",
+    "0.497",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Hold 'dram_clk_out'",
+    "4.103",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "16.268",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "33.632",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "1.247",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "3.136",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'",
+    "0.739",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "3.559",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'clk_74a'",
+    "5.326",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'bridge_spiclk'",
+    "5.820",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "8.717",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "19.119",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.315",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.317",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.469",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "2.115",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'dram_clk_out'",
+    "2.407",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'clk_74a'",
+    "2.979",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "6.412",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'bridge_spiclk'",
+    "11.327",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "19.187",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.283",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.285",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.343",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'clk_74a'",
+    "0.381",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.471",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'bridge_spiclk'",
+    "0.521",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Hold 'dram_clk_out'",
+    "4.170",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "16.424",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "33.866",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "1.158",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "2.953",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'",
+    "0.739",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "3.514",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'clk_74a'",
+    "5.229",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'bridge_spiclk'",
+    "5.780",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "8.664",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "19.045",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.251",
+    "0.000"
+   ],
+   [
+    "Slow 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.256",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'dram_clk_out'",
+    "2.939",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "3.100",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'clk_74a'",
+    "5.345",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "6.280",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "8.134",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'bridge_spiclk'",
+    "12.553",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "30.706",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.135",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.136",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.143",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.160",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'clk_74a'",
+    "0.176",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'bridge_spiclk'",
+    "0.185",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Hold 'dram_clk_out'",
+    "4.365",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "18.431",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "37.447",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.517",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "1.365",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'",
+    "0.739",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "4.062",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'clk_74a'",
+    "5.236",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'bridge_spiclk'",
+    "6.330",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "9.223",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "19.578",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.892",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 85C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.892",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'dram_clk_out'",
+    "2.951",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "3.271",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'clk_74a'",
+    "5.612",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "6.664",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "8.407",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'bridge_spiclk'",
+    "12.641",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Setup 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "31.695",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.106",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.128",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.130",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'clk_74a'",
+    "0.135",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.144",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'bridge_spiclk'",
+    "0.175",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Hold 'dram_clk_out'",
+    "4.373",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "18.720",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Recovery 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "37.877",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "0.476",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Removal 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "1.169",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'",
+    "0.739",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "4.063",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'clk_74a'",
+    "5.187",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'bridge_spiclk'",
+    "6.335",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "9.227",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "19.579",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.894",
+    "0.000"
+   ],
+   [
+    "Fast 1100mV 0C Model Minimum Pulse Width 'ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk'",
+    "40.895",
+    "0.000"
+   ]
+  ],
+  "timing_rows": [
+   "PLLT_CLOCK clk_74a 13.468",
+   "PLLT_CLOCK clk_74b 13.468",
+   "PLLT_CLOCK bridge_spiclk 13.468",
+   "PLLT_CLOCK ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 1.478",
+   "PLLT_CLOCK ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 10.347",
+   "PLLT_CLOCK ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 20.694",
+   "PLLT_CLOCK ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 82.776",
+   "PLLT_CLOCK ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk 82.776",
+   "PLLT_CLOCK ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 41.388",
+   "PLLT_CLOCK dram_clk_out 10.347",
+   "PLLT_INT 8_slow_1100mv_85c setup clk_74a 2.841",
+   "PLLT_INT 8_slow_1100mv_85c hold clk_74a 0.394",
+   "PLLT_INT 8_slow_1100mv_85c recovery clk_74a NA",
+   "PLLT_INT 8_slow_1100mv_85c removal clk_74a NA",
+   "PLLT_INT 8_slow_1100mv_85c setup clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_85c hold clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_85c recovery clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_85c removal clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_85c setup bridge_spiclk 11.141",
+   "PLLT_INT 8_slow_1100mv_85c hold bridge_spiclk 0.497",
+   "PLLT_INT 8_slow_1100mv_85c recovery bridge_spiclk NA",
+   "PLLT_INT 8_slow_1100mv_85c removal bridge_spiclk NA",
+   "PLLT_INT 8_slow_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 0.385",
+   "PLLT_INT 8_slow_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 0.300",
+   "PLLT_INT 8_slow_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 2.102",
+   "PLLT_INT 8_slow_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 0.299",
+   "PLLT_INT 8_slow_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 16.268",
+   "PLLT_INT 8_slow_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 3.136",
+   "PLLT_INT 8_slow_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 6.341",
+   "PLLT_INT 8_slow_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 0.476",
+   "PLLT_INT 8_slow_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 19.355",
+   "PLLT_INT 8_slow_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 0.355",
+   "PLLT_INT 8_slow_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 33.632",
+   "PLLT_INT 8_slow_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 1.247",
+   "PLLT_INT 8_slow_1100mv_85c setup dram_clk_out NA",
+   "PLLT_INT 8_slow_1100mv_85c hold dram_clk_out NA",
+   "PLLT_INT 8_slow_1100mv_85c recovery dram_clk_out NA",
+   "PLLT_INT 8_slow_1100mv_85c removal dram_clk_out NA",
+   "PLLT_IO 8_slow_1100mv_85c dram_out setup 2.435",
+   "PLLT_IO 8_slow_1100mv_85c dram_out hold 4.103",
+   "PLLT_IO 8_slow_1100mv_85c sram_out setup 8.176",
+   "PLLT_IO 8_slow_1100mv_85c sram_out hold 7.926",
+   "PLLT_IO 8_slow_1100mv_85c dram_in setup 2.797",
+   "PLLT_IO 8_slow_1100mv_85c dram_in hold 13.062",
+   "PLLT_IO 8_slow_1100mv_85c sram_in setup 40.234",
+   "PLLT_IO 8_slow_1100mv_85c sram_in hold 0.920",
+   "PLLT_INT 8_slow_1100mv_0c setup clk_74a 2.979",
+   "PLLT_INT 8_slow_1100mv_0c hold clk_74a 0.381",
+   "PLLT_INT 8_slow_1100mv_0c recovery clk_74a NA",
+   "PLLT_INT 8_slow_1100mv_0c removal clk_74a NA",
+   "PLLT_INT 8_slow_1100mv_0c setup clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_0c hold clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_0c recovery clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_0c removal clk_74b NA",
+   "PLLT_INT 8_slow_1100mv_0c setup bridge_spiclk 11.327",
+   "PLLT_INT 8_slow_1100mv_0c hold bridge_spiclk 0.521",
+   "PLLT_INT 8_slow_1100mv_0c recovery bridge_spiclk NA",
+   "PLLT_INT 8_slow_1100mv_0c removal bridge_spiclk NA",
+   "PLLT_INT 8_slow_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT 8_slow_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 0.469",
+   "PLLT_INT 8_slow_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 0.283",
+   "PLLT_INT 8_slow_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 2.115",
+   "PLLT_INT 8_slow_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 0.285",
+   "PLLT_INT 8_slow_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 16.424",
+   "PLLT_INT 8_slow_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 2.953",
+   "PLLT_INT 8_slow_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 6.412",
+   "PLLT_INT 8_slow_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 0.471",
+   "PLLT_INT 8_slow_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT 8_slow_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 19.187",
+   "PLLT_INT 8_slow_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 0.343",
+   "PLLT_INT 8_slow_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 33.866",
+   "PLLT_INT 8_slow_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 1.158",
+   "PLLT_INT 8_slow_1100mv_0c setup dram_clk_out NA",
+   "PLLT_INT 8_slow_1100mv_0c hold dram_clk_out NA",
+   "PLLT_INT 8_slow_1100mv_0c recovery dram_clk_out NA",
+   "PLLT_INT 8_slow_1100mv_0c removal dram_clk_out NA",
+   "PLLT_IO 8_slow_1100mv_0c dram_out setup 2.407",
+   "PLLT_IO 8_slow_1100mv_0c dram_out hold 4.170",
+   "PLLT_IO 8_slow_1100mv_0c sram_out setup 8.354",
+   "PLLT_IO 8_slow_1100mv_0c sram_out hold 7.835",
+   "PLLT_IO 8_slow_1100mv_0c dram_in setup 2.859",
+   "PLLT_IO 8_slow_1100mv_0c dram_in hold 13.011",
+   "PLLT_IO 8_slow_1100mv_0c sram_in setup 40.957",
+   "PLLT_IO 8_slow_1100mv_0c sram_in hold 0.285",
+   "PLLT_INT MIN_fast_1100mv_85c setup clk_74a 5.345",
+   "PLLT_INT MIN_fast_1100mv_85c hold clk_74a 0.176",
+   "PLLT_INT MIN_fast_1100mv_85c recovery clk_74a NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal clk_74a NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_85c hold clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_85c recovery clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup bridge_spiclk 12.553",
+   "PLLT_INT MIN_fast_1100mv_85c hold bridge_spiclk 0.185",
+   "PLLT_INT MIN_fast_1100mv_85c recovery bridge_spiclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal bridge_spiclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 3.100",
+   "PLLT_INT MIN_fast_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 0.143",
+   "PLLT_INT MIN_fast_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 6.280",
+   "PLLT_INT MIN_fast_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 0.135",
+   "PLLT_INT MIN_fast_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 18.431",
+   "PLLT_INT MIN_fast_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 1.365",
+   "PLLT_INT MIN_fast_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 8.134",
+   "PLLT_INT MIN_fast_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 0.136",
+   "PLLT_INT MIN_fast_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_85c setup ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 30.706",
+   "PLLT_INT MIN_fast_1100mv_85c hold ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 0.160",
+   "PLLT_INT MIN_fast_1100mv_85c recovery ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 37.447",
+   "PLLT_INT MIN_fast_1100mv_85c removal ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 0.517",
+   "PLLT_INT MIN_fast_1100mv_85c setup dram_clk_out NA",
+   "PLLT_INT MIN_fast_1100mv_85c hold dram_clk_out NA",
+   "PLLT_INT MIN_fast_1100mv_85c recovery dram_clk_out NA",
+   "PLLT_INT MIN_fast_1100mv_85c removal dram_clk_out NA",
+   "PLLT_IO MIN_fast_1100mv_85c dram_out setup 2.939",
+   "PLLT_IO MIN_fast_1100mv_85c dram_out hold 4.365",
+   "PLLT_IO MIN_fast_1100mv_85c sram_out setup 12.451",
+   "PLLT_IO MIN_fast_1100mv_85c sram_out hold 4.142",
+   "PLLT_IO MIN_fast_1100mv_85c dram_in setup 5.935",
+   "PLLT_IO MIN_fast_1100mv_85c dram_in hold 10.801",
+   "PLLT_IO MIN_fast_1100mv_85c sram_in setup 40.880",
+   "PLLT_IO MIN_fast_1100mv_85c sram_in hold 0.765",
+   "PLLT_INT MIN_fast_1100mv_0c setup clk_74a 5.612",
+   "PLLT_INT MIN_fast_1100mv_0c hold clk_74a 0.135",
+   "PLLT_INT MIN_fast_1100mv_0c recovery clk_74a NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal clk_74a NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_0c hold clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_0c recovery clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal clk_74b NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup bridge_spiclk 12.641",
+   "PLLT_INT MIN_fast_1100mv_0c hold bridge_spiclk 0.175",
+   "PLLT_INT MIN_fast_1100mv_0c recovery bridge_spiclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal bridge_spiclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 3.271",
+   "PLLT_INT MIN_fast_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 0.130",
+   "PLLT_INT MIN_fast_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 6.664",
+   "PLLT_INT MIN_fast_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 0.106",
+   "PLLT_INT MIN_fast_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 18.720",
+   "PLLT_INT MIN_fast_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 1.169",
+   "PLLT_INT MIN_fast_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 8.407",
+   "PLLT_INT MIN_fast_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk 0.128",
+   "PLLT_INT MIN_fast_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[4].gpll~PLL_OUTPUT_COUNTER|divclk NA",
+   "PLLT_INT MIN_fast_1100mv_0c setup ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 31.695",
+   "PLLT_INT MIN_fast_1100mv_0c hold ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 0.144",
+   "PLLT_INT MIN_fast_1100mv_0c recovery ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 37.877",
+   "PLLT_INT MIN_fast_1100mv_0c removal ic|mp|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 0.476",
+   "PLLT_INT MIN_fast_1100mv_0c setup dram_clk_out NA",
+   "PLLT_INT MIN_fast_1100mv_0c hold dram_clk_out NA",
+   "PLLT_INT MIN_fast_1100mv_0c recovery dram_clk_out NA",
+   "PLLT_INT MIN_fast_1100mv_0c removal dram_clk_out NA",
+   "PLLT_IO MIN_fast_1100mv_0c dram_out setup 2.951",
+   "PLLT_IO MIN_fast_1100mv_0c dram_out hold 4.373",
+   "PLLT_IO MIN_fast_1100mv_0c sram_out setup 12.735",
+   "PLLT_IO MIN_fast_1100mv_0c sram_out hold 3.891",
+   "PLLT_IO MIN_fast_1100mv_0c dram_in setup 6.111",
+   "PLLT_IO MIN_fast_1100mv_0c dram_in hold 10.635",
+   "PLLT_IO MIN_fast_1100mv_0c sram_in setup 41.401",
+   "PLLT_IO MIN_fast_1100mv_0c sram_in hold 0.218",
+   "PLLT_DONE"
+  ]
+ },
+ "run_json": {
+  "config": "rel",
+  "experiment": "D2",
+  "gen_dir_files": {
+   "d2_core.qip": "127100a2e8cf96c33dbfaa4a8e6c1aa1b453259106e7b6671da6c263f29b9840",
+   "files_synth.f": "9097d525da9bfaa67449a409da076318c105ff3a94e3b420e3504318b17b8005",
+   "files_synth_vhdl.f": "93f5fdcbef3cb88e744a2ed1e5ea44c028cfbb12fceeb3390b19bc7bd5183728",
+   "sources.json": "ac62b8a0ce48d17b55393885e65be1bef56e42496f4df4e05916c4ca0bf56969"
+  },
+  "io_script_sha256": "98fa20a335b108e1857633df3575f86518b4cd560032f8dd53a3f607be16e344",
+  "macros": [
+   "SYNTHESIS=1",
+   "S32_SYSTEM32_ONLY=1",
+   "S32_PROFILE_STANDARD=1",
+   "S32_PCB_TIMING=1",
+   "S32_UNIVERSAL=1",
+   "S32_V25_HW=1",
+   "S32_GAME_ONLY_STD=1",
+   "S32_V60_NO_FP=1",
+   "S80X86_PSEUDO_286_INT=0"
+  ],
+  "microcode": {
+   "baseline_s2_expected": {
+    "v2_cstore.hex": "9ea674812f9f36f234521b608208faeaf289e6c35064bb5ecc606ee3ca9fd95a",
+    "v2_dispatch.hex": "7e475e321d59a0be93996c635a9197e9f42eb5e903794d1c33988c270ff69842",
+    "v2_mode.hex": "671e9b84d6819a648191ca45e751901792b17b7321fafb63747df1c534bc1c56"
+   },
+   "builder": "experiments/M1-functional/m1_m11_microcode.py",
+   "builder_args": [
+    "--reset-native",
+    "--mc-pack=tail,zero",
+    "--arith=mul,div"
+   ],
+   "builder_sha256": "f1f5d21eab55961910d9d378e3c41845caef713597ce410ea0212368166d6ae8",
+   "images_sha256": {
+    "v2_cstore.hex": "9ea674812f9f36f234521b608208faeaf289e6c35064bb5ecc606ee3ca9fd95a",
+    "v2_dispatch.hex": "7e475e321d59a0be93996c635a9197e9f42eb5e903794d1c33988c270ff69842",
+    "v2_mode.hex": "671e9b84d6819a648191ca45e751901792b17b7321fafb63747df1c534bc1c56"
+   },
+   "pin_sha256": "90c4a222d4b26c49c071cf4830cd3b8fe39d878f8a3ab2e1e94e77dc2b2519cb",
+   "ref": "HEAD",
+   "v25_microcode_bin_sha256": "243e3c78e0390153e5b0a6dd36c5a941a91038992b6fd09b1182c5df9c6dc7d7",
+   "verified_against": "experiments/D2-pocket-top/reference/microcode_pin_rel.json"
+  },
+  "note": "NOT built: no Quartus was run. project_files are hashed at preparation time (run.json excluded).",
+  "project_files": {
+   "apf/apf.qip": "94af53185dde4d51ef30e75bb1ec8df672126742af36399bd62f4efb3a84b26a",
+   "apf/apf_constraints.sdc": "18b72957181178b046c2f27711190cb426482edcd7b58fcda9cfea27e855dd2e",
+   "apf/apf_top.v": "6c24aa45a3dab52d8b86944cdd90330aa74cfdcd62e2d43e39d33d4791d173c7",
+   "apf/build_id.mif": "3ef497ff9c6bd44ad96c936a2ee3bcf8e624f8b74ef4b37bedd10e98f0e91ee3",
+   "apf/build_id_gen.tcl": "6279533fec80081e3c91884e1cc5df853b2a716df0b573636147f3420aace996",
+   "apf/common.v": "c1615e2c6c12b111537f6ca11e826e5061eb91f405e349bdc649a17b48e24d4e",
+   "apf/io_bridge_peripheral.v": "fb9c13e0311ac6b01019898d0ca7786f370228380356fe618fc2b473f2add17d",
+   "apf/io_pad_controller.v": "70cda74af63d3baa53f87473e1d9e2d524ea305b299a3f832d6c1292771a305e",
+   "apf/mf_datatable.qip": "8d4fac9c708f86c426e5241055d8000063e16dbe9b5c414f320a8b24c44a0632",
+   "apf/mf_datatable.v": "e2cc2e33ccc22b9a8be3c426141848e0ea7800abb45ce55530eebe17dd23ffd7",
+   "apf/mf_ddio_bidir_12.qip": "f0ed4e73a07d734115bbde6501b43fe5878a7409f9b3b68bb4c7e0424b31b42e",
+   "apf/mf_ddio_bidir_12.v": "31c8b62114d7bc916104a6199d919d9e2235a164aba518360b339867a08426aa",
+   "core/core_constraints.sdc": "a02c35bacd9ca9a109297433c451f34462ed5d886f893f2f15362cdb7ee63474",
+   "core_bridge_cmd.v": "e6e0185218b3a63799db0f80085b0f4570c003c5f2197e8c9b8a1b1350f733fe",
+   "d2_core.qip": "5b448c11598ffd23a394191fa7697e52b11e07eb82dad847fdff4660adea071e",
+   "files_synth_resolved.f": "2c723bfe799d4251d87eb79a033057f45b43d54f278cb595de1cfb11e9a6e84b",
+   "ga2_d2.qpf": "de0eb30f9037b03a90174ffccc06290421dea4f9fa659a0c299a0a64cb01586a",
+   "ga2_d2.qsf": "289832bdeb42892d6e05b1890ebd486ad0dd16e927e7c4e96878aea471990731",
+   "microcode.bin": "243e3c78e0390153e5b0a6dd36c5a941a91038992b6fd09b1182c5df9c6dc7d7",
+   "v2_cstore.hex": "9ea674812f9f36f234521b608208faeaf289e6c35064bb5ecc606ee3ca9fd95a",
+   "v2_dispatch.hex": "7e475e321d59a0be93996c635a9197e9f42eb5e903794d1c33988c270ff69842",
+   "v2_mode.hex": "671e9b84d6819a648191ca45e751901792b17b7321fafb63747df1c534bc1c56"
+  },
+  "repo": {
+   "dirty": false,
+   "dirty_tracked": [],
+   "untracked_in_experiments_tools": []
+  },
+  "revision": "ga2_d2",
+  "sdc_au3_append_sha256": "37426115195909b6bf1a8b8c8f3d773c524194a70994a22a026d532d8d58c941",
+  "sdc_au_append_sha256": "b89291d6840715e1f83b944d655291774893d8f6c9babcf739c78437e7f947e5",
+  "sdc_sha256": "775a3c295f754eef7d927677ce54ac4521979fbbd7e27f7b635dd817475469a3",
+  "sdc_univ_fragment": {
+   "path": "experiments/U1-universal/pocket/u1_fit_hold.sdc",
+   "sha256": "def39288983bfd6ca50b713b38421b398419f79554170c3e93494312f2d14988"
+  },
+  "search_paths": [
+   "../../references/s32/rtl/cpu/v25/s80x86/generated",
+   "../V2-datapath-floor/rtl"
+  ],
+  "seed": 1,
+  "source_files": {
+   "build/D2REL/seed1/apf/apf_top.v": "6c24aa45a3dab52d8b86944cdd90330aa74cfdcd62e2d43e39d33d4791d173c7",
+   "build/D2REL/seed1/apf/common.v": "c1615e2c6c12b111537f6ca11e826e5061eb91f405e349bdc649a17b48e24d4e",
+   "build/D2REL/seed1/apf/io_bridge_peripheral.v": "fb9c13e0311ac6b01019898d0ca7786f370228380356fe618fc2b473f2add17d",
+   "build/D2REL/seed1/apf/io_pad_controller.v": "70cda74af63d3baa53f87473e1d9e2d524ea305b299a3f832d6c1292771a305e",
+   "build/D2REL/seed1/apf/mf_datatable.v": "e2cc2e33ccc22b9a8be3c426141848e0ea7800abb45ce55530eebe17dd23ffd7",
+   "build/D2REL/seed1/apf/mf_ddio_bidir_12.v": "31c8b62114d7bc916104a6199d919d9e2235a164aba518360b339867a08426aa",
+   "build/D2REL/seed1/core_bridge_cmd.v": "e6e0185218b3a63799db0f80085b0f4570c003c5f2197e8c9b8a1b1350f733fe",
+   "experiments/D2-pocket-top/rtl/d2_ack_stub.sv": "2f7af7a4cfd5d81db6d5ed0d7da2948b6a76dbd8faa1292ea508fb21a7d6c7c3",
+   "experiments/D2-pocket-top/rtl/d2_freeze_readout.sv": "181ece6ec97966d31480712d295e7469901bb50c5d7c46031f2e456ad2c22a87",
+   "experiments/D2-pocket-top/rtl/d2_rom_psram.sv": "cee48726ee875a178caa8ada86bac71c3edf06e4ca1e4a16608ab57b989c0456",
+   "experiments/D2-pocket-top/rtl/d2_wave_psram.sv": "84c77954af877e2698eb4f4e37245452bdb4b2f71cef293516922ee1fdaede00",
+   "experiments/D2-pocket-top/rtl/derived/d2_diag_band_au3.sv": "c4b603ff4725919d14603fcd0ab480a6b00b2a18a5503fa64fbd745dfa105104",
+   "experiments/D2-pocket-top/rtl/derived/d2_load_wq3.sv": "5f7db3037826456e4f9c1716887354b815d3c857930ad8f5a42a262f5409c872",
+   "experiments/D2-pocket-top/rtl/derived/d2_slot_verify3.sv": "011bed27fc5ab2c4d864c797f9d443d925d8df93f1ee1250b12fc6fd602f7932",
+   "experiments/D2-pocket-top/rtl/derived/d2_sram_port.sv": "25f88ea6e7826d5c06cdd710a6a9910512a9620fa84382665f9fc19fac07f96a",
+   "experiments/D2-pocket-top/rtl/derived/d2_v60_hw.sv": "0476df8febd15144633e7b69c44db4758f204d8ff2d7c89bd70dadb757993d28",
+   "experiments/D2-pocket-top/rtl/derived/s32_soundsys_d2_au.sv": "2f21b5945d6f2576d180d928dea6a4119be61b946ad3e5dde3d72e128a8fe261",
+   "experiments/D2-pocket-top/rtl/derived/s32_sprite_d2_au3.sv": "ef9c6038a58d2c319e5bce0ce6c5c9c9d74f8f5f09a073131c67aec48c190b7e",
+   "experiments/D2-pocket-top/rtl/derived/v2_core.sv": "57935a76167cfe34de1d85bce298bfb3f827554faab62801383fe006d3c40064",
+   "experiments/D2-pocket-top/rtl/derived/wc_v25_stub_hw.sv": "2ff186ecad4a22db8c69ac002f515e6d7da0464faa57b08a0a808dd42da0fe5a",
+   "experiments/D2-pocket-top/rtl/mf_pll_ga2.v": "307ae526ac707305564236d5106667f789dc4ea4ddd7dd7b33fbb3d824c84d5f",
+   "experiments/D2-pocket-top/rtl/third_party/sound_i2s.sv": "0fa70b694bd45ffaf60be5a70bc60dd8ec4faa1857d7dcd98d4b715e46ffc9f5",
+   "experiments/D2-pocket-top/rtl/third_party/sync_fifo.sv": "bc2aabb03140da9f4383819b72cfc6c0be9dfa96fa5e27dd2a3cc68b1010431e",
+   "experiments/P1-pocket-top/rtl/ga2_video.sv": "a2e18be626d2a4a6a5a391f70228fee3457878189684f31445ed3c90258523a5",
+   "experiments/P1-pocket-top/rtl/third_party/data_loader.sv": "813a9e6e2869dbd9915c07eb7827c08c9ff13e4155ada808be3ef65750008cae",
+   "experiments/SM1-spidman/rtl/sm_eep_bridge_rd.sv": "6d7e44ab2821ba61657ee6931fc739d09d20c051edcfe3775e810d7a4579fbac",
+   "experiments/SP-sprite-path/rtl/derived/sp_sdram.sv": "c2d96fde94463a5061588f621997b16d9481060aacf97831d81fec7ad0dd1468",
+   "experiments/SP-sprite-path/rtl/sp_fb_sdram.sv": "a23920192d0f10234adc28eb2feca0f8989a2b34aab0d810b1d98b0a3ed973fb",
+   "experiments/SP-sprite-path/rtl/sp_spriteram_win.sv": "db25f7dffc82a493e4d93cd4c93b3b02514969bf03512f75f254b076c021f3fd",
+   "experiments/U1-universal/rtl/derived/d2_core_top_rel.sv": "7d4a2c092f06c637b9f3b973547a3b5b892e28c8c8c30d36e1e3a657a3f794ff",
+   "experiments/U1-universal/rtl/derived/s32_core_d2_univ.sv": "e9d31f904736c8c500d9b5bb86221fef97d36caa62c9cf90181a8a0b9cec7abd",
+   "experiments/U1-universal/rtl/u1_board_cfg.sv": "e5457d56466794d80e3d5f02e9c6fe9c3e924e4388d8ec5fddb1b1aff4cf5230",
+   "experiments/V2-datapath-floor/rtl/v2_agu.sv": "25ade3f68b8e425dc81ff5f51c2cee9a01ca1c1ce5865076b0ec98a13105e694",
+   "experiments/V2-datapath-floor/rtl/v2_alu.sv": "ec56a0c63b0a86a84ea1988c11c59b9e587f5ba043f5ab3ef8f01f6281b93c62",
+   "experiments/V2-datapath-floor/rtl/v2_bcd_bitfield.sv": "89746e479b508dd3bba9d31f36a618880079185d03480e9c57d96634cae1cefe",
+   "experiments/V2-datapath-floor/rtl/v2_bus.sv": "72f07f0e39114b6c10ccad79bf08c79c85d27562990eed7a313da576d43d8bd8",
+   "experiments/V2-datapath-floor/rtl/v2_clz.sv": "e5ad49d4ad48f5bdd0c50b6ade87dfd4332136151e950a1c8d912c60e5e23f2a",
+   "experiments/V2-datapath-floor/rtl/v2_fetch.sv": "f84ad979ff414e6b13dc614864df293ff08aa3dd4d8933a1aca7dcc70fbfd6ef",
+   "experiments/V2-datapath-floor/rtl/v2_fetch_byteq.sv": "d8d3262b09bf7e9a51da34d4bcbac43d6776533a01d1960e19fe84cae11ff726",
+   "experiments/V2-datapath-floor/rtl/v2_glue.sv": "041f0de75b9f698456781b29e5bf9965f4b74cfced8e56fa42515588ab7ba233",
+   "experiments/V2-datapath-floor/rtl/v2_muldiv.sv": "101988cc41916586f5ab2f3a2f305f18ec3f192bf21cf90b7c4f137c146aad26",
+   "experiments/V2-datapath-floor/rtl/v2_psw_irq.sv": "6a31f9f3d9f09bf407796e37dc9d72a211067fb0a59422c015b08dddea2e7b1f",
+   "experiments/V2-datapath-floor/rtl/v2_regs.sv": "7007af8b455734819afc14f3bafca3c62a253fa2909a64b9718e69c390f87e9b",
+   "experiments/V2-datapath-floor/rtl/v2_shift.sv": "951a5ba6c2e9dc61fc26afe648139ac01e44b8703e02f72a90fcbe42928a1db3",
+   "experiments/V2-datapath-floor/rtl/v2_shift_iter.sv": "c8bb418f49b6101af0831edc614f7453355192a7172a8059b9d34b98ea31dcd3",
+   "experiments/V2-datapath-floor/rtl/v2_shift_naive.sv": "d3f8f58b44a7a2f3c390ec4a5fdb569dba9763dffe3eb9b8af5c387c4d1b3934",
+   "experiments/V2-datapath-floor/rtl/v2_useq.sv": "833b625906af3781f5e951a7b30e2725060b257fbba5e36691da8698d2a3748f",
+   "references/s32/rtl/audio/T80/T80.vhd": "e6f6a31dcbc34f0193ff8aa4bc124e4967e527d10731d0acc6f3908d3384e0ef",
+   "references/s32/rtl/audio/T80/T80_ALU.vhd": "8e1dfd1c47fc0ce4a902f3d789f657a93f2b9faa6a72df70e1f12f27649291b8",
+   "references/s32/rtl/audio/T80/T80_MCode.vhd": "a73c512d7f03bc34759de560efe78c1813785c5ae3f52714df149455b876e5a5",
+   "references/s32/rtl/audio/T80/T80_Reg.vhd": "b40f92eb96fc55fa0adc8ca1bbb20d99133ae1dfe3728b146e37ee00ef588783",
+   "references/s32/rtl/audio/T80/T80pa.vhd": "93a8af065cbb495d92ca15137e661f43bcdf4026b2dfedc7de598c2d100ba88f",
+   "references/s32/rtl/audio/T80/T80s.vhd": "16fbbccf05abda145ceca25f703f2f2057818e1cf2e703aac54375cb258df1ec",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm.v": "38d86af4d77a676ebcc3885f4bb324e201da74a086437f347e42fa7f5502aba5",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_acc.v": "a0c5f404dc28ab4dada70b3feea61476714df84b70f555d3d8dc850efbc0891c",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_cnt.v": "b3b39da33087ef7742059436516ed0372342e065695dcb99f2800931d740de1d",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_comb.v": "f959c339b51f8979eedcd89770acb568010ffb26f408a6e88d5ec9ea1a25b0cb",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_dbrom.v": "9ec98f60d31c4a6a928db993c967ee80a659d9d77c5658515778c878c735af28",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_div.v": "cbaaad79fff16df5c9d5f34e9be6d6811cff85121798139be34b19b36d791c07",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_drvA.v": "716d6acee8654bb5a75cb86c0f367604f09893779eb803d8aff82521bde03958",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_drvB.v": "bb1010421e7565f51215bb5e411ca8229000ec0f1ecf858ba2cc5e4d4ea02181",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_dt.v": "251203e623465f0990c474df55bab5a1eda0fef3e323ff014492d9119f303886",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcm_gain.v": "94e454f3cec16f24932adbeece10c0c02afc8faf1b3625e8687d779f6f3919db",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcma_lut.v": "0aa5eb92479cc7753f038f9c1715bbe7fa78ba9d413cbd4e987273a753223baf",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcmb.v": "dd257407b107792437bab7f70479a56b7233afd5bf33b7118420800d93f37980",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcmb_cnt.v": "3dd713e3b0a81b56b42a19a2c9c3fd1b56f31ac61c3b5d0a9d1274a72e73dad7",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcmb_gain.v": "e8ce4953be4ef31cb7929d5d3d12a9d16cc97c7212a0ca09093c4d24a5b653a5",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_adpcmb_interpol.v": "b91016dc06f8fc9dd48169fa0c6538873c34dae9d8c2fecde2b04815e420422f",
+   "references/s32/rtl/audio/jt12/adpcm/jt10_cen_burst.v": "720550af9699db08c17d77707557fd08c031e44ad0310a5befea14772c0ac553",
+   "references/s32/rtl/audio/jt12/jt12.v": "bb929c090298ee9ed1898061aa38a4cf127ebff991f34bcabb6e207b594d66d4",
+   "references/s32/rtl/audio/jt12/jt12_acc.v": "a80895c07a4024af1ae9cfd4baf92bf1dfbc85e9d15e782ce1b96927b5340760",
+   "references/s32/rtl/audio/jt12/jt12_csr.v": "4aaabf1cdaeaa1e7af133ebd48874c9619738b9f8ff579ed5ef24b7a11e8790d",
+   "references/s32/rtl/audio/jt12/jt12_div.v": "c0e834ce45468fecc975699bcb82224af5dca60a7ce2c9ba559a1b6d6f997c64",
+   "references/s32/rtl/audio/jt12/jt12_dout.v": "cfc26791f2cc21d2f39d600fa5776c2887ffe641071ca7f231a6a8aa92a3dde0",
+   "references/s32/rtl/audio/jt12/jt12_eg.v": "a6d21dbd10c4203153bd923e16bc4aeaeee97bad5d442e3fcbfed4c85a86d58a",
+   "references/s32/rtl/audio/jt12/jt12_eg_cnt.v": "f659140c6881fc5222da3bb4cc9a532935529b66c624cd3ddd38611b7ec08aec",
+   "references/s32/rtl/audio/jt12/jt12_eg_comb.v": "1ca6e221ef0e222d2ea4d6aecff5426901d17b7863bcfa147a9630847b85a76f",
+   "references/s32/rtl/audio/jt12/jt12_eg_ctrl.v": "f570518cdd0b653bff9e9c03d4fb0c45e74b898a6de0db0420750328dc7dee29",
+   "references/s32/rtl/audio/jt12/jt12_eg_final.v": "100cd049e409adfb47e4fd4f648c16e63d5222f5c8d7baec1e894a22e076f151",
+   "references/s32/rtl/audio/jt12/jt12_eg_pure.v": "23a12e8fcc946ae8d967f52566e60c1da1b5d68245d9a80ecae548c9de461cef",
+   "references/s32/rtl/audio/jt12/jt12_eg_step.v": "77af630259cee627739e5bfd2f31fb37d421cf2342323baf109a4d0f8f546569",
+   "references/s32/rtl/audio/jt12/jt12_exprom.v": "53ca640b882ad1e485f84896f88a20bc9d572f0771f34d1771a1a3e6a9a06e22",
+   "references/s32/rtl/audio/jt12/jt12_kon.v": "278906bed31509c70d31643a458ed6d4633cf10bf8d7833283594a0e63377245",
+   "references/s32/rtl/audio/jt12/jt12_lfo.v": "67839ad9271072b535be20e5a7b3fcd5b8b71472897a19e49f8868f27f0d3e27",
+   "references/s32/rtl/audio/jt12/jt12_logsin.v": "372d99205ac743b16bbafe937a8c3b5b4dbed104c336f44f74a45800e52c74e0",
+   "references/s32/rtl/audio/jt12/jt12_mmr.v": "b9205a9a1c7318e2cc389afb74f7859f96b49038306998af61e37e4d72f3f565",
+   "references/s32/rtl/audio/jt12/jt12_mod.v": "74d9ccf472bd9ea4d21829caa8a5545cada9200e80a69db7216a22f1cda90079",
+   "references/s32/rtl/audio/jt12/jt12_op.v": "9e3cc26a78e981dbe1d71cee83415da04729cb38e9b3a25a84cc90ba0d61b954",
+   "references/s32/rtl/audio/jt12/jt12_pcm.v": "3b68b1dc76cad3df9a87b1328fb39cff6095433c8e9ce2189898979080a1a45d",
+   "references/s32/rtl/audio/jt12/jt12_pcm_interpol.v": "e373db7ff3d80b57ebb384ffa713826874d926f9600a4b76eb28f00d69ac9b47",
+   "references/s32/rtl/audio/jt12/jt12_pg.v": "45adc7c30419cdfd39c2377b12f0822dacc0cca3bbacb33f70a42f0e840a41ac",
+   "references/s32/rtl/audio/jt12/jt12_pg_comb.v": "5aac7ff07533fd1764c6f23efeea653c4c2a0019b177aa6f7fca5676f12000bd",
+   "references/s32/rtl/audio/jt12/jt12_pg_dt.v": "ea54be76a10628d35263a75140e4f028cbaf54abb9d0721f2d3f18bece90f6e3",
+   "references/s32/rtl/audio/jt12/jt12_pg_inc.v": "5c766037c4138062ce2e2b5a6c9442d6fc9b4c9338739ac9e8ae2ee8be0ded9c",
+   "references/s32/rtl/audio/jt12/jt12_pg_sum.v": "928128558cf56ecdc35d3b7c2de8509ed32ca25e577f001f7aea0d72212fe424",
+   "references/s32/rtl/audio/jt12/jt12_pm.v": "1365093deeea115f3ff2c684d94c28a738b446c0223bb95c5b32b6a8f2b7edbc",
+   "references/s32/rtl/audio/jt12/jt12_reg.v": "fa10625f84e216b65e1edf5bd040bccb4ab6cbc8c9973809f1ba0102ca42ac64",
+   "references/s32/rtl/audio/jt12/jt12_reg_ch.v": "24b615009a818fee7919c67b91ea9e4122f0dd37a83c63f47dea5d2940aa6357",
+   "references/s32/rtl/audio/jt12/jt12_rst.v": "5aadf3d18c8e52f046c89f675b202f5f0571ef715f2a120ca4cb91fcbd86b678",
+   "references/s32/rtl/audio/jt12/jt12_sh.v": "6338254874f88eb9f1ecb36fae4de9b371c694e85897bb34bbdec2e7dede901e",
+   "references/s32/rtl/audio/jt12/jt12_sh24.v": "d15232653c91ecf7ad20f89259b083cd59ee343ed6d909b94d08e509ac98feae",
+   "references/s32/rtl/audio/jt12/jt12_sh_rst.v": "94b887a5c34d767779a2a90592ad5ca6635ccf615ebc86857d063d1a1f785a77",
+   "references/s32/rtl/audio/jt12/jt12_single_acc.v": "f989b34f1947c158a767702a433855d03b13dbe5ff3391c7e28db206008d2f42",
+   "references/s32/rtl/audio/jt12/jt12_sumch.v": "f6b274620e265af8785503d47e4b2035ac253a45677d12976c63bda04efd83ef",
+   "references/s32/rtl/audio/jt12/jt12_timers.v": "56627912f918db6b5f53a034d9e551182fc7cffe70bfd9d9d68ac7909eb8597f",
+   "references/s32/rtl/audio/jt12/jt12_top.v": "b397b5278dfe031d07a720f0e779eebd57d7562e348077f26dd07c080cda21bd",
+   "references/s32/rtl/audio/s32_audio_ce.sv": "2d8f613b6bfa5577682cce6be548dcf1021df48024b1097761ce3c6d8fc1e706",
+   "references/s32/rtl/audio/s32_audio_mix.sv": "dfe049067c5930981394f5c91d5f8585ef210077fe6e6a0e81d63153282242ab",
+   "references/s32/rtl/audio/s32_multipcm.sv": "673a25c91fdb8122a72b83fd3e83328969470c643acc07bc6a528ab5ba6f787b",
+   "references/s32/rtl/audio/s32_rf5c68.sv": "9d7d9c0a5d126f2fc9c0c2e158933d1d545aa7ed10a791848526e7d9071747a7",
+   "references/s32/rtl/cpu/v25/s32_v25_cpu.sv": "74fcd48e0e6bc6214414304a3cc609f3c9686a712829cd7d61ac44ef7a2b0535",
+   "references/s32/rtl/cpu/v25/s32_v25_rom_cache.sv": "20b665b4a8624e7bf95d3987bff3de741030d10ab00fcc99355b22f902d5ab30",
+   "references/s32/rtl/cpu/v25/s80x86/generated/InstructionDefinitions.sv": "642a3bd0d16287cd646283a565611efe57501b02881a8bae860397bc16927683",
+   "references/s32/rtl/cpu/v25/s80x86/generated/Microcode.sv": "2cc8b764975ab4d3a5274db35d2c3d1c2913debe4aaa56465fe78ca3a9fa947e",
+   "references/s32/rtl/cpu/v25/s80x86/generated/MicrocodeTypes.sv": "bd962600c15f5b94e248cae19a7700118f1614e39bb3d036c08c900edc421fc4",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/CSIPSync.sv": "e2faa6fb05a2009f9035093c24a9437f2b912ef187dc55b4fad1b6413476a511",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/Core.sv": "dfadd8ed31eda3bbc2c526c38516b807b4890622293cd70a1e1fa4ffb8972d54",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/Divider.sv": "cc44e24abbd9b8093b6c0c9dfb0d68ade8977ab9087695f803244b35d64ba004",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/Fifo.sv": "838d0822a57e4d2811dd04c689e2c7fd70c388d0ba754c6077b042af4857df17",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/Flags.sv": "f9249474fe6d57c71961825f387e24b2a4f51dc753788e0fc0d4ad717abefe21",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/FlagsEnum.sv": "465e9a15a6314aa506ca9c97cff1c28afc973c2b86531d0ffd08b4c9e5531bf2",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/IP.sv": "a074ca27ead42b770e8076dfd78e4c88007d5b8e8d5847b061d3e5e798adf602",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/ImmediateReader.sv": "5d1630037ef6d649424b46068fa98ab9dfd9a977b0f9ba011dd118ba3f202af6",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/InsnDecoder.sv": "a7c550452d23a91973b5874cfe1aa09b3faf80595569488e4246e076bec75c0b",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/Instruction.sv": "dae84d8c84cb3a71bcc8051073b84ab8c4ae392f117e6eac4197e683c22ef081",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/JumpTest.sv": "ae9696d88e4d7f5370e60231d3fd89afb6feb56fceceb2b5ffd9c5877896e789",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/LoadStore.sv": "9fdcc71715cc7191096253d23cc160dcd14a6a3d82e6b80d31607bcfde8d93f3",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/LoopCounter.sv": "8d3d022a8051468fe7876f492d6c0f680aeb4229e49116a3eacc27af916c8674",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/ModRMDecode.sv": "277ac0e589874c93cec4d25eea11d2a26077338646100bf954c3880f9a605910",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/PosedgeToPulse.sv": "0e71cc563cd824b27d3c3c0cfa228ccde2956fefa47cb457b5a3b8d0743c9940",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/Prefetch.sv": "51b3a07f0de4f93624641d8d5bd05029b48a19e2399832e3227dd4117c416881",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/RegisterEnum.sv": "5cbc99c47be1aeb8dabf9ea570e7e95f4c60414fb2705d090da8bcb35757772b",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/RegisterFile.sv": "2212a8e292d27590993eebcc7d6c4a191f2e06ce29b3bc2c30b13c2b1d24ce0c",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/SegmentOverride.sv": "0ec30c84b97713d18e04e6cfee1bfcaaaa013de3cf336c677d2c44aa483cca55",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/SegmentRegisterFile.sv": "fc3c2723132b96801b5e77b06bf0f971070b8239b448e28625b9208a2d25dd57",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/TempReg.sv": "f904199dfde41199962b1eaea0fe94237d7114f6395ab37fdffe4e792c8aa5b4",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/ALU.sv": "b5d0d31106098206623fbde21d29485bc3959b7ea723e39676a9a6c1aac0ba46",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/aaa.sv": "dcb956b279ef0a99bcc299d07394c04bcc89aa24aa8e4b6bb0e4ce71f4694214",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/aas.sv": "e2cfa8462ecb584ee4527d23a5b1931554a6136861a347ad0db97da29ea3cbf9",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/adc.sv": "592e8b81c0218711c0eb129442d1d809a7e3c725037aeedb6de089b2c2223ba0",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/add.sv": "7f0ff207e1034e40f6ac555b816ec9b92089f8355c83374bd4c268b800a449f0",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/and.sv": "7b2491b66a8af7d877e865368b88f30aaa195092f6c03fcf572c3899adabe6b4",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/bound.sv": "f9c68f8da5d10d0c14d0d72f87c02463f9a19d54d4da3a167820277a5fcdebb6",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/daa.sv": "fa5c702b9d4a7a8be5fe7292d0b8292539336fe0e2c6df42defe3cf767693c03",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/das.sv": "b857ec97d38ae064f69968753864e0ff375340047cf712072302f92cd33d241b",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/enter.sv": "2762dac30dc142adfb51c4565eb2c38c5b93c305524341ee78c09cda8479237e",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/extend.sv": "8a1bc895f6d085accb0c844030b6c7b917c5cb7426656313007ea08ea5830406",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/flags.sv": "e4f769d8de61dc006032a1a917c59afde5367b5eed18c28c3b2e14c16c9b0d1a",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/mul.sv": "bf0308f35951746ee9c645380bc641072335e60964592586971356e785fcd27a",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/not.sv": "b46691896fc01221e3c3c565a593297ee8922cd49f30bbdf4ffbc3d0a6d5ded6",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/or.sv": "3e28999aa9288f7d11562115a7693144a9194901281f062a374fded6f17e455b",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/rcl.sv": "3df69a2517573ca8c2062a9337d059da5bd698e7b94fdbd0796fe752406194e8",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/rcr.sv": "b92c7d118399594888e7af0451437e288bc1eda25dd2a397df97aa823828aec6",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/rol.sv": "19c611f826d5ec6364ef728caac7b8bace7f973ae440860c8cce6a1d7d6100da",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/ror.sv": "56f710c3fad6ffa4221415960428951bb080b042c6237b90d5a4b0fa7e45a9ed",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/sar.sv": "3e1954243fdbe5ec473551c879e543962bb1ca0f4fd14c478173b43523f169de",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/shift_flags.sv": "c420b323a00718269e7e2d8031e50f14f551c80208eb41766c1f34d58fe51661",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/shl.sv": "c9b91bbcd73e718c45efbd1a9eefedfd5ace56799940ad7fa4816327cbfcbeec",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/shr.sv": "27a149211bb64f81c9ebf2d4e6355c34a7851f33653e7909ffd2bfe0c5c942da",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/sub.sv": "b66b159ce8b1e71c70046b2ec1a344da24340a7c5d198788f0392cb68f41bb30",
+   "references/s32/rtl/cpu/v25/s80x86/rtl/alu/xor.sv": "e21f5cc9452d6833d63dcb6f387a9696991fd9a30658b6b8d1b6c84acedc8fd1",
+   "references/s32/rtl/cpu/v60/s32_v60_bus.sv": "72f0970eb2665fab51aa577fd9257ece3e110fa813b4d84827447b491a392c10",
+   "references/s32/rtl/crt_adjust.sv": "9b4d2832f3f4df932063c87d7cd920a97940f4db85ac4f7f9d7d822ed9e07a44",
+   "references/s32/rtl/io/s32_driving_controls.sv": "0eb795c852a3d10d76f18bfb03f87a8c177bbed31776a1f452be7707169a84b2",
+   "references/s32/rtl/io/s32_guncon_snac.sv": "e8e9fe23b92616422a1d1d4c318bc809c9afc3578dcff0a8c397d814ab1d4355",
+   "references/s32/rtl/io/s32_io.sv": "1393c39b45566a457f8351aed934b9462d2b76bbdd647840444eb944cf1a8816",
+   "references/s32/rtl/io/s32_jpark_gun_gain.sv": "3bb980c12e30484bb352948bc24e424558967952e366152ee05f99a4d853d262",
+   "references/s32/rtl/io/s32_lightgun.sv": "676752eca04dc977534f82fd89fb04f655352b7e436503f83dd434be42a3a127",
+   "references/s32/rtl/mem/s32_sdram_write_mux2.sv": "d35af234e611a03066439832866820694509383c8b612a1fed481b0cb081f8fb",
+   "references/s32/rtl/prot/s32_prot.sv": "ee878b2c20b2e0bc35f82f821c81c2c4955fc81d9fc51437c8060bb71966882b",
+   "references/s32/rtl/s32_pkg.sv": "40f22fd3644afa41e66be3ea6a1b8ddca409c8a69ecd08676dd92f74acfd6122",
+   "references/s32/rtl/video/s32_big_dpram.sv": "e04e45693f8e91b932674dc7e94b9c9857194d37922d375f5c9e3968d00ed220",
+   "references/s32/rtl/video/s32_lightgun_overlay.sv": "094da77175d3147cfb18d4c01ba2df01354456059af572f76c12052aa8d7692d",
+   "references/s32/rtl/video/s32_linebuf.sv": "2892738abdee81d7aaf51adc1ee604cb1aa6af0bdf35f73ff1c1bc203208ea4e",
+   "references/s32/rtl/video/s32_mixer.sv": "f35cdebcde001b08b21a5a3de20d4001e1f49fb55cf7e08c1edd69c1e28d18fe",
+   "references/s32/rtl/video/s32_palette.sv": "13ac110eddce440469d75d524ff1ef7825033c36d5e932161e41a81a2766b543",
+   "references/s32/rtl/video/s32_tilemap.sv": "a2449f48d3939d9d03c382cc41875c1afa01e9c4f74c2d7f17bcce8898f9ed83",
+   "references/s32/rtl/video/s32_tilemap_regcap.sv": "91ef51b56443a8eb4c16dc4995f1583a52766be6b14691e09d01274209d379a8",
+   "references/s32/rtl/video/s32_video.sv": "295ea2d6101608fcae69c00e65f1635563329140d69a9381585fdc71183cdf98",
+   "references/s32/rtl/video/s32_video_retime.sv": "ad1fff08d018287a60a37a1b4e78b2b6bd4564d3694b76f4527a4caf7e3fd781",
+   "references/s32/rtl/video/s32_vram.sv": "45faafc9a2a600a6968b49214b814dc3c3195852be8c0209b736729f0f9a8d9f"
+  },
+  "template": {
+   "pinned": "da3a021b1eaf742604d86d8dc9b33a6666263e6a",
+   "rev": "da3a021b1eaf742604d86d8dc9b33a6666263e6a",
+   "sha256": {
+    "ap_core.qsf": "65d1b8989e6efa2e4d9cd361d03493a26dbda601a8fa9058b151c4fb7360acaf",
+    "apf/apf_top.v": "6c24aa45a3dab52d8b86944cdd90330aa74cfdcd62e2d43e39d33d4791d173c7",
+    "apf/common.v": "c1615e2c6c12b111537f6ca11e826e5061eb91f405e349bdc649a17b48e24d4e",
+    "core/core_bridge_cmd.v": "e6e0185218b3a63799db0f80085b0f4570c003c5f2197e8c9b8a1b1350f733fe"
+   },
+   "tracked_clean": true
+  },
+  "upstream_s32": {
+   "commit": "accd644d139eb74110668b004abe2b48d8e4b07c",
+   "pin": "accd644d139eb74110668b004abe2b48d8e4b07c",
+   "tracked_clean": true
+  }
+ },
+ "run_json_excluded_values": {},
+ "schema": 1,
+ "sdc_sha256": "a02c35bacd9ca9a109297433c451f34462ed5d886f893f2f15362cdb7ee63474",
+ "self_reference": {
+  "base_path": "experiments/D2-pocket-top/reference/d2_run42135281517_reference.json",
+  "base_sha256": "6f09e8c8b5dd7ab1dc0a48c2e92bd1f5a974bbb0f08a62787f3f3a5379cf0409",
+  "base_source_run": {
+   "ci_run": "42135281517",
+   "evidence_dir": "D2-r2-run42135281517-2026-11-05",
+   "repo_commit": "47406e3bd1bbf0c48e8556a0bcc7ad9bd271d631",
+   "seed": 1
+  },
+  "config": "rel",
+  "frozen_vs_base": [
+   "qsf_sha256",
+   "sdc_sha256 (rel: the base prefix)",
+   "experiments/U1-universal/pocket/u1_fit_hold.sdc on disk (pinned SDC_FRAGMENTS['rel'])",
+   "run_json.sdc_univ_fragment",
+   "source_sha256_lines",
+   "run_json.template",
+   "run_json.upstream_s32",
+   "run_json.macros",
+   "run_json.search_paths",
+   "run_json.sdc_sha256",
+   "run_json.io_script_sha256",
+   "run_json.revision",
+   "run_json.experiment",
+   "project_files.apf/apf.qip",
+   "project_files.apf/apf_constraints.sdc",
+   "project_files.apf/apf_top.v",
+   "project_files.apf/build_id.mif",
+   "project_files.apf/build_id_gen.tcl",
+   "project_files.apf/common.v",
+   "project_files.apf/io_bridge_peripheral.v",
+   "project_files.apf/io_pad_controller.v",
+   "project_files.apf/mf_datatable.qip",
+   "project_files.apf/mf_datatable.v",
+   "project_files.apf/mf_ddio_bidir_12.qip",
+   "project_files.apf/mf_ddio_bidir_12.v",
+   "project_files.core_bridge_cmd.v",
+   "project_files.ga2_d2.qpf",
+   "project_files.ga2_d2.qsf",
+   "project_files.microcode.bin",
+   "source_files.experiments/D2-pocket-top/rtl/mf_pll_ga2.v",
+   "git_objects.experiments/V2-datapath-floor/rtl",
+   "git_objects.experiments/P1-pocket-top/rtl",
+   "git_objects.experiments/WC-sim/rtl",
+   "git_objects.experiments/F2-fullchip/rtl",
+   "git_objects.experiments/D2-pocket-top/pll_plan.py",
+   "git_objects.experiments/D2-pocket-top/pocket/d2_pocket_io.py",
+   "git_objects.experiments/D2-pocket-top/pocket/d2_core_constraints.sdc",
+   "git_objects.experiments/D2-pocket-top/pocket/d2_timing.tcl",
+   "git_objects.experiments/V2-datapath-floor/toolchain.json",
+   "git_objects.experiments/V2-datapath-floor/ci_quartus.sh",
+   "git_objects.experiments/P1-pocket-top/BASELINE_S2.md",
+   "git_objects.UPSTREAM.lock",
+   "git_objects.references/s32",
+   "git_objects.tools/d2_gate.py",
+   "git_objects.tools/pll_gate.py"
+  ],
+  "repo_commit": "c19bfa1c7e8a9f542ee7a44ea018ceeade6e5add"
+ },
+ "source_run": {
+  "config": "rel",
+  "kind": "self",
+  "repo_commit": "c19bfa1c7e8a9f542ee7a44ea018ceeade6e5add",
+  "seed": 1
+ },
+ "source_sha256_lines": [
+  "307ae526ac707305564236d5106667f789dc4ea4ddd7dd7b33fbb3d824c84d5f  experiments/D2-pocket-top/rtl/mf_pll_ga2.v",
+  "98fa20a335b108e1857633df3575f86518b4cd560032f8dd53a3f607be16e344  experiments/D2-pocket-top/pocket/d2_pocket_io.py",
+  "456e9600e4101283f8ac462185b4223258d732d88c4486825326f325eb511861  experiments/D2-pocket-top/pll_plan.py",
+  "775a3c295f754eef7d927677ce54ac4521979fbbd7e27f7b635dd817475469a3  experiments/D2-pocket-top/pocket/d2_core_constraints.sdc",
+  "d31dbd3d5d2c2f595ce0230b9a7120a316047e9a7dd5b3287a058c3825b5c2b8  experiments/D2-pocket-top/pocket/d2_timing.tcl"
+ ],
+ "template_rev": "da3a021b1eaf742604d86d8dc9b33a6666263e6a",
+ "what": "SELF-REFERENCE configuration reference for the rel configuration (release/s32-v1 universal core, experiments/U1-universal rel_derive.py): this commit's locally generated project (tools/d2rbf_identity.py self-reference). NOT a delta vs run 42135281517 (the compiled source set is structurally new); QSF / SDC / PLL / I/O / toolchain / gate scripts are frozen to it (S4). Its `result` section is the base's."
+}

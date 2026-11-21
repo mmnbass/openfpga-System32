@@ -1,0 +1,54 @@
+validated 102 runs: each halted, no trap, SIMCHECK/ipc 0, one RETIRE record per retired instruction
+form                              n  min   med  max   exec  fetch   mem  iter
+ADD.W F1 #i32,R                  49   20  30.0   38  20.00   8.73  0.00  0.00
+ADD.W F1 #q,R                    54   19  19.0   37  18.00   2.52  0.00  0.00
+ADD.W F1 R,R                     69   18  18.0   32  18.00   2.26  0.00  0.00
+ADD.W F2 D=0 R,R                 85   14  14.0   38  14.00   2.39  0.00  0.00
+ADD.W F2 D=1 #i32,R              68   14  16.0   39  14.00   7.18  0.00  0.00
+ADD.W F2 D=1 #q,R                61   14  14.0   39  14.00   1.34  0.00  0.00
+ADD.W F2 D=1 R,R                 93   12  12.0   37  12.00   4.29  0.00  0.00
+AND.W F1 #i32,R                  56   20  30.0   46  20.00   8.55  0.00  0.00
+AND.W F1 #q,R                    47   19  19.0   37  18.00   3.34  0.00  0.00
+AND.W F1 R,R                     86   18  18.0   44  18.00   3.38  0.00  0.00
+AND.W F2 D=0 R,R                 81   14  14.0   38  14.00   2.57  0.00  0.00
+AND.W F2 D=1 #i32,R              61   14  14.0   39  14.00   5.38  0.00  0.00
+AND.W F2 D=1 #q,R                53   14  14.0   39  14.00   1.42  0.00  0.00
+AND.W F2 D=1 R,R                 92   12  12.0   37  12.00   2.38  0.00  0.00
+BR8                             504   37  45.0   80   7.00  41.71  0.00  0.00
+CMP.W F1 #i32,#i32                4   22  26.5   34  22.00   5.25  0.00  0.00
+CMP.W F1 #i32,#q                  2   22  30.5   39  22.00   8.50  0.00  0.00
+CMP.W F1 #i32,R                  36   20  30.0   38  20.00   9.22  0.00  0.00
+CMP.W F1 #q,#i32                  6   21  23.5   30  20.00   4.00  0.00  0.00
+CMP.W F1 #q,#q                    3   21  21.0   21  20.00   1.00  0.00  0.00
+CMP.W F1 #q,R                    41   19  19.0   31  18.00   2.85  0.00  0.00
+CMP.W F1 R,#i32                   7   20  20.0   30  20.00   4.00  0.00  0.00
+CMP.W F1 R,#q                     8   20  20.0   32  20.00   2.62  0.00  0.00
+CMP.W F1 R,R                     45   18  18.0   32  18.00   4.02  0.00  0.00
+CMP.W F2 D=0 R,#i32              10   16  16.5   30  16.00   2.60  0.00  0.00
+CMP.W F2 D=0 R,#q                15   16  16.0   30  16.00   1.87  0.00  0.00
+CMP.W F2 D=0 R,R                 79   14  14.0   38  14.00   2.00  0.00  0.00
+CMP.W F2 D=1 #i32,R              44   14  14.0   39  14.00   2.11  0.00  0.00
+CMP.W F2 D=1 #q,R                59   14  14.0   30  14.00   0.59  0.00  0.00
+CMP.W F2 D=1 R,R                 74   12  12.0   37  12.00   3.24  0.00  0.00
+GETPSW R                        882   11  11.0   30  10.00   2.00  0.00  0.00
+HALT                            102    1   1.0    1   1.00   0.00  0.00  0.00
+MOV.W F1 #i32,R                  29   20  24.0   46  20.00   5.69  0.00  0.00
+MOV.W F1 #q,R                    23   19  19.0   31  18.00   1.91  0.00  0.00
+MOV.W F1 R,R                     32   18  18.0   30  18.00   2.38  0.00  0.00
+MOV.W F2 D=0 R,R                 76   14  14.0   30  14.00   0.89  0.00  0.00
+MOV.W F2 D=1 #i32,R            1043   14  20.0   39  14.00   7.11  0.00  0.00
+MOV.W F2 D=1 #q,R                32   13  13.0   30  13.00   1.59  0.00  0.00
+MOV.W F2 D=1 R,R                 53   12  12.0   37  12.00   3.00  0.00  0.00
+NOP                             129    4   4.0   30   4.00   1.05  0.00  0.00
+SUB.W F1 #i32,R                  54   20  30.0   38  20.00   9.83  0.00  0.00
+SUB.W F1 #q,R                    58   19  19.0   37  18.00   2.91  0.00  0.00
+SUB.W F1 R,R                     60   18  18.0   37  18.00   3.57  0.00  0.00
+SUB.W F2 D=0 R,R                 83   14  14.0   38  14.00   3.00  0.00  0.00
+SUB.W F2 D=1 #i32,R              59   14  14.0   39  14.00   6.49  0.00  0.00
+SUB.W F2 D=1 #q,R                63   14  14.0   39  14.00   1.59  0.00  0.00
+SUB.W F2 D=1 R,R                 99   12  12.0   37  12.00   4.16  0.00  0.00
+
+MOVEA.B /abs,Rn (opcode 0x40; Format I d=1; 7 bytes), measured on a1_v00 with +retire (run3/obj_v2, production microcode):
+  default: cycles=24 exec=13 fetch=11     +wide: cycles=13 exec=13 fetch=0     (plan estimate: about 13 advancing execute cycles)
+  control store words: production 244 -> 253 (+9); reset-native 240 -> 249; --smc-test 242 (unchanged, routine not emitted); smc+merged 241; smc+reset 238; smc+merged+reset 237 (unchanged)
+  102-program cost table (default and +wide): IDENTICAL to the pre-R3b microcode run (build/M1/r3b/costs_pre_*) and to results/r2b_costs_default_2026-10-28.txt (every other form unchanged)

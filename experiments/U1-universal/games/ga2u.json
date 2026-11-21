@@ -1,0 +1,11 @@
+{
+  "set": "ga2u",
+  "title": "Golden Axe: The Revenge of Death Adder (US)",
+  "mra": "references/s32/releases/Golden Axe The Revenge of Death Adder.mra",
+  "mra_note": "upstream's MRA is the World set (ga2); ga2u runs on the same board, so the descriptor bytes are the same",
+  "descriptor": "22000083000000000000000000000000",
+  "input_profile": 0,
+  "input_profile_note": "0 = GA2 US wiring: Coin 1 on 8255 port C bit 3 (MAME ga2u counts SERVICE12 bit 2 as COIN4), Start on SERVICE12 bit 4",
+  "expected_sums": {"sum0": "a54f8e76", "fl0": "9e152dfa", "sum1": "5e9bf850", "fl1": "39aeff9a", "sum2": "bcd81c86", "fl2": "f5dfbf9c"},
+  "expected_sums_source": "GA2Play8 d2_core_top_sp.sv parameters EXP_SUM0..EXP_FL2 (checksums of the slot files, not ROM data)"
+}

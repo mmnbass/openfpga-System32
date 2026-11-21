@@ -1,0 +1,89 @@
+{
+ "phase": "r3b",
+ "simulation_only": true,
+ "builder_sha256": "4ac7fa340674fc73ce4166adf07b01efde7c417e1c409c00c40913a40f94c510",
+ "pre_builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+ "words": {
+  "production": [
+   244,
+   253
+  ],
+  "reset_native": [
+   240,
+   249
+  ],
+  "smc": [
+   242,
+   242
+  ],
+  "smc_merged": [
+   241,
+   241
+  ],
+  "smc_reset": [
+   238,
+   238
+  ]
+ },
+ "movea_cost": {
+  "exec": 13,
+  "default_cycles": 24,
+  "wide_cycles": 13,
+  "estimate": "about 13"
+ },
+ "run_r3": {
+  "groups": "78/78",
+  "controls": "484/484",
+  "caught": 481,
+  "equivalent": 3,
+  "missed": 0,
+  "v2_production_per_config": "736/736",
+  "s0_harness": "17/17",
+  "smc": "733/733 + 9/9"
+ },
+ "mutants": {
+  "behavioural_killed": 30,
+  "equivalent": 2,
+  "survived": 0,
+  "structural_killed": "9/9",
+  "baseline_runs": [
+   1550,
+   742
+  ],
+  "file": "r3b_mutants_2026-11-02.json"
+ },
+ "s0": {
+  "reach": 4,
+  "trap": "mode ipc=0010051c",
+  "R31": "00210000",
+  "R25": "00208000",
+  "SBR": "00100000",
+  "PSW": "10000000",
+  "check": "PASS",
+  "file": "r3b_s0_result_2026-11-02.json"
+ },
+ "regression": {
+  "r1b": "35/35 + 39/39, mutants 33=28+5",
+  "r2b": "79/79 + 107/107",
+  "refs": "105 agree, D1 reproduces",
+  "m11": "1051 refs, V2 1043 x4, SMC 14/14",
+  "m12": "1045 refs, V2 1051 x4",
+  "dbcc": "0 failures",
+  "d1": "rc 0",
+  "s0_selftest": "PASS",
+  "test_s0_compare": "379/379",
+  "s1": "122 PASS; 31 mutants 0 missed; 113/8/0/1",
+  "hw001": "ALL OK 277 stores, images 7/7"
+ },
+ "identity": {
+  "pairs": 14412,
+  "identical": 11480,
+  "differ_movea_only": 2932,
+  "differ_other": 0
+ },
+ "frozen": {
+  "digest": "3720e1bab01c3959",
+  "expectations": 912,
+  "match": true
+ }
+}

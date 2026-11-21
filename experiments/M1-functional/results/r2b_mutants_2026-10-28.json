@@ -1,0 +1,564 @@
+{
+ "runs_per_mutant": 430,
+ "mutants": {
+  "imm_ofs0": {
+   "desc": "IMM_OFS 0 on the immediate word",
+   "knobs": {
+    "imm_ofs": 0
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 0: got [(5,ffee11f4,f)] expected [(5,c0ffee11,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "imm_ofs2": {
+   "desc": "IMM_OFS 2 on the immediate word",
+   "knobs": {
+    "imm_ofs": 2
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 0: got [(5,e5c0ffee,f)] expected [(5,c0ffee11,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "imm_sz1": {
+   "desc": "IMM_SZ 1 (16-bit) on the immediate word",
+   "knobs": {
+    "imm_sz": 1
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 136,
+   "designated_failing": 69,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 0: got [(5,ee11,f)] expected [(5,c0ffee11,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "consume4": {
+   "desc": "CONSUME 4 on the immediate word",
+   "knobs": {
+    "imm_consume": 4
+   },
+   "designated_tags": [
+    "L1",
+    "L2",
+    "L3"
+   ],
+   "failing_programs": 160,
+   "designated_failing": 104,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at 00000000, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "consume6": {
+   "desc": "CONSUME 6 on the immediate word",
+   "knobs": {
+    "imm_consume": 6
+   },
+   "designated_tags": [
+    "L1",
+    "L2",
+    "L3"
+   ],
+   "failing_programs": 160,
+   "designated_failing": 104,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped mode at 00000000, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_final_consume": {
+   "desc": "missing final CONSUME 1 (the #q byte)",
+   "knobs": {
+    "final_consume": 0
+   },
+   "designated_tags": [
+    "L1",
+    "L2",
+    "L3"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 104,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped opcode at 00000007, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_const0": {
+   "desc": "WR_ASEL const (RCONST 0)",
+   "knobs": {
+    "wr_asel": 0,
+    "wr_rconst": 0
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 0: got [(0,c0ffee11,f)] expected [(5,c0ffee11,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_const5": {
+   "desc": "WR_ASEL const with RCONST 5 (right for SBR only)",
+   "knobs": {
+    "wr_asel": 0,
+    "wr_rconst": 5
+   },
+   "designated_tags": [
+    "L2"
+   ],
+   "failing_programs": 112,
+   "designated_failing": 57,
+   "first": "l2_id2_v0",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 1: got [(5,20fe00,f)] expected [(2,20fe00,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_fld1": {
+   "desc": "WR_ASEL operand field 1",
+   "knobs": {
+    "wr_asel": 1
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 0: got [(0,c0ffee11,f)] expected [(5,c0ffee11,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_asel_fld2": {
+   "desc": "WR_ASEL operand field 2 [extra]",
+   "knobs": {
+    "wr_asel": 2
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "privileged events of instruction 0: got [(20,c0ffee11,f)] expected [(5,c0ffee11,f)]"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_dst_gpr": {
+   "desc": "WR_DST general register",
+   "knobs": {
+    "wr_dst": 1
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "wr_dst_temp": {
+   "desc": "WR_DST temp",
+   "knobs": {
+    "wr_dst": 2
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "counters: instruction 0 priv=0 expected 1"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "flag_upd_imm": {
+   "desc": "FLAG_UPD on the immediate word",
+   "knobs": {
+    "flag_upd_imm": 15
+   },
+   "designated_tags": [
+    "L4",
+    "L1"
+   ],
+   "failing_programs": 171,
+   "designated_failing": 24,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "flag_upd_q": {
+   "desc": "FLAG_UPD on the quick-extraction word",
+   "knobs": {
+    "flag_upd_q": 15
+   },
+   "designated_tags": [
+    "L4",
+    "L1"
+   ],
+   "failing_programs": 160,
+   "designated_failing": 24,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "the privileged write (instruction 0) updated the PSW 1 time(s)"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "flag_upd_add": {
+   "desc": "FLAG_UPD on the ID-check ADD word",
+   "knobs": {
+    "flag_upd_add": 15
+   },
+   "designated_tags": [
+    "L4",
+    "L1"
+   ],
+   "failing_programs": 160,
+   "designated_failing": 24,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "the privileged write (instruction 0) updated the PSW 1 time(s)"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "flag_upd_and": {
+   "desc": "FLAG_UPD on the ID-check AND word",
+   "knobs": {
+    "flag_upd_and": 15
+   },
+   "designated_tags": [
+    "L4",
+    "L1"
+   ],
+   "failing_programs": 160,
+   "designated_failing": 24,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "flag_upd_wr": {
+   "desc": "FLAG_UPD on the write word",
+   "knobs": {
+    "flag_upd_wr": 15
+   },
+   "designated_tags": [
+    "L4",
+    "L1"
+   ],
+   "failing_programs": 148,
+   "designated_failing": 24,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "lock-step records differ from the expectation"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "id_allows1": {
+   "desc": "regID check off by one, allows 1 (ADD 31: window 1..4)",
+   "knobs": {
+    "id_add": 31
+   },
+   "designated_tags": [
+    "N1"
+   ],
+   "failing_programs": 85,
+   "designated_failing": 1,
+   "first": "n1_id1",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('regid', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "id_allows6": {
+   "desc": "regID check off by one, allows 6 (ADD 29: window 3..6)",
+   "knobs": {
+    "id_add": 29
+   },
+   "designated_tags": [
+    "N1"
+   ],
+   "failing_programs": 50,
+   "designated_failing": 1,
+   "first": "n1_id6",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('regid', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "id_mask24": {
+   "desc": "regID check mask 24 (window 2..9) [extra]",
+   "knobs": {
+    "id_mask": 24
+   },
+   "designated_tags": [
+    "N1"
+   ],
+   "failing_programs": 4,
+   "designated_failing": 4,
+   "first": "n1_id6",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('regid', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_id_check": {
+   "desc": "regID check removed",
+   "knobs": {
+    "no_id_check": true
+   },
+   "designated_tags": [
+    "N1"
+   ],
+   "failing_programs": 12,
+   "designated_failing": 12,
+   "first": "n1_id0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('regid', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_regid_quick_guard": {
+   "desc": "C_QUICK regID guard removed",
+   "knobs": {
+    "no_regid_quick_guard": true
+   },
+   "designated_tags": [
+    "regid_quick"
+   ],
+   "failing_programs": 9,
+   "designated_failing": 9,
+   "first": "n2_abs",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP ('opcode', '0000000f') expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_src_imm_guard": {
+   "desc": "C_IMM source guard removed",
+   "knobs": {
+    "no_src_imm_guard": true
+   },
+   "designated_tags": [
+    "src_imm"
+   ],
+   "failing_programs": 3,
+   "designated_failing": 3,
+   "first": "n3_abs",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_src_quick_guard": {
+   "desc": "C_QUICK source guard removed",
+   "knobs": {
+    "no_src_quick_guard": true
+   },
+   "designated_tags": [
+    "src_quick"
+   ],
+   "failing_programs": 1,
+   "designated_failing": 1,
+   "first": "n3_quick_crafted",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_priv_check": {
+   "desc": "privilege check removed",
+   "knobs": {
+    "no_priv_check": true
+   },
+   "designated_tags": [
+    "N5"
+   ],
+   "failing_programs": 5,
+   "designated_failing": 5,
+   "first": "n5_el1",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('priv', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dtab_flag_cleared": {
+   "desc": "dtab privileged flag cleared",
+   "knobs": {
+    "dtab_flag_cleared": true
+   },
+   "designated_tags": [
+    "N5"
+   ],
+   "failing_programs": 5,
+   "designated_failing": 5,
+   "first": "n5_el1",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('priv', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "dtab_wrong_routine": {
+   "desc": "dtab[0x12] at a wrong routine (the NOP routine)",
+   "knobs": {
+    "dtab_wrong_routine": true
+   },
+   "designated_tags": [
+    "L1",
+    "L2"
+   ],
+   "failing_programs": 189,
+   "designated_failing": 80,
+   "first": "l1_first",
+   "first_evidence": [
+    "default",
+    "std",
+    "trapped opcode at 00000001, expected to halt"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  },
+  "no_f1_guard": {
+   "desc": "format-I guard removed [extra]",
+   "knobs": {
+    "no_f1_guard": true
+   },
+   "designated_tags": [
+    "N4"
+   ],
+   "failing_programs": 1,
+   "designated_failing": 1,
+   "first": "n4_f1_0",
+   "first_evidence": [
+    "default",
+    "std",
+    "TRAP None expected ('mode', '00000007')"
+   ],
+   "status": "KILLED_BY_DESIGNATED",
+   "equivalence_reason": null
+  }
+ },
+ "baseline": {
+  "runs": 430,
+  "failing_programs": []
+ },
+ "all_ok": true
+}

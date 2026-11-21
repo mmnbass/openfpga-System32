@@ -1,0 +1,36 @@
+{
+  "instance": {
+    "magic": "APF_VER_1",
+    "data_path": "",
+    "core_select": {
+      "id": 0,
+      "select": false
+    },
+    "data_slots": [
+      {
+        "id": 1,
+        "filename": "spidman_main.bin"
+      },
+      {
+        "id": 2,
+        "filename": "spidman_tiles.bin"
+      },
+      {
+        "id": 3,
+        "filename": "spidman_sprites.bin"
+      },
+      {
+        "id": 7,
+        "filename": "spidman_sound.bin"
+      },
+      {
+        "id": 4,
+        "filename": "spidman_eeprom.bin"
+      },
+      {
+        "id": 6,
+        "filename": "spidman_u1cfg.bin"
+      }
+    ]
+  }
+}

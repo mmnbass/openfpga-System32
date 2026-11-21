@@ -1,0 +1,104 @@
+{
+ "v2_reach": 7,
+ "v2_end": "unsupported",
+ "v2_end_detail": {
+  "trap": "opcode",
+  "pc": "0010052d",
+  "mnemonic": "mov.b [R10+], [R11+]",
+  "upstream_next": "0010052d op=09"
+ },
+ "upstream_vs_mame_agree": 20003,
+ "upstream_vs_mame_divergence": null,
+ "upstream_records": 20003,
+ "mame_instructions_in_head": 199999,
+ "upstream_nonmodel_accesses": {
+  "interrupt-ctl": {
+   "reads": 0,
+   "writes": 12
+  },
+  "unmapped-e": {
+   "reads": 0,
+   "writes": 16
+  }
+ },
+ "r4b_check": {
+  "pass": true,
+  "failures": [],
+  "state_source": "replay of the first 7 records of each log",
+  "upstream_log_is_long_run": true,
+  "v2_gpr_events_checked": true
+ },
+ "priv_compared": true,
+ "r4b_expected": {
+  "reach": 7,
+  "first_difference": "TRAP opcode ipc=0010052d (mov.b [R10+], [R11+], opcode 0x09)",
+  "R10": "0010058c",
+  "R11": "00e00000",
+  "R1": "00000008",
+  "R31": "00210000",
+  "R25": "00208000",
+  "PSW": "10000000",
+  "SBR": "00100000",
+  "others": "all other GPRs zero"
+ },
+ "v2_log_lines": [
+  "GPREV on",
+  "C 0 dr=0 dw=0 priv=0 psw=0 gpr=0",
+  "P 1 id=5 be=f val=00100000",
+  "C 1 dr=0 dw=0 priv=1 psw=0 gpr=0",
+  "G 2 id=31 be=f val=00210000",
+  "C 2 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "G 3 id=25 be=f val=00208000",
+  "C 3 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "G 4 id=10 be=f val=0010058c",
+  "C 4 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "G 5 id=11 be=f val=00e00000",
+  "C 5 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "G 6 id=1 be=f val=00000008",
+  "C 6 dr=0 dw=0 priv=0 psw=0 gpr=1",
+  "R01=00000008",
+  "R10=0010058c",
+  "R11=00e00000",
+  "R25=00208000",
+  "R31=00210000",
+  "PSW=10000000",
+  "PR id=5 val=00100000",
+  "CU 7 dr=0 dw=0 priv=0 psw=0 gpr=0",
+  "DRAIN data_busy=0 d_active=0 owner=0 d_starts=0 d_acks=0 d_wr_acks=0 pf_acks=22 at_trap_data_busy=0 at_trap_d_starts=0 at_trap_d_acks=0 settle=312",
+  "TRAP opcode ipc=0010052d",
+  "END halted=0 instrs=7 cycles=570",
+  "SIMCHECK errors=0 ipc_errors=0",
+  "MEMSTAT read  rom            36",
+  "MEMSTAT read  rom-mirror     8",
+  "MEMSTAT rom_writes_ignored 0",
+  "MEMDRAIN reqs=44 acks=44 rd_reqs=44 wr_reqs=0 wr_acks=0 outstanding=0 outstanding_wr=0 nonrom_reqs=0 m_req=0 busy=0"
+ ],
+ "nonzero_gprs_in_v2_final_dump": [
+  "R01=00000008",
+  "R10=0010058c",
+  "R11=00e00000",
+  "R25=00208000",
+  "R31=00210000"
+ ],
+ "v2_w_lines": 0,
+ "checks": {
+  "prefix_run_16_line_head": {
+   "pass": true,
+   "failures": [],
+   "state_source": "replay of the first 7 records of each log",
+   "upstream_log_is_long_run": true,
+   "v2_gpr_events_checked": true
+  },
+  "long_run_full_head": {
+   "pass": true,
+   "failures": [],
+   "state_source": "replay of the first 7 records of each log",
+   "upstream_log_is_long_run": true,
+   "v2_gpr_events_checked": true
+  }
+ },
+ "upstream_window": "records 0-6: no W / M line; the byte store W addr=00e00000 size=1 (index 7) accepted; the same effects moved to index 6 rejected (control s0u6)",
+ "simulation_only": true,
+ "source": "build/M1/r4/r4b_run2/s0 (git-ignored); m1_r4_s0.py then s0_compare.py --r4b-check",
+ "builder_sha256": "b810b8d8837bee03fd13f6dfb270b23cf5c9354c3c98d303d498381a68913df8"
+}

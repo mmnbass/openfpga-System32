@@ -1,0 +1,142 @@
+{
+ "smc_test=0 smc_merged=0 reset_native=0": {
+  "tagged": [
+   "0xf2"
+  ],
+  "tag_descriptors": {
+   "0xf2": "0x88c"
+  },
+  "c23": [
+   {
+    "word": 210,
+    "routine": "jmp",
+    "target": "trap_mode",
+    "cpol": 0,
+    "after_operand": true
+   },
+   {
+    "word": 252,
+    "routine": "movea",
+    "target": "movea_pcrel",
+    "cpol": 0,
+    "after_operand": true
+   }
+  ],
+  "live": [],
+  "words": 257,
+  "problems": []
+ },
+ "smc_test=0 smc_merged=0 reset_native=1": {
+  "tagged": [
+   "0xf2"
+  ],
+  "tag_descriptors": {
+   "0xf2": "0x88c"
+  },
+  "c23": [
+   {
+    "word": 206,
+    "routine": "jmp",
+    "target": "trap_mode",
+    "cpol": 0,
+    "after_operand": true
+   },
+   {
+    "word": 248,
+    "routine": "movea",
+    "target": "movea_pcrel",
+    "cpol": 0,
+    "after_operand": true
+   }
+  ],
+  "live": [],
+  "words": 253,
+  "problems": []
+ },
+ "smc_test=0 smc_merged=1 reset_native=0": {
+  "tagged": [
+   "0xf2"
+  ],
+  "tag_descriptors": {
+   "0xf2": "0x88c"
+  },
+  "c23": [
+   {
+    "word": 210,
+    "routine": "jmp",
+    "target": "trap_mode",
+    "cpol": 0,
+    "after_operand": true
+   },
+   {
+    "word": 252,
+    "routine": "movea",
+    "target": "movea_pcrel",
+    "cpol": 0,
+    "after_operand": true
+   }
+  ],
+  "live": [],
+  "words": 257,
+  "problems": []
+ },
+ "smc_test=0 smc_merged=1 reset_native=1": {
+  "tagged": [
+   "0xf2"
+  ],
+  "tag_descriptors": {
+   "0xf2": "0x88c"
+  },
+  "c23": [
+   {
+    "word": 206,
+    "routine": "jmp",
+    "target": "trap_mode",
+    "cpol": 0,
+    "after_operand": true
+   },
+   {
+    "word": 248,
+    "routine": "movea",
+    "target": "movea_pcrel",
+    "cpol": 0,
+    "after_operand": true
+   }
+  ],
+  "live": [],
+  "words": 253,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=0 reset_native=0": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 242,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=0 reset_native=1": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 238,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=1 reset_native=0": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 241,
+  "problems": []
+ },
+ "smc_test=1 smc_merged=1 reset_native=1": {
+  "tagged": [],
+  "tag_descriptors": {},
+  "c23": [],
+  "live": [],
+  "words": 237,
+  "problems": []
+ }
+}

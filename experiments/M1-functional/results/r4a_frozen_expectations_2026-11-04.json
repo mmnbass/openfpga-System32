@@ -1,0 +1,79 @@
+{
+ "manifest_sha256": "f7c28d613a37723edad1b26d6d2cd189ceccc3ae402751d1263b5cc66387f31f",
+ "programs": 832,
+ "classes": {
+  "pos/low": 190,
+  "pos/s0": 18,
+  "neg/s0": 2,
+  "neg/low": 622
+ },
+ "generator_sha256": "29e0df3ca50d86763941a56fae871b3c0c700358fed2eb1225761640ffbab58f",
+ "b1_displacements": [
+  "00000000",
+  "00000001",
+  "ffffffff",
+  "00000070",
+  "0000007f",
+  "00000080",
+  "000000ff",
+  "00000100",
+  "ffffff80",
+  "ffffff7f",
+  "00007fff",
+  "00008000",
+  "ffff8000",
+  "ffff7fff",
+  "7fffffff",
+  "80000000",
+  "deadbeef",
+  "aaaaaaaa",
+  "55555555",
+  "00ff0000",
+  "ff000000",
+  "12345678",
+  "fffffffe",
+  "00002000"
+ ],
+ "ga2_pcrel": [
+  {
+   "start": "0010051c",
+   "disp": "00000070",
+   "rd": 10,
+   "bytes": "40 2A F2 70 00 00 00",
+   "target": "0010058c"
+  },
+  {
+   "start": "0013346e",
+   "disp": "000024ba",
+   "rd": 2,
+   "bytes": "40 22 F2 BA 24 00 00",
+   "target": "00135928"
+  }
+ ],
+ "supersession": [
+  [
+   "n3_m0_f2",
+   "TRAP mode at the instruction (R3 sweep entry m = 0, mode byte F2)",
+   "retires: R31 <- start + 0x210000, then HALT",
+   "sup_n3_m0_f2",
+   "7.1"
+  ],
+  [
+   "n6_mode_bit0",
+   "TRAP mode (mode byte F3 ^ 1 = F2)",
+   "retires: R31 <- start + 0x210000, then HALT",
+   "sup_n6_mode_bit0",
+   "7.1"
+  ],
+  [
+   "a10_s0_prefix_trap",
+   "TRAP mode ipc=0010051c (the reach-4 end)",
+   "retires R10 <- 0x0010058c; the next byte is HALT",
+   "sup_a10_s0_prefix",
+   "7.1"
+  ]
+ ],
+ "note": "expectations frozen before any R4 microcode exists (mtab[0x0F2] = trap_mode in the builder, builder sha256 4ac7fa34...); computed from the encoding only: (start + signed disp) mod 2^32 (m1_r4.py imports no reference or RTL model)",
+ "builder_sha256": "4ac7fa340674fc73ce4166adf07b01efde7c417e1c409c00c40913a40f94c510",
+ "mtab_0x0F2_is_trap_mode": true
+}

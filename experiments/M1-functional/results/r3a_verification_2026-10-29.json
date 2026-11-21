@@ -1,0 +1,2980 @@
+{
+"phase_r3a_real_builder": {
+"groups": {
+"V60X (corrected, ref_ext) (M1 bench)": [
+160,
+160
+],
+"upstream s32_v60 (M1 bench)": [
+160,
+160
+],
+"V60X (corrected, ref_ext) (S0 harness)": [
+16,
+16
+],
+"upstream s32_v60 (S0 harness)": [
+16,
+16
+],
+"V60X == upstream (lock-step records)": [
+1,
+1
+],
+"upstream privileged events == V60X events minus unchanged-value writes": [
+1,
+1
+],
+"upstream S0: no memory access outside ROM / work RAM / mirror during a MOVEA program (+memlog)": [
+16,
+16
+],
+"upstream S0: the memory model's per-region counters show reads / writes only in ROM and its mirror (no I/O, work-RAM, video ... access by the MOVEA targets)": [
+16,
+16
+],
+"V2 production [default]": [
+736,
+736
+],
+"V2 production [+memwait=2]": [
+736,
+736
+],
+"V2 production [+memwait=5 +memjit=4]": [
+736,
+736
+],
+"V2 production [+wide]": [
+736,
+736
+],
+"V2 production [default] S0 harness": [
+17,
+17
+],
+"V2 production [+memwait=2] S0 harness": [
+17,
+17
+],
+"V2 production [+memwait=5 +memjit=4] S0 harness": [
+17,
+17
+],
+"V2 production [+wide] S0 harness": [
+17,
+17
+],
+"V2 production [default] withheld fetch, never released": [
+12,
+12
+],
+"V2 production [default] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 production [+memwait=2] withheld fetch, never released": [
+12,
+12
+],
+"V2 production [+memwait=2] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 production [+memwait=5 +memjit=4] withheld fetch, never released": [
+12,
+12
+],
+"V2 production [+memwait=5 +memjit=4] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 production [+wide] withheld fetch, never released": [
+12,
+12
+],
+"V2 production [+wide] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 probe image [default]": [
+159,
+159
+],
+"V2 probe image [+memwait=2]": [
+159,
+159
+],
+"V2 probe image [+memwait=5 +memjit=4]": [
+159,
+159
+],
+"V2 probe image [+wide]": [
+159,
+159
+],
+"V2 probe image [default] withheld fetch, never released": [
+10,
+10
+],
+"V2 probe image [default] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 probe image [+memwait=2] withheld fetch, never released": [
+10,
+10
+],
+"V2 probe image [+memwait=2] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 probe image [+memwait=5 +memjit=4] withheld fetch, never released": [
+10,
+10
+],
+"V2 probe image [+memwait=5 +memjit=4] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 probe image [+wide] withheld fetch, never released": [
+10,
+10
+],
+"V2 probe image [+wide] withheld fetch, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smc, M1 bench] [default]": [
+733,
+733
+],
+"SMC matrix A7 [smc] [default] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smc] [default] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smc, M1 bench] [+memwait=2]": [
+733,
+733
+],
+"SMC matrix A7 [smc] [+memwait=2] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smc] [+memwait=2] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smc, M1 bench] [+memwait=5 +memjit=4]": [
+733,
+733
+],
+"SMC matrix A7 [smc] [+memwait=5 +memjit=4] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smc] [+memwait=5 +memjit=4] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smc, M1 bench] [+wide]": [
+733,
+733
+],
+"SMC matrix A7 [smc] [+wide] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smc] [+wide] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smc, S0 reset-native] [default]": [
+9,
+9
+],
+"SMC matrix [smc, S0 reset-native] [+memwait=2]": [
+9,
+9
+],
+"SMC matrix [smc, S0 reset-native] [+memwait=5 +memjit=4]": [
+9,
+9
+],
+"SMC matrix [smc, S0 reset-native] [+wide]": [
+9,
+9
+],
+"SMC matrix [smcm, M1 bench] [default]": [
+733,
+733
+],
+"SMC matrix A7 [smcm] [default] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smcm] [default] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smcm, M1 bench] [+memwait=2]": [
+733,
+733
+],
+"SMC matrix A7 [smcm] [+memwait=2] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smcm] [+memwait=2] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smcm, M1 bench] [+memwait=5 +memjit=4]": [
+733,
+733
+],
+"SMC matrix A7 [smcm] [+memwait=5 +memjit=4] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smcm] [+memwait=5 +memjit=4] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smcm, M1 bench] [+wide]": [
+733,
+733
+],
+"SMC matrix A7 [smcm] [+wide] withheld, never released": [
+12,
+12
+],
+"SMC matrix A7 [smcm] [+wide] withheld, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smcm, S0 reset-native] [default]": [
+9,
+9
+],
+"SMC matrix [smcm, S0 reset-native] [+memwait=2]": [
+9,
+9
+],
+"SMC matrix [smcm, S0 reset-native] [+memwait=5 +memjit=4]": [
+9,
+9
+],
+"SMC matrix [smcm, S0 reset-native] [+wide]": [
+9,
+9
+],
+"dispatch isolation and invariants (dtab[0x40/0x42/0x44] are the opcode trap (pre-R3b state); mode-table classification and uniqueness invariants)": [
+8,
+8
+],
+"mode table accepts exactly: /abs, #q (16), #imm, modm-1 register direct (32) [smc: [Rn] instead of /abs]": [
+8,
+8
+],
+"builder state (tables and control store identical to the pre-R3 pins)": [
+8,
+8
+],
+"V2 immediate extraction: imm_val is zero/sign-extended only for byte/half sizes; a word-size immediate returns all 32 bits (IMM_SX equivalence basis)": [
+1,
+1
+],
+"probe_movea_value reproduces D1: v60_ref R1=0x5A dr=1 / upstream R1=0x20 dr=0, both runs successful, no unrelated difference": [
+1,
+1
+],
+"probe execute step is independent of the dispatch size / flag bits and works with layout 0 or 1 (fld1 = byte 1 [4:0])": [
+4,
+4
+],
+"guard reach [src_regdir]: every crafted/short N4 case rejects the guard mutant (production table)": [
+1,
+1
+],
+"guard reach [src_imm]: every crafted/short N4 case rejects the guard mutant (production table)": [
+1,
+1
+],
+"N3 sweep: all 511 (m, mode byte) entries other than (0, F3) trap `mode` in the unmutated model": [
+1,
+1
+]
+},
+"controls": [
+{
+"id": "a0",
+"result": "CAUGHT",
+"desc": "control: the UNmutated in-process corrected V60X passes every positive program (160)",
+"evidence": "baseline for (a)"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: the contents at the address (the v60_ref defect, counts a data read)",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=0000002d expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: result masked to 8 bits",
+"evidence": "150/160 programs fail; first: a1_v03: lock-step: record 2: got 2 pc=0000000e op=40 R05=00000000 expected 2 pc=0000000e op=40 R05=00000100"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: low byte sign-extended",
+"evidence": "151/160 programs fail; first: a1_v02: lock-step: record 2: got 2 pc=0000000e op=40 R05=ffffffff expected 2 pc=0000000e op=40 R05=000000ff"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: low half sign-extended",
+"evidence": "139/160 programs fail; first: a1_v04: lock-step: record 2: got 2 pc=0000000e op=40 R05=ffffffff expected 2 pc=0000000e op=40 R05=7fffffff"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: address read from byte offset 2",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=000000f3 expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: destination register + 1",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: no register write",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: the write is omitted when the value is unchanged (lock-step identical)",
+"evidence": "15/160 programs fail; rejected by the pre-R3a checks alone: 0; first: a3_same: GPR write events of instruction 1: got [] expected [(7,2000)]"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: the write happens twice (final state identical)",
+"evidence": "160/160 programs fail; rejected by the pre-R3a checks alone: 0; first: a1_v00: GPR write events of instruction 2: got [(5,0), (5,0)] expected [(5,0)]"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: a constant written first, then the address (final state identical)",
+"evidence": "160/160 programs fail; rejected by the pre-R3a checks alone: 0; first: a1_v00: GPR write events of instruction 2: got [(5,7), (5,0)] expected [(5,0)]"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: CY toggled",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=00000000 PSW=10000008 expected 2 pc=0000000e op=40"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: another register changed",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=00000000 R06=00000001 expected 2 pc=0000000e op=40"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: instruction length 6",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 3: got 3 pc=00000014 op=00 expected 3 pc=00000015 op=00"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: instruction length 8",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 3: got 3 pc=00000016 op=00 expected 3 pc=00000015 op=00"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: an extra data read at the target",
+"evidence": "160/160 programs fail; first: a1_v00: counters: instruction 2 dr=1 expected 0"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: an extra privileged write",
+"evidence": "160/160 programs fail; first: a1_v00: counters: instruction 2 priv=1 expected 0"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "base v60_ref (retained defect D1) on the A3 programs: values differ from the generator and the MOVEA windows show data reads",
+"evidence": "6/6 programs differ; data reads counted in the MOVEA windows: 6"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: the V60X log of a3_same passes",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event dropped (the MOVEA's)",
+"evidence": "['GPR write events of instruction 1: got [] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event duplicated",
+"evidence": "['GPR write events of instruction 1: got [(7,2000), (7,2000)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event value changed",
+"evidence": "['GPR write events of instruction 1: got [(7,badf00d)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event register changed",
+"evidence": "['GPR write events of instruction 1: got [(30,2000)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event moved to the next instruction",
+"evidence": "['GPR write events of instruction 1: got [] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: the GPREV marker removed",
+"evidence": "[\"no 'GPREV on' line (run without +gprev / --gprev?): the GPR write events are not observed\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: an extra GPR event for another register",
+"evidence": "['GPR write events of instruction 1: got [(29,1), (7,2000)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a data read injected into the MOVEA window (C dr=1)",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a privileged write injected into the MOVEA window (C priv=1)",
+"evidence": "['counters: instruction 1 priv=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a data write injected (W)",
+"evidence": "['data writes 1 expected 0']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: the V60X log of a8_same_val_regs passes",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event dropped (the MOVEA's)",
+"evidence": "['GPR write events of instruction 1: got [] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event duplicated",
+"evidence": "['GPR write events of instruction 1: got [(5,55550005), (5,55550005)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event value changed",
+"evidence": "['GPR write events of instruction 1: got [(5,badf00d)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event register changed",
+"evidence": "['GPR write events of instruction 1: got [(30,55550005)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event moved to the next instruction",
+"evidence": "['GPR write events of instruction 1: got [] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: the GPREV marker removed",
+"evidence": "[\"no 'GPREV on' line (run without +gprev / --gprev?): the GPR write events are not observed\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: an extra GPR event for another register",
+"evidence": "['GPR write events of instruction 1: got [(29,1), (5,55550005)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a data read injected into the MOVEA window (C dr=1)",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a privileged write injected into the MOVEA window (C priv=1)",
+"evidence": "['counters: instruction 1 priv=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a data write injected (W)",
+"evidence": "['data writes 1 expected 0']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: the upstream log of a3_pat passes",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream log of a3_pat with a data read injected into the MOVEA window",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream log of a3_pat with the destination value replaced by the byte at the address (0x5A)",
+"evidence": "['lock-step: record 1: got 1 pc=00000007 op=40 R07=0000005a expected 1 pc=00000007 op=40 R07=00002000']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: upstream's S0 log of a9_regions shows ROM / mirror reads only",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT io read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT wram read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT interrupt-ctl read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT vram read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT protection read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT write to work RAM added is flagged",
+"evidence": ""
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: V2's probe-image log of pr_a3_same passes",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: the MOVEA-shaped instruction's GPR event dropped (unchanged-value write omitted: the lock-step record is identical)",
+"evidence": "['GPR write events of instruction 1: got [] expected [(7,2000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a GPR event duplicated",
+"evidence": "['GPR write events of instruction 1: got [(7,2000,f), (7,2000,f)] expected [(7,2000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: byte enables 3 instead of f",
+"evidence": "['GPR write events of instruction 1: got [(7,2000,3)] expected [(7,2000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: an event of an instruction that never retired",
+"evidence": "['GPR write events of instruction 5, which did not retire: [(5,1,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: C gpr= count wrong",
+"evidence": "['counter record 1: gpr=2 but 1 G events']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a PSW update in the MOVEA window (C psw=1)",
+"evidence": "['MOVEA window (instruction 1): psw=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a data read in the MOVEA window (C dr=1)",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a privileged write in the MOVEA window (C priv=1)",
+"evidence": "['counters: instruction 1 priv=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: the GPREV marker removed",
+"evidence": "[\"no 'GPREV on' line (run without +gprev / --gprev?): the GPR write events are not observed\"]"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: V2's trap-exit log of a1_v00 passes the phase-r3a expectation",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of a1_v00: a GPR write by the trapped instruction (G)",
+"evidence": "['GPR write events of instruction 2, which did not retire: [(5,210000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of a1_v00: a GPR write by the trapped instruction (CU gpr=1)",
+"evidence": "['unretired record 2: gpr=1 but 0 G events']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of a1_v00: a PSW update by the trapped instruction (CU psw)",
+"evidence": "['unretired instruction 2 updated the PSW 1 time(s)']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of a1_v00: a privileged write by the trapped instruction (P)",
+"evidence": "['privileged events of instruction 2, which did not retire: [(5,210000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of a1_v00: a data write",
+"evidence": "['data writes: 1 W records, expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (a1_v00): trap PC + 1",
+"evidence": "[\"TRAP ('opcode', '0000000e') expected ('opcode', '0000000f')\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (a1_v00): trap kind mode instead of opcode",
+"evidence": "[\"TRAP ('opcode', '0000000e') expected ('mode', '0000000e')\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (a1_v00): retired count + 1",
+"evidence": "['lock-step: 2 records, first 3 expected to equal the independent prefix']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: V2's trap-exit log of n2_d0_1f passes the phase-r3a expectation",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a GPR write by the trapped instruction (G)",
+"evidence": "['GPR write events of instruction 1, which did not retire: [(5,210000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a GPR write by the trapped instruction (CU gpr=1)",
+"evidence": "['unretired record 1: gpr=1 but 0 G events']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a PSW update by the trapped instruction (CU psw)",
+"evidence": "['unretired instruction 1 updated the PSW 1 time(s)']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a privileged write by the trapped instruction (P)",
+"evidence": "['privileged events of instruction 1, which did not retire: [(5,210000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a data write",
+"evidence": "['data writes: 1 W records, expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (n2_d0_1f): trap PC + 1",
+"evidence": "[\"TRAP ('opcode', '00000007') expected ('opcode', '00000008')\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (n2_d0_1f): trap kind mode instead of opcode",
+"evidence": "[\"TRAP ('opcode', '00000007') expected ('mode', '00000007')\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (n2_d0_1f): retired count + 1",
+"evidence": "['counters: 1 C records, expected at least 2']"
+},
+{
+"id": "g",
+"result": "CAUGHT",
+"desc": "phase r3b expectation rejects the current V2 (phase r3a) on the MOVEA positives",
+"evidence": "163/163 rejected"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "A7 wait exit: control passes; a GPR write of the unretired (withheld) instruction is rejected",
+"evidence": "base=[] leak:['GPR write events of instruction 4, which did not retire: [(2,b6a5948a,f)]']"
+},
+{
+"id": "c2",
+"result": "CAUGHT",
+"desc": "V2 observer without G events (rebuilt copy): every probe-image MOVEA program is rejected",
+"evidence": "4/4 rejected"
+},
+{
+"id": "c1",
+"result": "CAUGHT",
+"desc": "corrected V60X without its register write log: every positive program is rejected",
+"evidence": "20/20"
+},
+{
+"id": "d",
+"result": "CAUGHT",
+"desc": "checker control (a) on the real V2: an omitted GPR write whose value is unchanged (destination already equals the address)",
+"evidence": "caught 2/2 by the GPR event log; the pre-R3a checks alone pass 2/2; first: pr_a3_same: GPR write events of instruction 1: got [] expected [(7,2000,f)]"
+},
+{
+"id": "d",
+"result": "CAUGHT",
+"desc": "checker control (b) on the real V2: a duplicate GPR write (the same write twice; final state identical)",
+"evidence": "caught 4/4 by the GPR event log; the pre-R3a checks alone pass 4/4; first: pr_a1_v00: GPR write events of instruction 2: got [(5,0,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "d",
+"result": "CAUGHT",
+"desc": "checker control (c) on the real V2: a transient GPR write restored before a trap (register value unchanged, the instruction never retires)",
+"evidence": "caught 4/4 after the drain; the pre-R3a checks alone pass 4/4; first: pr3_mid_r1: GPR write events of instruction 1, which did not retire: [(1,7,f), (1,5a5a1234,f)]"
+},
+{
+"id": "e0",
+"result": "CAUGHT",
+"desc": "control: the real runners reproduce D1",
+"evidence": "v60_ref R1=0x0000005a dr=1; upstream R1=0x00000020 dr=0; nothing else differs"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the references AGREE (v60_ref corrected: R1 = 0x20, dr = 0)",
+"evidence": "the references now AGREE (D1 no longer reproduces): v60_ref R1 = 0x00000020, expected 0x0000005a; v60_ref dr ="
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the v60_ref run crashed (exit 1)",
+"evidence": "v60_ref run failed (exit 1)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the upstream run crashed (exit 1)",
+"evidence": "upstream run failed (exit 1)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the v60_ref run timed out",
+"evidence": "v60_ref run failed (exit -1)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when empty v60_ref output",
+"evidence": "v60_ref run produced no output"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when missing upstream log (empty output)",
+"evidence": "upstream run produced no output"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when upstream R1 differs (0x21, not 0x20)",
+"evidence": "unexpected values: upstream R1 = 0x00000021, expected 0x00000020"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when v60_ref R1 differs (0x5b)",
+"evidence": "unexpected values: v60_ref R1 = 0x0000005b, expected 0x0000005a"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when v60_ref dr = 0 (the read vanished)",
+"evidence": "unexpected values: v60_ref dr = 0, expected 1"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when upstream dr = 1",
+"evidence": "unexpected values: upstream dr = 1, expected 0"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when an unrelated difference (R5 differs)",
+"evidence": "unrelated difference(s): registers other than R1"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when an unrelated difference (a data write in one run only)",
+"evidence": "unrelated difference(s): data writes"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when an unrelated difference (PSW)",
+"evidence": "unrelated difference(s): PSW"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when no END record",
+"evidence": "v60_ref: no clean END record (halted=1 instrs=2): None"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: m1_probe_movea.py with a deliberately FIXED copy of the reference exits non-zero",
+"evidence": "rc=1: probe_movea_value: FAIL: the references now AGREE (D1 no longer reproduces): v60_ref R1 = 0x00000020, expected 0x0000005a; v60_ref dr = 0, e"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: m1_probe_movea.py with a missing upstream simulator exits non-zero",
+"evidence": "rc=1: probe_movea_value: FAIL: upstream run failed (exit -2)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: m1_probe_movea.py with a missing reference script exits non-zero",
+"evidence": "rc=1: probe_movea_value: FAIL: v60_ref run failed (exit 2)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: run_refs.sh with the FIXED reference exits non-zero",
+"evidence": "rc=1;   probe probe_movea_value: references differ, as documented | probe_movea_value: FAIL: the references now AGREE (D1 no longer reproduces): v60_ref R1 = 0x00000020, expected 0x0000005a; v60_ref dr = 0,"
+},
+{
+"id": "e0",
+"result": "CAUGHT",
+"desc": "control: run_refs.sh with the real reference exits 0 and reports probe_movea_value as reproducing",
+"evidence": "rc=0;   probe probe_movea_value: references differ, as documented | probe_movea_value: D1 reproduces, as documented: v60_ref R1=0x0000005a dr=1; upstream R1=0x00000020 dr=0; nothing else differs"
+},
+{
+"id": "f",
+"result": "CAUGHT",
+"desc": "dispatch layout 2 (fld1 = a different byte) breaks the execute step, as expected: R3b must use layout 0 or 1",
+"evidence": "34/35 programs fail"
+},
+{
+"id": "f",
+"result": "CAUGHT",
+"desc": "dispatch layout 3 (fld1 = a different byte) breaks the execute step, as expected: R3b must use layout 0 or 1",
+"evidence": "35/35 programs fail"
+},
+{
+"id": "z0",
+"result": "CAUGHT",
+"desc": "control: the regenerated manifest equals the frozen-expectation record",
+"evidence": "3720e1bab01c3959"
+},
+{
+"id": "z",
+"result": "CAUGHT",
+"desc": "a one-event change of the manifest breaks the frozen digest",
+"evidence": "digest differs"
+},
+{
+"id": "m0",
+"result": "CAUGHT",
+"desc": "control: the UNmutated model passes every program in r3b (production tables, 736 programs)",
+"evidence": "failing: []"
+},
+{
+"id": "m0",
+"result": "CAUGHT",
+"desc": "control: the UNmutated model passes every program in r3b (--smc-test tables, 733 programs)",
+"evidence": "failing: []"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_ofs0: IMM_OFS 0 (reads the mode byte and three address bytes)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A2']: 51 program(s), e.g. a1_v00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_ofs2: IMM_OFS 2 (address skewed by one byte)",
+"evidence": "production 161/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A2']: 50 program(s), e.g. a1_v01: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_sz0: IMM_SZ 0 (byte read; the `.b`-role mutant)",
+"evidence": "production 153/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 14 program(s), e.g. a1_v03: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_sz1: IMM_SZ 1 (halfword read)",
+"evidence": "production 143/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 12 program(s), e.g. a1_v04: lock-step records differ from the expectation"
+},
+{
+"id": "mE",
+"result": "EQUIV",
+"desc": "model mutant imm_sx (IMM_SX set with IMM_SZ = 2): EQUIVALENT - v2_immx returns all 32 bits unchanged for a word-size immediate (v2_glue.sv imm_val): sign extension applies only to byte/half; IMM_SX together with a narrower IMM_SZ is the imm_sz0 / imm_sz1 rows",
+"evidence": "production 0/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 0 program(s); failing programs: []"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant mask8: result masked to 8 bits (zero-extend `.b`)",
+"evidence": "production 153/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 14 program(s), e.g. a1_v03: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant consume4: CONSUME 4 on the execute word",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A6', 'A8']: 71 program(s), e.g. a3_same_twice: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant consume6: CONSUME 6 on the execute word",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A6', 'A8']: 71 program(s), e.g. a3_same_twice: trapped opcode at 0000000f, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant fmt_consume1: missing CONSUME on the format word (CONSUME 1)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A6', 'A8']: 71 program(s), e.g. a3_same_twice: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_dst_temp: WR_DST temp instead of GPR",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 32 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_dst_priv: WR_DST privileged instead of GPR",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 32 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_asel_const: WR_ASEL const (RCONST 0) instead of the format-byte register",
+"evidence": "production 162/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 31 program(s), e.g. a2_r01: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_asel_fld2: WR_ASEL field 2 (the mode byte's low five bits = R19)",
+"evidence": "production 162/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 31 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_asel_mreg: WR_ASEL mode-byte register (R19)",
+"evidence": "production 162/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 31 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant nowrite: omitted GPR write (the value changes: also visible in the lock-step record)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 32 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dup_write: duplicate GPR write in the executed word sequence",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A3']: 27 program(s), e.g. a1_v00: GPR write events of instruction 2: got [(5,0,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant omit_unchanged: omitted GPR write whose value is unchanged (destination already equals the address)",
+"evidence": "production 15/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A3']: 3 program(s), e.g. a3_same: GPR write events of instruction 1: got [] expected [(7,2000,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant transient_write: transient GPR write (a constant, then the address): two events, final state correct",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A3']: 27 program(s), e.g. a1_v00: GPR write events of instruction 2: got [(5,7,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant transient_trap: transient write restored before a trap: unretired instruction with GPR events, state unchanged",
+"evidence": "production 553/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N2', 'N3', 'N4', 'N6', 'd0', 'f2', 'sweep']: 551 program(s), e.g. n2_d0_1f: GPR write events of instruction 1, which did not retire: [(31,7,f), (31,0,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant flag_upd: FLAG_UPD on the execute word",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A5']: 10 program(s), e.g. a5_flags_z: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant value_contents: a data-bus read of the target (value instead of address; the v60_ref defect)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A3', 'A4']: 15 program(s), e.g. a3_ffff: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_regdir_guard: C_REGDIR guard removed",
+"evidence": "production 40/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N4', 'src_regdir']: 8 program(s), e.g. n4_rn2_crafted: TRAP None expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_imm_guard: C_IMM guard removed",
+"evidence": "production 27/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N3', 'N4', 'src_imm']: 26 program(s), e.g. n3_m0_e0: TRAP None expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_f1_guard: C_F1 guard removed",
+"evidence": "production 4/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N2', 'f2']: 3 program(s), e.g. n2_f2_abs_rn: TRAP ('opcode', '0000000e') expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_d_guard: C_D guard removed",
+"evidence": "production 4/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N2', 'd0']: 3 program(s), e.g. n2_d0_1f: TRAP None expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab42: dtab[0x42] = movea",
+"evidence": "production 8/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N1']: 5 program(s), e.g. n1_42_abs: TRAP None expected ('opcode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab44: dtab[0x44] = movea",
+"evidence": "production 6/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N1']: 5 program(s), e.g. n1_44_abs: TRAP None expected ('opcode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab40_wrong: dtab[0x40] at a wrong routine (the NOP routine)",
+"evidence": "production 716/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped opcode at 0000000f, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab40_trap: dtab[0x40] left trap",
+"evidence": "production 716/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped opcode at 0000000e, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant smc_dispatch: dtab[0x40] = movea in the --smc-test builds",
+"evidence": "--smc-test 713/733 programs fail; designated catcher ['N5']: 2 program(s), e.g. n5_ind_2: TRAP None expected ('opcode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_disp_jmp: missing final jmp disp (the routine does not return to the dispatch loop)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A8']: 47 program(s), e.g. a3_same_twice: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant mtab_marked_imm: mtab[0x0F3] descriptor marked immediate (C_IMM guard fires)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped mode at 0000000e, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant mtab_marked_reg: mtab[0x0F3] descriptor marked register (C_REGDIR guard fires)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped mode at 0000000e, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N5 [Rn] cases under the unmutated model in the smc build: all pass (opcode trap, no execution)",
+"evidence": "rejected: []"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N5 [Rn] cases under the smc_dispatch mutant in the smc build: all rejected",
+"evidence": "rejected: ['n5_ind_2', 'n5_ind_7']"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "catcher precision, C_REGDIR guard mutant: the crafted stream (n4_rn5_crafted) catches it; the short form (n4_rn5_short) also does",
+"evidence": "short rejected=True; crafted rejected=True"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "catcher precision, C_IMM guard (#q) mutant: the crafted stream (n4_q5_crafted) catches it; the short form (n4_q5_short) also does",
+"evidence": "short rejected=True; crafted rejected=True"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N3 sweep under no_imm_guard: exactly the 17 entries that guard protects are rejected",
+"evidence": "rejected 17: ['n3_m0_e0', 'n3_m0_e1', 'n3_m0_e2', 'n3_m0_e3']..."
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N3 sweep under no_regdir_guard: exactly the 32 entries that guard protects are rejected",
+"evidence": "rejected 32: ['n3_m1_60', 'n3_m1_61', 'n3_m1_62', 'n3_m1_63']..."
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: mtab[0xF3] descriptor offset size 16 (dsz = 2): the builder invariants fail",
+"evidence": "['mtab[0x0F3] is not (0x14C << 12) | mret']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: mtab[0xF3] marked immediate: the builder invariants fail",
+"evidence": "['mtab[0x0F3] is not (0x14C << 12) | mret', 'non-register non-immediate supported mode-table entries [] (must be exactly [0xf3])']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: mtab[0xF3] marked register: the builder invariants fail",
+"evidence": "['mtab[0x0F3] is not (0x14C << 12) | mret', 'non-register non-immediate supported mode-table entries [] (must be exactly [0xf3])']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: a second memory descriptor (mtab[0xF2], PC disp32) added: the builder invariants fail",
+"evidence": "[\"non-register non-immediate supported mode-table entries ['0xf2', '0xf3'] (must be exactly [0xf3])\"]"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: a second memory descriptor ([R5], modm 0 0x65) added: the builder invariants fail",
+"evidence": "[\"non-register non-immediate supported mode-table entries ['0x65', '0xf3'] (must be exactly [0xf3])\"]"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: F3 with m = 1 accepted: the builder invariants fail",
+"evidence": "[\"non-register non-immediate supported mode-table entries ['0xf3', '0x1f3'] (must be exactly [0xf3])\", 'mtab[0x1F3] (m = 1, mode byte F3) is not trap_mode']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: dtab[0x42] dispatched",
+"evidence": "['dtab[0x42] is not the opcode trap (r3a)']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: dtab[0x44] dispatched",
+"evidence": "['dtab[0x44] is not the opcode trap (r3a)']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: dtab[0x40] dispatched in an --smc-test build",
+"evidence": "['dtab[0x40] is not the opcode trap (smc build)']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "phase flip: the pre-R3 tables (dtab[0x40] = trap, no movea symbol) fail the r3b invariants",
+"evidence": "['dtab[0x40] is not the movea routine (production r3b)']"
+},
+{
+"id": "s0",
+"result": "CAUGHT",
+"desc": "control: the pre-R3 tables pass the r3a invariants",
+"evidence": "[]"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_OFS 0",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_OFS 2",
+"evidence": "306/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v01 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_SZ 0 (byte read)",
+"evidence": "294/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v03 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_SZ 1 (halfword read)",
+"evidence": "274/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v04 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "pE",
+"result": "EQUIV",
+"desc": "probe-image mutant on the real V2: IMM_SX set with IMM_SZ = 2: EQUIVALENT (identical logs on all 330 runs)",
+"evidence": "0/330 runs differ; v2_immx returns all 32 bits for a word-size immediate"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: CONSUME 4 on the execute word",
+"evidence": "314/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; the availability checker (SIMCHECK) fired on 23 run(s); first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: CONSUME 6 on the execute word",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: missing CONSUME on the format word (CONSUME 1)",
+"evidence": "330/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: trapped mode at 0000000e, expected to halt"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_DST temp",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_DST privileged",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_ASEL const (RCONST 0)",
+"evidence": "308/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_ASEL field 2",
+"evidence": "308/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_ASEL mode-byte register",
+"evidence": "308/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: FLAG_UPD 15 on the execute word",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: duplicate GPR write (the same write word twice)",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: GPR write events of instruction 2: got [(5,0,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: omitted GPR write (the value goes to a temp)",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "pE",
+"result": "EQUIV",
+"desc": "probe-image mutant on the real V2: mtab[0x0F3] descriptor offset size 16 (dsz = 2): EQUIVALENT for the sketch (IMM_SZ explicit; not caught by A1, only by the structural assertion)",
+"evidence": "0/143 runs differ"
+},
+{
+"id": "s0a",
+"result": "CAUGHT",
+"desc": "upstream reference state: replay of the first 4 records (R31 = 00210000, R25 = 00208000, PSW 10000000, SBR 00100000). No final dump is used: the +maxinstr=5 run's dump is already PAST the trap point (R10 set) and the +maxinstr=200 run's final R31 differs",
+"evidence": "203 records in the +maxinstr=200 run; its final R31 = 0020ff00; prefix run final R10 set: True"
+},
+{
+"id": "s0b0",
+"result": "CAUGHT",
+"desc": "control: the CURRENT V2 on the real S0 prefix passes --r2b-check (reach 2, TRAP opcode at 0010050e)",
+"evidence": "R2B S0 CHECK PASS; V2 ended TRAP opcode ipc=0010050e"
+},
+{
+"id": "s0b",
+"result": "CAUGHT",
+"desc": "the CURRENT V2 (pre-R3b) FAILS --r3b-check, for exactly the expected reasons (reach 2 != 4; not TRAP mode at 0010051c)",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'opcode', 'pc': '0010050e', 'mnemonic': 'movea.b 210000, SP', 'upstream_next': '0010050e op=40'}; v2 log has"
+},
+{
+"id": "s0c0",
+"result": "CAUGHT",
+"desc": "control: the planned R3b end (V2 synthesised from the real upstream prefix) PASSES --r3b-check with upstream's prefix run",
+"evidence": "R3B S0 CHECK PASS; state source: replay of the first 4 records of each log; upstream long-run log: False"
+},
+{
+"id": "s0c0",
+"result": "CAUGHT",
+"desc": "control: the planned R3b end (V2 synthesised from the real upstream prefix) PASSES --r3b-check with upstream's longer run (+maxinstr=200)",
+"evidence": "R3B S0 CHECK PASS; state source: replay of the first 4 records of each log; upstream long-run log: True"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: TRAP kind opcode (the current V2, mis-predicted)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'opcode', 'pc': '0010051c', 'mnemonic': 'mo"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: TRAP at 0010050e (the first MOVEA, the pre-R3b end)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'mode', 'pc': '0010050e', 'mnemonic': 'move"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: no trap, the run just ends (limit)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: limit {'upstream_records': 6, 'v2_records': 4}"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: record 3 missing (reach 3)",
+"evidence": "R3B S0 CHECK FAIL: reach 3 != 4; v2 log has 3 lock-step records, fewer than the reach point 4; V2 GPR write events {2: ["
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: R31 wrong in record 2",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: R25 wrong in record 3",
+"evidence": "R3B S0 CHECK FAIL: reach 3 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 3, 'pc': '00100515', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: another register written by record 3 (R10)",
+"evidence": "R3B S0 CHECK FAIL: reach 3 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 3, 'pc': '00100515', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: PSW changed by record 2",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: an extra privileged write by record 2",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: the SBR write missing",
+"evidence": "R3B S0 CHECK FAIL: reach 1 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 1, 'pc': '00100506', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: SBR wrong in the privileged dump",
+"evidence": "R3B S0 CHECK FAIL: V2 final SBR 1048577 != 00100000"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: GPR event value wrong (+gprev)",
+"evidence": "R3B S0 CHECK FAIL: V2 GPR write events {2: [(31, 2162689)], 3: [(25, 2129920)]} != only instruction 2 -> R31 and instruc"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: a stray GPR event of the trapping instruction",
+"evidence": "R3B S0 CHECK FAIL: V2 GPR write events {2: [(31, 2162688)], 3: [(25, 2129920)], 4: [(10, 1049996)]} != only instruction"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: final dump R25 wrong",
+"evidence": "R3B S0 CHECK FAIL: V2 final dump differs: {R31=00210000} PSW 268435456"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: final dump PSW wrong",
+"evidence": "R3B S0 CHECK FAIL: V2 final dump differs: {R25=00208000, R31=00210000} PSW 268435457"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: V2 STALL instead of the trap (the stub's behaviour)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: incorrect {'stall': True, 'pc': '0010050e', 'mnemonic': 'movea.b"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has: upstream record 2 with another R31 value",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has: upstream with a data write in the prefix",
+"evidence": "R3B S0 CHECK FAIL: reach 0 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 0, 'pc': 'fffffff0', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has: upstream with a non-ROM access in the prefix (+memlog)",
+"evidence": "R3B S0 CHECK FAIL: upstream accessed memory outside ROM / work RAM during the prefix: [(0, 'R', 'io', 12582922)]"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has no P/PR records (run without +privev)",
+"evidence": "R3B S0 CHECK FAIL: reach 1 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 1, 'pc': '00100506', 'mnemonic"
+},
+{
+"id": "s0d0",
+"result": "CAUGHT",
+"desc": "control: the archived R2b S0 logs still pass --r2b-check (the new option changed nothing)",
+"evidence": "R2B S0 CHECK PASS"
+},
+{
+"id": "s0d",
+"result": "CAUGHT",
+"desc": "the archived R2b S0 logs (reach 2) FAIL --r3b-check",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'opcode', 'pc': '0010050e', '"
+}
+],
+"summary": "R3a PASS: 77/77 result groups pass, 205/205 negative controls/catchers caught"
+},
+"phase_r3b_table_stub": {
+"groups": {
+"V60X (corrected, ref_ext) (M1 bench)": [
+160,
+160
+],
+"upstream s32_v60 (M1 bench)": [
+160,
+160
+],
+"V60X (corrected, ref_ext) (S0 harness)": [
+16,
+16
+],
+"upstream s32_v60 (S0 harness)": [
+16,
+16
+],
+"V60X == upstream (lock-step records)": [
+1,
+1
+],
+"upstream privileged events == V60X events minus unchanged-value writes": [
+1,
+1
+],
+"upstream S0: no memory access outside ROM / work RAM / mirror during a MOVEA program (+memlog)": [
+16,
+16
+],
+"upstream S0: the memory model's per-region counters show reads / writes only in ROM and its mirror (no I/O, work-RAM, video ... access by the MOVEA targets)": [
+16,
+16
+],
+"V2 production [default]": [
+10,
+50
+],
+"V2 production [+wide]": [
+10,
+50
+],
+"V2 production [default] S0 harness": [
+0,
+2
+],
+"V2 production [+wide] S0 harness": [
+0,
+2
+],
+"V2 production [default] withheld fetch, never released": [
+1,
+1
+],
+"V2 production [default] withheld fetch, released by cycle count": [
+0,
+1
+],
+"V2 production [+wide] withheld fetch, never released": [
+1,
+1
+],
+"V2 production [+wide] withheld fetch, released by cycle count": [
+0,
+1
+],
+"V2 probe image [default]": [
+159,
+159
+],
+"V2 probe image [+wide]": [
+159,
+159
+],
+"V2 probe image [default] withheld fetch, never released": [
+10,
+10
+],
+"V2 probe image [default] withheld fetch, released by cycle count": [
+12,
+12
+],
+"V2 probe image [+wide] withheld fetch, never released": [
+10,
+10
+],
+"V2 probe image [+wide] withheld fetch, released by cycle count": [
+12,
+12
+],
+"SMC matrix [smc, M1 bench] [default]": [
+25,
+25
+],
+"SMC matrix A7 [smc] [default] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smc] [default] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smc, M1 bench] [+memwait=2]": [
+25,
+25
+],
+"SMC matrix A7 [smc] [+memwait=2] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smc] [+memwait=2] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smc, M1 bench] [+memwait=5 +memjit=4]": [
+25,
+25
+],
+"SMC matrix A7 [smc] [+memwait=5 +memjit=4] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smc] [+memwait=5 +memjit=4] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smc, M1 bench] [+wide]": [
+25,
+25
+],
+"SMC matrix A7 [smc] [+wide] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smc] [+wide] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smc, S0 reset-native] [default]": [
+2,
+2
+],
+"SMC matrix [smc, S0 reset-native] [+memwait=2]": [
+2,
+2
+],
+"SMC matrix [smc, S0 reset-native] [+memwait=5 +memjit=4]": [
+2,
+2
+],
+"SMC matrix [smc, S0 reset-native] [+wide]": [
+2,
+2
+],
+"SMC matrix [smcm, M1 bench] [default]": [
+25,
+25
+],
+"SMC matrix A7 [smcm] [default] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smcm] [default] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smcm, M1 bench] [+memwait=2]": [
+25,
+25
+],
+"SMC matrix A7 [smcm] [+memwait=2] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smcm] [+memwait=2] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smcm, M1 bench] [+memwait=5 +memjit=4]": [
+25,
+25
+],
+"SMC matrix A7 [smcm] [+memwait=5 +memjit=4] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smcm] [+memwait=5 +memjit=4] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smcm, M1 bench] [+wide]": [
+25,
+25
+],
+"SMC matrix A7 [smcm] [+wide] withheld, never released": [
+1,
+1
+],
+"SMC matrix A7 [smcm] [+wide] withheld, released by cycle count": [
+1,
+1
+],
+"SMC matrix [smcm, S0 reset-native] [default]": [
+2,
+2
+],
+"SMC matrix [smcm, S0 reset-native] [+memwait=2]": [
+2,
+2
+],
+"SMC matrix [smcm, S0 reset-native] [+memwait=5 +memjit=4]": [
+2,
+2
+],
+"SMC matrix [smcm, S0 reset-native] [+wide]": [
+2,
+2
+],
+"dispatch isolation and invariants (dtab[0x40] = movea, 0x42/0x44 trap; mode-table classification and uniqueness invariants)": [
+4,
+4
+],
+"mode table accepts exactly: /abs, #q (16), #imm, modm-1 register direct (32) [smc: [Rn] instead of /abs]": [
+8,
+8
+],
+"builder state (tables except dtab[0x40], and the first words of the control store, identical to the pre-R3 pins)": [
+8,
+8
+],
+"dispatch isolation and invariants (dtab[0x40/0x42/0x44] are the opcode trap (pre-R3b state); mode-table classification and uniqueness invariants)": [
+4,
+4
+],
+"V2 immediate extraction: imm_val is zero/sign-extended only for byte/half sizes; a word-size immediate returns all 32 bits (IMM_SX equivalence basis)": [
+1,
+1
+],
+"probe_movea_value reproduces D1: v60_ref R1=0x5A dr=1 / upstream R1=0x20 dr=0, both runs successful, no unrelated difference": [
+1,
+1
+],
+"probe execute step is independent of the dispatch size / flag bits and works with layout 0 or 1 (fld1 = byte 1 [4:0])": [
+4,
+4
+],
+"guard reach [src_regdir]: every crafted/short N4 case rejects the guard mutant (production table)": [
+1,
+1
+],
+"guard reach [src_imm]: every crafted/short N4 case rejects the guard mutant (production table)": [
+1,
+1
+],
+"N3 sweep: all 511 (m, mode byte) entries other than (0, F3) trap `mode` in the unmutated model": [
+1,
+1
+]
+},
+"controls": [
+{
+"id": "a0",
+"result": "CAUGHT",
+"desc": "control: the UNmutated in-process corrected V60X passes every positive program (160)",
+"evidence": "baseline for (a)"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: the contents at the address (the v60_ref defect, counts a data read)",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=0000002d expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: result masked to 8 bits",
+"evidence": "150/160 programs fail; first: a1_v03: lock-step: record 2: got 2 pc=0000000e op=40 R05=00000000 expected 2 pc=0000000e op=40 R05=00000100"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: low byte sign-extended",
+"evidence": "151/160 programs fail; first: a1_v02: lock-step: record 2: got 2 pc=0000000e op=40 R05=ffffffff expected 2 pc=0000000e op=40 R05=000000ff"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: low half sign-extended",
+"evidence": "139/160 programs fail; first: a1_v04: lock-step: record 2: got 2 pc=0000000e op=40 R05=ffffffff expected 2 pc=0000000e op=40 R05=7fffffff"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: address read from byte offset 2",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=000000f3 expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: destination register + 1",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: no register write",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 expected 2 pc=0000000e op=40 R05=00000000"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: the write is omitted when the value is unchanged (lock-step identical)",
+"evidence": "15/160 programs fail; rejected by the pre-R3a checks alone: 0; first: a3_same: GPR write events of instruction 1: got [] expected [(7,2000)]"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: the write happens twice (final state identical)",
+"evidence": "160/160 programs fail; rejected by the pre-R3a checks alone: 0; first: a1_v00: GPR write events of instruction 2: got [(5,0), (5,0)] expected [(5,0)]"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: a constant written first, then the address (final state identical)",
+"evidence": "160/160 programs fail; rejected by the pre-R3a checks alone: 0; first: a1_v00: GPR write events of instruction 2: got [(5,7), (5,0)] expected [(5,0)]"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: CY toggled",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=00000000 PSW=10000008 expected 2 pc=0000000e op=40"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: another register changed",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 2: got 2 pc=0000000e op=40 R05=00000000 R06=00000001 expected 2 pc=0000000e op=40"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: instruction length 6",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 3: got 3 pc=00000014 op=00 expected 3 pc=00000015 op=00"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: instruction length 8",
+"evidence": "160/160 programs fail; first: a1_v00: lock-step: record 3: got 3 pc=00000016 op=00 expected 3 pc=00000015 op=00"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: an extra data read at the target",
+"evidence": "160/160 programs fail; first: a1_v00: counters: instruction 2 dr=1 expected 0"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "V60X MOVEA mutant: an extra privileged write",
+"evidence": "160/160 programs fail; first: a1_v00: counters: instruction 2 priv=1 expected 0"
+},
+{
+"id": "a",
+"result": "CAUGHT",
+"desc": "base v60_ref (retained defect D1) on the A3 programs: values differ from the generator and the MOVEA windows show data reads",
+"evidence": "6/6 programs differ; data reads counted in the MOVEA windows: 6"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: the V60X log of a3_same passes",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event dropped (the MOVEA's)",
+"evidence": "['GPR write events of instruction 1: got [] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event duplicated",
+"evidence": "['GPR write events of instruction 1: got [(7,2000), (7,2000)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event value changed",
+"evidence": "['GPR write events of instruction 1: got [(7,badf00d)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event register changed",
+"evidence": "['GPR write events of instruction 1: got [(30,2000)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a GPR event moved to the next instruction",
+"evidence": "['GPR write events of instruction 1: got [] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: the GPREV marker removed",
+"evidence": "[\"no 'GPREV on' line (run without +gprev / --gprev?): the GPR write events are not observed\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: an extra GPR event for another register",
+"evidence": "['GPR write events of instruction 1: got [(29,1), (7,2000)] expected [(7,2000)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a data read injected into the MOVEA window (C dr=1)",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a privileged write injected into the MOVEA window (C priv=1)",
+"evidence": "['counters: instruction 1 priv=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a3_same corrupted: a data write injected (W)",
+"evidence": "['data writes 1 expected 0']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: the V60X log of a8_same_val_regs passes",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event dropped (the MOVEA's)",
+"evidence": "['GPR write events of instruction 1: got [] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event duplicated",
+"evidence": "['GPR write events of instruction 1: got [(5,55550005), (5,55550005)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event value changed",
+"evidence": "['GPR write events of instruction 1: got [(5,badf00d)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event register changed",
+"evidence": "['GPR write events of instruction 1: got [(30,55550005)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a GPR event moved to the next instruction",
+"evidence": "['GPR write events of instruction 1: got [] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: the GPREV marker removed",
+"evidence": "[\"no 'GPREV on' line (run without +gprev / --gprev?): the GPR write events are not observed\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: an extra GPR event for another register",
+"evidence": "['GPR write events of instruction 1: got [(29,1), (5,55550005)] expected [(5,55550005)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a data read injected into the MOVEA window (C dr=1)",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a privileged write injected into the MOVEA window (C priv=1)",
+"evidence": "['counters: instruction 1 priv=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V60X log of a8_same_val_regs corrupted: a data write injected (W)",
+"evidence": "['data writes 1 expected 0']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: the upstream log of a3_pat passes",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream log of a3_pat with a data read injected into the MOVEA window",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream log of a3_pat with the destination value replaced by the byte at the address (0x5A)",
+"evidence": "['lock-step: record 1: got 1 pc=00000007 op=40 R07=0000005a expected 1 pc=00000007 op=40 R07=00002000']"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: upstream's S0 log of a9_regions shows ROM / mirror reads only",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT io read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT wram read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT interrupt-ctl read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT vram read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT protection read added (a bus access by the MOVEA target) is flagged",
+"evidence": ""
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "upstream S0 log of a9_regions with a MEMSTAT write to work RAM added is flagged",
+"evidence": ""
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: V2's probe-image log of pr_a3_same passes",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: the MOVEA-shaped instruction's GPR event dropped (unchanged-value write omitted: the lock-step record is identical)",
+"evidence": "['GPR write events of instruction 1: got [] expected [(7,2000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a GPR event duplicated",
+"evidence": "['GPR write events of instruction 1: got [(7,2000,f), (7,2000,f)] expected [(7,2000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: byte enables 3 instead of f",
+"evidence": "['GPR write events of instruction 1: got [(7,2000,3)] expected [(7,2000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: an event of an instruction that never retired",
+"evidence": "['GPR write events of instruction 5, which did not retire: [(5,1,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: C gpr= count wrong",
+"evidence": "['counter record 1: gpr=2 but 1 G events']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a PSW update in the MOVEA window (C psw=1)",
+"evidence": "['MOVEA window (instruction 1): psw=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a data read in the MOVEA window (C dr=1)",
+"evidence": "['counters: instruction 1 dr=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: a privileged write in the MOVEA window (C priv=1)",
+"evidence": "['counters: instruction 1 priv=1 expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 probe-image log of pr_a3_same corrupted: the GPREV marker removed",
+"evidence": "[\"no 'GPREV on' line (run without +gprev / --gprev?): the GPR write events are not observed\"]"
+},
+{
+"id": "b0",
+"result": "CAUGHT",
+"desc": "control: V2's trap-exit log of n2_d0_1f passes the phase-r3b expectation",
+"evidence": "[]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a GPR write by the trapped instruction (G)",
+"evidence": "['GPR write events of instruction 1, which did not retire: [(5,210000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a GPR write by the trapped instruction (CU gpr=1)",
+"evidence": "['unretired record 1: gpr=1 but 0 G events']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a PSW update by the trapped instruction (CU psw)",
+"evidence": "['unretired instruction 1 updated the PSW 1 time(s)']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a privileged write by the trapped instruction (P)",
+"evidence": "['privileged events of instruction 1, which did not retire: [(5,210000,f)]']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "V2 trap exit of n2_d0_1f: a data write",
+"evidence": "['data writes: 1 W records, expected 0']"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (n2_d0_1f): trap PC + 1",
+"evidence": "[\"TRAP ('mode', '00000007') expected ('mode', '00000008')\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (n2_d0_1f): trap kind opcode instead of mode",
+"evidence": "[\"TRAP ('mode', '00000007') expected ('opcode', '00000007')\"]"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "wrong expected V2 trap (n2_d0_1f): retired count + 1",
+"evidence": "['counters: 1 C records, expected at least 2']"
+},
+{
+"id": "g",
+"result": "CAUGHT",
+"desc": "phase r3a expectation rejects the current V2 (phase r3b) on the MOVEA positives",
+"evidence": "12/12 rejected"
+},
+{
+"id": "b",
+"result": "CAUGHT",
+"desc": "A7 wait exit: control passes; a GPR write of the unretired (withheld) instruction is rejected",
+"evidence": "base=[] leak:['GPR write events of instruction 4, which did not retire: [(2,b6a5948a,f)]']"
+},
+{
+"id": "c2",
+"result": "CAUGHT",
+"desc": "V2 observer without G events (rebuilt copy): every probe-image MOVEA program is rejected",
+"evidence": "4/4 rejected"
+},
+{
+"id": "c1",
+"result": "CAUGHT",
+"desc": "corrected V60X without its register write log: every positive program is rejected",
+"evidence": "20/20"
+},
+{
+"id": "d",
+"result": "CAUGHT",
+"desc": "checker control (a) on the real V2: an omitted GPR write whose value is unchanged (destination already equals the address)",
+"evidence": "caught 2/2 by the GPR event log; the pre-R3a checks alone pass 2/2; first: pr_a3_same: GPR write events of instruction 1: got [] expected [(7,2000,f)]"
+},
+{
+"id": "d",
+"result": "CAUGHT",
+"desc": "checker control (b) on the real V2: a duplicate GPR write (the same write twice; final state identical)",
+"evidence": "caught 4/4 by the GPR event log; the pre-R3a checks alone pass 4/4; first: pr_a1_v00: GPR write events of instruction 2: got [(5,0,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "d",
+"result": "CAUGHT",
+"desc": "checker control (c) on the real V2: a transient GPR write restored before a trap (register value unchanged, the instruction never retires)",
+"evidence": "caught 4/4 after the drain; the pre-R3a checks alone pass 4/4; first: pr3_mid_r1: GPR write events of instruction 1, which did not retire: [(1,7,f), (1,5a5a1234,f)]"
+},
+{
+"id": "e0",
+"result": "CAUGHT",
+"desc": "control: the real runners reproduce D1",
+"evidence": "v60_ref R1=0x0000005a dr=1; upstream R1=0x00000020 dr=0; nothing else differs"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the references AGREE (v60_ref corrected: R1 = 0x20, dr = 0)",
+"evidence": "the references now AGREE (D1 no longer reproduces): v60_ref R1 = 0x00000020, expected 0x0000005a; v60_ref dr ="
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the v60_ref run crashed (exit 1)",
+"evidence": "v60_ref run failed (exit 1)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the upstream run crashed (exit 1)",
+"evidence": "upstream run failed (exit 1)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when the v60_ref run timed out",
+"evidence": "v60_ref run failed (exit -1)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when empty v60_ref output",
+"evidence": "v60_ref run produced no output"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when missing upstream log (empty output)",
+"evidence": "upstream run produced no output"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when upstream R1 differs (0x21, not 0x20)",
+"evidence": "unexpected values: upstream R1 = 0x00000021, expected 0x00000020"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when v60_ref R1 differs (0x5b)",
+"evidence": "unexpected values: v60_ref R1 = 0x0000005b, expected 0x0000005a"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when v60_ref dr = 0 (the read vanished)",
+"evidence": "unexpected values: v60_ref dr = 0, expected 1"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when upstream dr = 1",
+"evidence": "unexpected values: upstream dr = 1, expected 0"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when an unrelated difference (R5 differs)",
+"evidence": "unrelated difference(s): registers other than R1"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when an unrelated difference (a data write in one run only)",
+"evidence": "unrelated difference(s): data writes"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when an unrelated difference (PSW)",
+"evidence": "unrelated difference(s): PSW"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "probe_movea_value must FAIL when no END record",
+"evidence": "v60_ref: no clean END record (halted=1 instrs=2): None"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: m1_probe_movea.py with a deliberately FIXED copy of the reference exits non-zero",
+"evidence": "rc=1: probe_movea_value: FAIL: the references now AGREE (D1 no longer reproduces): v60_ref R1 = 0x00000020, expected 0x0000005a; v60_ref dr = 0, e"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: m1_probe_movea.py with a missing upstream simulator exits non-zero",
+"evidence": "rc=1: probe_movea_value: FAIL: upstream run failed (exit -2)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: m1_probe_movea.py with a missing reference script exits non-zero",
+"evidence": "rc=1: probe_movea_value: FAIL: v60_ref run failed (exit 2)"
+},
+{
+"id": "e",
+"result": "CAUGHT",
+"desc": "end to end: run_refs.sh with the FIXED reference exits non-zero",
+"evidence": "rc=1;   probe probe_movea_value: references differ, as documented | probe_movea_value: FAIL: the references now AGREE (D1 no longer reproduces): v60_ref R1 = 0x00000020, expected 0x0000005a; v60_ref dr = 0,"
+},
+{
+"id": "e0",
+"result": "CAUGHT",
+"desc": "control: run_refs.sh with the real reference exits 0 and reports probe_movea_value as reproducing",
+"evidence": "rc=0;   probe probe_movea_value: references differ, as documented | probe_movea_value: D1 reproduces, as documented: v60_ref R1=0x0000005a dr=1; upstream R1=0x00000020 dr=0; nothing else differs"
+},
+{
+"id": "f",
+"result": "CAUGHT",
+"desc": "dispatch layout 2 (fld1 = a different byte) breaks the execute step, as expected: R3b must use layout 0 or 1",
+"evidence": "34/35 programs fail"
+},
+{
+"id": "f",
+"result": "CAUGHT",
+"desc": "dispatch layout 3 (fld1 = a different byte) breaks the execute step, as expected: R3b must use layout 0 or 1",
+"evidence": "35/35 programs fail"
+},
+{
+"id": "z0",
+"result": "CAUGHT",
+"desc": "control: the regenerated manifest equals the frozen-expectation record",
+"evidence": "3720e1bab01c3959"
+},
+{
+"id": "z",
+"result": "CAUGHT",
+"desc": "a one-event change of the manifest breaks the frozen digest",
+"evidence": "digest differs"
+},
+{
+"id": "m0",
+"result": "CAUGHT",
+"desc": "control: the UNmutated model passes every program in r3b (production tables, 736 programs)",
+"evidence": "failing: []"
+},
+{
+"id": "m0",
+"result": "CAUGHT",
+"desc": "control: the UNmutated model passes every program in r3b (--smc-test tables, 733 programs)",
+"evidence": "failing: []"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_ofs0: IMM_OFS 0 (reads the mode byte and three address bytes)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A2']: 51 program(s), e.g. a1_v00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_ofs2: IMM_OFS 2 (address skewed by one byte)",
+"evidence": "production 161/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A2']: 50 program(s), e.g. a1_v01: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_sz0: IMM_SZ 0 (byte read; the `.b`-role mutant)",
+"evidence": "production 153/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 14 program(s), e.g. a1_v03: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant imm_sz1: IMM_SZ 1 (halfword read)",
+"evidence": "production 143/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 12 program(s), e.g. a1_v04: lock-step records differ from the expectation"
+},
+{
+"id": "mE",
+"result": "EQUIV",
+"desc": "model mutant imm_sx (IMM_SX set with IMM_SZ = 2): EQUIVALENT - v2_immx returns all 32 bits unchanged for a word-size immediate (v2_glue.sv imm_val): sign extension applies only to byte/half; IMM_SX together with a narrower IMM_SZ is the imm_sz0 / imm_sz1 rows",
+"evidence": "production 0/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 0 program(s); failing programs: []"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant mask8: result masked to 8 bits (zero-extend `.b`)",
+"evidence": "production 153/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 14 program(s), e.g. a1_v03: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant consume4: CONSUME 4 on the execute word",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A6', 'A8']: 71 program(s), e.g. a3_same_twice: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant consume6: CONSUME 6 on the execute word",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A6', 'A8']: 71 program(s), e.g. a3_same_twice: trapped opcode at 0000000f, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant fmt_consume1: missing CONSUME on the format word (CONSUME 1)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A6', 'A8']: 71 program(s), e.g. a3_same_twice: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_dst_temp: WR_DST temp instead of GPR",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 32 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_dst_priv: WR_DST privileged instead of GPR",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 32 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_asel_const: WR_ASEL const (RCONST 0) instead of the format-byte register",
+"evidence": "production 162/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 31 program(s), e.g. a2_r01: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_asel_fld2: WR_ASEL field 2 (the mode byte's low five bits = R19)",
+"evidence": "production 162/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 31 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant wr_asel_mreg: WR_ASEL mode-byte register (R19)",
+"evidence": "production 162/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 31 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant nowrite: omitted GPR write (the value changes: also visible in the lock-step record)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A2']: 32 program(s), e.g. a2_r00: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dup_write: duplicate GPR write in the executed word sequence",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A3']: 27 program(s), e.g. a1_v00: GPR write events of instruction 2: got [(5,0,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant omit_unchanged: omitted GPR write whose value is unchanged (destination already equals the address)",
+"evidence": "production 15/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A3']: 3 program(s), e.g. a3_same: GPR write events of instruction 1: got [] expected [(7,2000,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant transient_write: transient GPR write (a constant, then the address): two events, final state correct",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1', 'A3']: 27 program(s), e.g. a1_v00: GPR write events of instruction 2: got [(5,7,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant transient_trap: transient write restored before a trap: unretired instruction with GPR events, state unchanged",
+"evidence": "production 553/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N2', 'N3', 'N4', 'N6', 'd0', 'f2', 'sweep']: 551 program(s), e.g. n2_d0_1f: GPR write events of instruction 1, which did not retire: [(31,7,f), (31,0,f)]"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant flag_upd: FLAG_UPD on the execute word",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A5']: 10 program(s), e.g. a5_flags_z: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant value_contents: a data-bus read of the target (value instead of address; the v60_ref defect)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A3', 'A4']: 15 program(s), e.g. a3_ffff: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_regdir_guard: C_REGDIR guard removed",
+"evidence": "production 40/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N4', 'src_regdir']: 8 program(s), e.g. n4_rn2_crafted: TRAP None expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_imm_guard: C_IMM guard removed",
+"evidence": "production 27/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N3', 'N4', 'src_imm']: 26 program(s), e.g. n3_m0_e0: TRAP None expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_f1_guard: C_F1 guard removed",
+"evidence": "production 4/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N2', 'f2']: 3 program(s), e.g. n2_f2_abs_rn: TRAP ('opcode', '0000000e') expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_d_guard: C_D guard removed",
+"evidence": "production 4/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N2', 'd0']: 3 program(s), e.g. n2_d0_1f: TRAP None expected ('mode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab42: dtab[0x42] = movea",
+"evidence": "production 8/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N1']: 5 program(s), e.g. n1_42_abs: TRAP None expected ('opcode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab44: dtab[0x44] = movea",
+"evidence": "production 6/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['N1']: 5 program(s), e.g. n1_44_abs: TRAP None expected ('opcode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab40_wrong: dtab[0x40] at a wrong routine (the NOP routine)",
+"evidence": "production 716/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped opcode at 0000000f, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant dtab40_trap: dtab[0x40] left trap",
+"evidence": "production 716/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped opcode at 0000000e, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant smc_dispatch: dtab[0x40] = movea in the --smc-test builds",
+"evidence": "--smc-test 713/733 programs fail; designated catcher ['N5']: 2 program(s), e.g. n5_ind_2: TRAP None expected ('opcode', '00000007')"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant no_disp_jmp: missing final jmp disp (the routine does not return to the dispatch loop)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A8']: 47 program(s), e.g. a3_same_twice: lock-step records differ from the expectation"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant mtab_marked_imm: mtab[0x0F3] descriptor marked immediate (C_IMM guard fires)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped mode at 0000000e, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "model mutant mtab_marked_reg: mtab[0x0F3] descriptor marked register (C_REGDIR guard fires)",
+"evidence": "production 163/736 programs fail; --smc-test 0/733 programs fail; designated catcher ['A1']: 19 program(s), e.g. a1_v00: trapped mode at 0000000e, expected to halt"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N5 [Rn] cases under the unmutated model in the smc build: all pass (opcode trap, no execution)",
+"evidence": "rejected: []"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N5 [Rn] cases under the smc_dispatch mutant in the smc build: all rejected",
+"evidence": "rejected: ['n5_ind_2', 'n5_ind_7']"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "catcher precision, C_REGDIR guard mutant: the crafted stream (n4_rn5_crafted) catches it; the short form (n4_rn5_short) also does",
+"evidence": "short rejected=True; crafted rejected=True"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "catcher precision, C_IMM guard (#q) mutant: the crafted stream (n4_q5_crafted) catches it; the short form (n4_q5_short) also does",
+"evidence": "short rejected=True; crafted rejected=True"
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N3 sweep under no_imm_guard: exactly the 17 entries that guard protects are rejected",
+"evidence": "rejected 17: ['n3_m0_e0', 'n3_m0_e1', 'n3_m0_e2', 'n3_m0_e3']..."
+},
+{
+"id": "m",
+"result": "CAUGHT",
+"desc": "N3 sweep under no_regdir_guard: exactly the 32 entries that guard protects are rejected",
+"evidence": "rejected 32: ['n3_m1_60', 'n3_m1_61', 'n3_m1_62', 'n3_m1_63']..."
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: mtab[0xF3] descriptor offset size 16 (dsz = 2): the builder invariants fail",
+"evidence": "['mtab[0x0F3] is not (0x14C << 12) | mret']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: mtab[0xF3] marked immediate: the builder invariants fail",
+"evidence": "['mtab[0x0F3] is not (0x14C << 12) | mret', 'non-register non-immediate supported mode-table entries [] (must be exactly [0xf3])']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: mtab[0xF3] marked register: the builder invariants fail",
+"evidence": "['mtab[0x0F3] is not (0x14C << 12) | mret', 'non-register non-immediate supported mode-table entries [] (must be exactly [0xf3])']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: a second memory descriptor (mtab[0xF2], PC disp32) added: the builder invariants fail",
+"evidence": "[\"non-register non-immediate supported mode-table entries ['0xf2', '0xf3'] (must be exactly [0xf3])\"]"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: a second memory descriptor ([R5], modm 0 0x65) added: the builder invariants fail",
+"evidence": "[\"non-register non-immediate supported mode-table entries ['0x65', '0xf3'] (must be exactly [0xf3])\"]"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: F3 with m = 1 accepted: the builder invariants fail",
+"evidence": "[\"non-register non-immediate supported mode-table entries ['0xf3', '0x1f3'] (must be exactly [0xf3])\", 'mtab[0x1F3] (m = 1, mode byte F3) is not trap_mode']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: dtab[0x42] dispatched",
+"evidence": "['dtab[0x42] is not the opcode trap (r3a)']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: dtab[0x44] dispatched",
+"evidence": "['dtab[0x44] is not the opcode trap (r3a)']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "structural mutant: dtab[0x40] dispatched in an --smc-test build",
+"evidence": "['dtab[0x40] is not the opcode trap (smc build)']"
+},
+{
+"id": "s",
+"result": "CAUGHT",
+"desc": "phase flip: the pre-R3 tables (dtab[0x40] = trap, no movea symbol) fail the r3b invariants",
+"evidence": "['dtab[0x40] is not the movea routine (production r3b)']"
+},
+{
+"id": "s0",
+"result": "CAUGHT",
+"desc": "control: the pre-R3 tables pass the r3a invariants",
+"evidence": "[]"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_OFS 0",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_OFS 2",
+"evidence": "306/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v01 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_SZ 0 (byte read)",
+"evidence": "294/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v03 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: IMM_SZ 1 (halfword read)",
+"evidence": "274/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v04 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "pE",
+"result": "EQUIV",
+"desc": "probe-image mutant on the real V2: IMM_SX set with IMM_SZ = 2: EQUIVALENT (identical logs on all 330 runs)",
+"evidence": "0/330 runs differ; v2_immx returns all 32 bits for a word-size immediate"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: CONSUME 4 on the execute word",
+"evidence": "314/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; the availability checker (SIMCHECK) fired on 23 run(s); first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: CONSUME 6 on the execute word",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: missing CONSUME on the format word (CONSUME 1)",
+"evidence": "330/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: trapped mode at 0000000e, expected to halt"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_DST temp",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_DST privileged",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_ASEL const (RCONST 0)",
+"evidence": "308/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_ASEL field 2",
+"evidence": "308/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: WR_ASEL mode-byte register",
+"evidence": "308/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: FLAG_UPD 15 on the execute word",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: duplicate GPR write (the same write word twice)",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: GPR write events of instruction 2: got [(5,0,f), (5,0,f)] expected [(5,0,f)]"
+},
+{
+"id": "p",
+"result": "CAUGHT",
+"desc": "probe-image mutant on the real V2: omitted GPR write (the value goes to a temp)",
+"evidence": "310/330 runs rejected; failing program groups ['A1', 'A10', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'jmp']; first: pr_a1_v00 [default/std]: lock-step records differ from the expectation"
+},
+{
+"id": "pE",
+"result": "EQUIV",
+"desc": "probe-image mutant on the real V2: mtab[0x0F3] descriptor offset size 16 (dsz = 2): EQUIVALENT for the sketch (IMM_SZ explicit; not caught by A1, only by the structural assertion)",
+"evidence": "0/143 runs differ"
+},
+{
+"id": "s0a",
+"result": "CAUGHT",
+"desc": "upstream reference state: replay of the first 4 records (R31 = 00210000, R25 = 00208000, PSW 10000000, SBR 00100000). No final dump is used: the +maxinstr=5 run's dump is already PAST the trap point (R10 set) and the +maxinstr=200 run's final R31 differs",
+"evidence": "203 records in the +maxinstr=200 run; its final R31 = 0020ff00; prefix run final R10 set: True"
+},
+{
+"id": "s0b",
+"result": "CAUGHT",
+"desc": "stub (table-only, inert self-loop routine) on the real S0 bench: --r3b-check FAILS",
+"evidence": "V2 ended: STALL ipc=0010050e upc=240 retired=2"
+},
+{
+"id": "s0c0",
+"result": "CAUGHT",
+"desc": "control: the planned R3b end (V2 synthesised from the real upstream prefix) PASSES --r3b-check with upstream's prefix run",
+"evidence": "R3B S0 CHECK PASS; state source: replay of the first 4 records of each log; upstream long-run log: False"
+},
+{
+"id": "s0c0",
+"result": "CAUGHT",
+"desc": "control: the planned R3b end (V2 synthesised from the real upstream prefix) PASSES --r3b-check with upstream's longer run (+maxinstr=200)",
+"evidence": "R3B S0 CHECK PASS; state source: replay of the first 4 records of each log; upstream long-run log: True"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: TRAP kind opcode (the current V2, mis-predicted)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'opcode', 'pc': '0010051c', 'mnemonic': 'mo"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: TRAP at 0010050e (the first MOVEA, the pre-R3b end)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'mode', 'pc': '0010050e', 'mnemonic': 'move"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: no trap, the run just ends (limit)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: limit {'upstream_records': 6, 'v2_records': 4}"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: record 3 missing (reach 3)",
+"evidence": "R3B S0 CHECK FAIL: reach 3 != 4; v2 log has 3 lock-step records, fewer than the reach point 4; V2 GPR write events {2: ["
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: R31 wrong in record 2",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: R25 wrong in record 3",
+"evidence": "R3B S0 CHECK FAIL: reach 3 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 3, 'pc': '00100515', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: another register written by record 3 (R10)",
+"evidence": "R3B S0 CHECK FAIL: reach 3 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 3, 'pc': '00100515', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: PSW changed by record 2",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: an extra privileged write by record 2",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: the SBR write missing",
+"evidence": "R3B S0 CHECK FAIL: reach 1 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 1, 'pc': '00100506', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: SBR wrong in the privileged dump",
+"evidence": "R3B S0 CHECK FAIL: V2 final SBR 1048577 != 00100000"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: GPR event value wrong (+gprev)",
+"evidence": "R3B S0 CHECK FAIL: V2 GPR write events {2: [(31, 2162689)], 3: [(25, 2129920)]} != only instruction 2 -> R31 and instruc"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: a stray GPR event of the trapping instruction",
+"evidence": "R3B S0 CHECK FAIL: V2 GPR write events {2: [(31, 2162688)], 3: [(25, 2129920)], 4: [(10, 1049996)]} != only instruction"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: final dump R25 wrong",
+"evidence": "R3B S0 CHECK FAIL: V2 final dump differs: {R31=00210000} PSW 268435456"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: final dump PSW wrong",
+"evidence": "R3B S0 CHECK FAIL: V2 final dump differs: {R25=00208000, R31=00210000} PSW 268435457"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when V2's log has: V2 STALL instead of the trap (the stub's behaviour)",
+"evidence": "R3B S0 CHECK FAIL: V2 end is not TRAP mode at 0010051c: incorrect {'stall': True, 'pc': '0010050e', 'mnemonic': 'movea.b"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has: upstream record 2 with another R31 value",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 2, 'pc': '0010050e', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has: upstream with a data write in the prefix",
+"evidence": "R3B S0 CHECK FAIL: reach 0 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 0, 'pc': 'fffffff0', 'mnemonic"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has: upstream with a non-ROM access in the prefix (+memlog)",
+"evidence": "R3B S0 CHECK FAIL: upstream accessed memory outside ROM / work RAM during the prefix: [(0, 'R', 'io', 12582922)]"
+},
+{
+"id": "s0c",
+"result": "CAUGHT",
+"desc": "--r3b-check must FAIL when upstream's log has no P/PR records (run without +privev)",
+"evidence": "R3B S0 CHECK FAIL: reach 1 != 4; V2 end is not TRAP mode at 0010051c: incorrect {'index': 1, 'pc': '00100506', 'mnemonic"
+},
+{
+"id": "s0d0",
+"result": "CAUGHT",
+"desc": "control: the archived R2b S0 logs still pass --r2b-check (the new option changed nothing)",
+"evidence": "R2B S0 CHECK PASS"
+},
+{
+"id": "s0d",
+"result": "CAUGHT",
+"desc": "the archived R2b S0 logs (reach 2) FAIL --r3b-check",
+"evidence": "R3B S0 CHECK FAIL: reach 2 != 4; V2 end is not TRAP mode at 0010051c: unsupported {'trap': 'opcode', 'pc': '0010050e', '"
+}
+],
+"summary": "R3a FAIL: 58/64 result groups pass, 195/195 negative controls/catchers caught"
+}
+}

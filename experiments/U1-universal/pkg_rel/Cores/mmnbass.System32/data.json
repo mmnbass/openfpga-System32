@@ -1,0 +1,95 @@
+{
+  "data": {
+    "magic": "APF_VER_1",
+    "data_slots": [
+      {
+        "name": "Game",
+        "id": 0,
+        "required": true,
+        "parameters": "0x113",
+        "extensions": [
+          "json"
+        ]
+      },
+      {
+        "name": "Program ROM",
+        "id": 1,
+        "required": true,
+        "parameters": "0x108",
+        "extensions": [
+          "bin"
+        ],
+        "address": "0x10000000",
+        "size_maximum": "0x200000"
+      },
+      {
+        "name": "Tile ROM",
+        "id": 2,
+        "required": true,
+        "parameters": "0x108",
+        "extensions": [
+          "bin"
+        ],
+        "address": "0x20000000",
+        "size_maximum": "0x400000"
+      },
+      {
+        "name": "Sprite ROM",
+        "id": 3,
+        "required": true,
+        "parameters": "0x108",
+        "extensions": [
+          "bin"
+        ],
+        "address": "0x30000000",
+        "size_maximum": "0x1000000"
+      },
+      {
+        "name": "Save",
+        "id": 10,
+        "required": false,
+        "parameters": "0x84",
+        "nonvolatile": true,
+        "extensions": [
+          "sav"
+        ],
+        "address": "0x50000000",
+        "size_maximum": "0x80"
+      },
+      {
+        "name": "EEPROM default",
+        "id": 4,
+        "required": false,
+        "parameters": "0x08",
+        "extensions": [
+          "bin"
+        ],
+        "address": "0x40000000",
+        "size_maximum": "0x80"
+      },
+      {
+        "name": "Configuration",
+        "id": 6,
+        "required": true,
+        "parameters": "0x108",
+        "extensions": [
+          "bin"
+        ],
+        "address": "0x60000000",
+        "size_exact": "0x40",
+        "size_maximum": "0x40"
+      },
+      {
+        "name": "Sound ROM",
+        "id": 7,
+        "required": true,
+        "parameters": "0x108",
+        "extensions": [
+          "bin"
+        ],
+        "address": "0x70000000",
+        "size_maximum": "0x400000"
+      }
+    ]
+  }
+}

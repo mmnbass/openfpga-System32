@@ -1,0 +1,32 @@
+{
+  "instance": {
+    "magic": "APF_VER_1",
+    "data_path": "",
+    "core_select": {
+      "id": 0,
+      "select": false
+    },
+    "data_slots": [
+      {
+        "id": 1,
+        "filename": "ga2u_main.bin"
+      },
+      {
+        "id": 2,
+        "filename": "ga2u_tiles.bin"
+      },
+      {
+        "id": 3,
+        "filename": "ga2u_sprites.bin"
+      },
+      {
+        "id": 7,
+        "filename": "ga2u_sound.bin"
+      },
+      {
+        "id": 6,
+        "filename": "ga2u_u1cfg.bin"
+      }
+    ]
+  }
+}

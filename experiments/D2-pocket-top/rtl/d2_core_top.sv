@@ -1,0 +1,750 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// core_top for the GA2 first-pixels Pocket core, D2 (exploratory; SIMULATED ONLY, not built, not fitted).
+// The synthesizable form of the S2 Pocket-top simulation (experiments/P1-pocket-top/rtl/p1_top.sv):
+//   * APF wrapper: port list, safe pin defaults and the core_bridge_cmd block from the HW-001 core
+//     (experiments/HW-cpu-test/pocket/core_top.sv, itself from Analogue's core template v1.3.0; ran on the Pocket).
+//     Two data slots: id 1 program ROM (bridge 0x1000_0000, 2 MB), id 2 tile ROM (0x2000_0000, 4 MB); their sizes come
+//     from dataslot_requestwrite_size and drive the read-back verifier.
+//   * Clocks: ONE fractional PLL (mf_pll_ga2.v) from clk_74a: clk_ram 96.634615, clk_sys 48.317307, clk_v25 24.158653,
+//     clk_vid 12.079326 (+ a 90-degree copy). Legality is only known after a Quartus fit (README).
+//   * Lock / reset sequencing: PLL lock -> sdram.sv init -> SDRAM ready -> status_boot_done / status_setup_done (as the
+//     Jaguar core) -> the host loads the slots -> dataslot_allcomplete, empty write queue, 1024 quiet clk_ram -> read-back
+//     of both regions through sdram.sv p5 -> CPU reset released when the read-back is done AND the host has released
+//     reset_n (Reset Exit) AND the PLL is locked; video reset VIDEO_AFTER_RST clk_sys later (S2's comparison aid, kept so
+//     the vblank phase matches the S2 baseline; harmless on hardware: ~6 ms). Losing lock re-asserts everything.
+//   * SDRAM: upstream rtl/mem/sdram.sv unmodified (p0 CPU fetch, p1 tiles, write port = ROM load through p1_load_wq,
+//     p5 = read-back verifier, p2-p4 idle); dram_clk forwarded through altddio_out (high in clk_ram's low half = the
+//     180-degree clock, as pocket_jaguar's sdram_dual.sv). The board has no SDRAM chip select (template port list);
+//     sdram.sv drives nCS = 0 in every command, so it is left unconnected.
+//   * Work RAM on the external SRAM (d2_sram_port = S2's p1_sram_port, all pins registered; read sampled RD_EDGES
+//     clk_sys after the address edge; S2 showed 2 and 3 give identical CPU timing). I/O standard / drive (3.3-V LVTTL,
+//     8 mA, not the template's 2 mA) is a QSF setting: see the D2 fit plan in README.md.
+//   * Client ports the first-pixels core does not serve from memory are answered by d2_ack_stub (the RTL form of the
+//     S2 C++ stubs): p2 (sprite ROM), p3/p4, p5 (V25 program: the V25 is fed zeros), wave write, framebuffer erase/read
+//     (fb_rd_pix FFFF = transparent, fb_wr_busy 0).
+//   * Video: ga2_video (S2) -> d2_diag_band (bottom four lines, BAND_EN) -> pins.
+// Simulation-only parts are NOT in this file: behavioural PLL / DDIO / dcfifo / datatable models and every observer or
+// monitor live in experiments/D2-pocket-top/tb/.
+//
+import s32_pkg::*;
+
+`default_nettype none
+
+// d2_controls (D2-play): Pocket cont1_key[15:0] (APF, clk_74a domain, active HIGH): 0 up, 1 down, 2 left, 3 right, 4 A, 5 B,
+// 6 X, 7 Y, 8 L1, 9 R1, 10 L2, 11 R2, 12 L3, 13 R3, 14 select, 15 start. Two-flop synchroniser into clk (levels, no pulses: a
+// held key is a held level; the game debounces its own coin switch). GA2 ports are active LOW and follow MAME ga2u:
+//   p1a   (C00000): b0 attack(A), b1 jump(B), b2 magic(X or Y), b3 unused(1), b4 down, b5 up, b6 right, b7 left (upstream p_dig order)
+//   svc12 (C00008): b4 Start1 (start); b0 service, b1 test, b2/b3 COIN4/COIN3, b5 Start2, b6/b7 stay released
+//   ppi_pc(C00064): b3 Coin1 (select; ga2u US set). Upper nibble stays 0 (D2's previous constant 8'h0F), bits 2:0 released.
+// Coin: upstream (Arcade-SegaSystem32.sv l.856-862, 898) also drives svc12 bit2 from the same button; MAME ga2u counts that line
+// as a SECOND coin (COIN4), so only the ppi_pc bit is driven here (README "D2-play", MAME double-coin test).
+// Idle (no key): p1a = svc12 = FF, ppi_pc = 0F, exactly the previous constants.
+module d2_controls (
+    input  wire        clk,
+    input  wire [15:0] key,
+    output wire  [7:0] p1a, svc12, ppi_pc
+);
+    reg  [15:0] key_m = 16'd0, key_s = 16'd0;
+always @(posedge clk) begin key_m <= key; key_s <= key_m; end
+    wire        k_up = key_s[0], k_dn = key_s[1], k_lf = key_s[2], k_rt = key_s[3];
+    wire        k_atk = key_s[4], k_jmp = key_s[5], k_mag = key_s[6] | key_s[7], k_sel = key_s[14], k_sta = key_s[15];
+assign p1a    = ~{k_lf, k_rt, k_up, k_dn, 1'b0, k_mag, k_jmp, k_atk};
+assign svc12  = ~{3'b000, k_sta, 4'b0000};
+assign ppi_pc = {4'h0, ~k_sel, 3'b111};
+endmodule
+
+module core_top #(
+    parameter int          CE_MODE         = 1,          // 1: upstream ce accumulator (hardware cadence), 0: exact 1/3
+    parameter int          RD_EDGES        = 3,          // SRAM read sample: clk_sys edges after the address edge (62 ns)
+    parameter int unsigned VIDEO_AFTER_RST = 297192,     // clk_sys from CPU-reset release to video-reset release (S2)
+    parameter int          BAND_EN         = 1,          // on-screen diagnostic band
+    parameter int          BAND_ROW0       = 220,        // first of the band's four DE lines
+    parameter int          HB_BIT          = 18,         // heartbeat = this bit of the work-RAM access counter
+    parameter [31:0]       EXP_SUM0 = 32'ha54f8e76, EXP_FL0 = 32'h9e152dfa,   // ga2u program slot (sum / position-weighted)
+    parameter [31:0]       EXP_SUM1 = 32'h5e9bf850, EXP_FL1 = 32'h39aeff9a    // ga2u tile slot
+) (
+
+//
+// physical connections
+//
+
+///////////////////////////////////////////////////
+// clock inputs 74.25mhz. not phase aligned, so treat these domains as asynchronous
+
+input   wire            clk_74a, // mainclk1
+input   wire            clk_74b, // mainclk1 
+
+///////////////////////////////////////////////////
+// cartridge interface
+// switches between 3.3v and 5v mechanically
+// output enable for multibit translators controlled by pic32
+
+// GBA AD[15:8]
+inout   wire    [7:0]   cart_tran_bank2,
+output  wire            cart_tran_bank2_dir,
+
+// GBA AD[7:0]
+inout   wire    [7:0]   cart_tran_bank3,
+output  wire            cart_tran_bank3_dir,
+
+// GBA A[23:16]
+inout   wire    [7:0]   cart_tran_bank1,
+output  wire            cart_tran_bank1_dir,
+
+// GBA [7] PHI#
+// GBA [6] WR#
+// GBA [5] RD#
+// GBA [4] CS1#/CS#
+//     [3:0] unwired
+inout   wire    [7:4]   cart_tran_bank0,
+output  wire            cart_tran_bank0_dir,
+
+// GBA CS2#/RES#
+inout   wire            cart_tran_pin30,
+output  wire            cart_tran_pin30_dir,
+// when GBC cart is inserted, this signal when low or weak will pull GBC /RES low with a special circuit
+// the goal is that when unconfigured, the FPGA weak pullups won't interfere.
+// thus, if GBC cart is inserted, FPGA must drive this high in order to let the level translators
+// and general IO drive this pin.
+output  wire            cart_pin30_pwroff_reset,
+
+// GBA IRQ/DRQ
+inout   wire            cart_tran_pin31,
+output  wire            cart_tran_pin31_dir,
+
+// infrared
+input   wire            port_ir_rx,
+output  wire            port_ir_tx,
+output  wire            port_ir_rx_disable, 
+
+// GBA link port
+inout   wire            port_tran_si,
+output  wire            port_tran_si_dir,
+inout   wire            port_tran_so,
+output  wire            port_tran_so_dir,
+inout   wire            port_tran_sck,
+output  wire            port_tran_sck_dir,
+inout   wire            port_tran_sd,
+output  wire            port_tran_sd_dir,
+ 
+///////////////////////////////////////////////////
+// cellular psram 0 and 1, two chips (64mbit x2 dual die per chip)
+
+output  wire    [21:16] cram0_a,
+inout   wire    [15:0]  cram0_dq,
+input   wire            cram0_wait,
+output  wire            cram0_clk,
+output  wire            cram0_adv_n,
+output  wire            cram0_cre,
+output  wire            cram0_ce0_n,
+output  wire            cram0_ce1_n,
+output  wire            cram0_oe_n,
+output  wire            cram0_we_n,
+output  wire            cram0_ub_n,
+output  wire            cram0_lb_n,
+
+output  wire    [21:16] cram1_a,
+inout   wire    [15:0]  cram1_dq,
+input   wire            cram1_wait,
+output  wire            cram1_clk,
+output  wire            cram1_adv_n,
+output  wire            cram1_cre,
+output  wire            cram1_ce0_n,
+output  wire            cram1_ce1_n,
+output  wire            cram1_oe_n,
+output  wire            cram1_we_n,
+output  wire            cram1_ub_n,
+output  wire            cram1_lb_n,
+
+///////////////////////////////////////////////////
+// sdram, 512mbit 16bit
+
+output  wire    [12:0]  dram_a,
+output  wire    [1:0]   dram_ba,
+inout   wire    [15:0]  dram_dq,
+output  wire    [1:0]   dram_dqm,
+output  wire            dram_clk,
+output  wire            dram_cke,
+output  wire            dram_ras_n,
+output  wire            dram_cas_n,
+output  wire            dram_we_n,
+
+///////////////////////////////////////////////////
+// sram, 1mbit 16bit
+
+output  wire    [16:0]  sram_a,
+inout   wire    [15:0]  sram_dq,
+output  wire            sram_oe_n,
+output  wire            sram_we_n,
+output  wire            sram_ub_n,
+output  wire            sram_lb_n,
+
+///////////////////////////////////////////////////
+// vblank driven by dock for sync in a certain mode
+
+input   wire            vblank,
+
+///////////////////////////////////////////////////
+// i/o to 6515D breakout usb uart
+
+output  wire            dbg_tx,
+input   wire            dbg_rx,
+
+///////////////////////////////////////////////////
+// i/o pads near jtag connector user can solder to
+
+output  wire            user1,
+input   wire            user2,
+
+///////////////////////////////////////////////////
+// RFU internal i2c bus 
+
+inout   wire            aux_sda,
+output  wire            aux_scl,
+
+///////////////////////////////////////////////////
+// RFU, do not use
+output  wire            vpll_feed,
+
+
+//
+// logical connections
+//
+
+///////////////////////////////////////////////////
+// video, audio output to scaler
+output  wire    [23:0]  video_rgb,
+output  wire            video_rgb_clock,
+output  wire            video_rgb_clock_90,
+output  wire            video_de,
+output  wire            video_skip,
+output  wire            video_vs,
+output  wire            video_hs,
+    
+output  wire            audio_mclk,
+input   wire            audio_adc,
+output  wire            audio_dac,
+output  wire            audio_lrck,
+
+///////////////////////////////////////////////////
+// bridge bus connection
+// synchronous to clk_74a
+output  wire            bridge_endian_little,
+input   wire    [31:0]  bridge_addr,
+input   wire            bridge_rd,
+output  reg     [31:0]  bridge_rd_data,
+input   wire            bridge_wr,
+input   wire    [31:0]  bridge_wr_data,
+
+///////////////////////////////////////////////////
+// controller data
+// 
+// key bitmap:
+//   [0]    dpad_up
+//   [1]    dpad_down
+//   [2]    dpad_left
+//   [3]    dpad_right
+//   [4]    face_a
+//   [5]    face_b
+//   [6]    face_x
+//   [7]    face_y
+//   [8]    trig_l1
+//   [9]    trig_r1
+//   [10]   trig_l2
+//   [11]   trig_r2
+//   [12]   trig_l3
+//   [13]   trig_r3
+//   [14]   face_select
+//   [15]   face_start
+//   [31:28] type
+// joy values - unsigned
+//   [ 7: 0] lstick_x
+//   [15: 8] lstick_y
+//   [23:16] rstick_x
+//   [31:24] rstick_y
+// trigger values - unsigned
+//   [ 7: 0] ltrig
+//   [15: 8] rtrig
+//
+input   wire    [31:0]  cont1_key,
+input   wire    [31:0]  cont2_key,
+input   wire    [31:0]  cont3_key,
+input   wire    [31:0]  cont4_key,
+input   wire    [31:0]  cont1_joy,
+input   wire    [31:0]  cont2_joy,
+input   wire    [31:0]  cont3_joy,
+input   wire    [31:0]  cont4_joy,
+input   wire    [15:0]  cont1_trig,
+input   wire    [15:0]  cont2_trig,
+input   wire    [15:0]  cont3_trig,
+input   wire    [15:0]  cont4_trig
+    
+);
+
+
+
+// ============================================================================================ safe defaults (HW-001)
+assign port_ir_tx = 0;
+assign port_ir_rx_disable = 1;
+assign bridge_endian_little = 0;
+
+assign cart_tran_bank3 = 8'hzz;   assign cart_tran_bank3_dir = 1'b0;
+assign cart_tran_bank2 = 8'hzz;   assign cart_tran_bank2_dir = 1'b0;
+assign cart_tran_bank1 = 8'hzz;   assign cart_tran_bank1_dir = 1'b0;
+assign cart_tran_bank0 = 4'hf;    assign cart_tran_bank0_dir = 1'b1;
+assign cart_tran_pin30 = 1'b0;    assign cart_tran_pin30_dir = 1'bz;
+assign cart_pin30_pwroff_reset = 1'b0;
+assign cart_tran_pin31 = 1'bz;    assign cart_tran_pin31_dir = 1'b0;
+assign port_tran_so = 1'bz;       assign port_tran_so_dir = 1'b0;
+assign port_tran_si = 1'bz;       assign port_tran_si_dir = 1'b0;
+assign port_tran_sck = 1'bz;      assign port_tran_sck_dir = 1'b0;
+assign port_tran_sd = 1'bz;       assign port_tran_sd_dir = 1'b0;
+
+assign cram0_a='h0; assign cram0_dq={16{1'bZ}}; assign cram0_clk=0;
+assign cram0_adv_n=1; assign cram0_cre=0; assign cram0_ce0_n=1; assign cram0_ce1_n=1;
+assign cram0_oe_n=1; assign cram0_we_n=1; assign cram0_ub_n=1; assign cram0_lb_n=1;
+assign cram1_a='h0; assign cram1_dq={16{1'bZ}}; assign cram1_clk=0;
+assign cram1_adv_n=1; assign cram1_cre=0; assign cram1_ce0_n=1; assign cram1_ce1_n=1;
+assign cram1_oe_n=1; assign cram1_we_n=1; assign cram1_ub_n=1; assign cram1_lb_n=1;
+
+assign dbg_tx = 1'bZ;  assign user1 = 1'bZ;  assign aux_scl = 1'bZ;  assign vpll_feed = 1'bZ;
+assign audio_mclk = 0; assign audio_lrck = 0; assign audio_dac = 0;   // no audio in the first-pixels core
+
+// ============================================================================================ clocks
+// One PLL, phase-aligned outputs (mf_pll_ga2.v). clk_sys = clk_ram/2 and clk_vid = clk_sys/4 are SYNCHRONOUS to clk_ram
+// (the load queue, the reset release and ga2_video's /4 transfer rely on it); clk_v25 is treated as asynchronous by the
+// upstream SDC (the V25 crossings are synchronised in s32_core); clk_74a is asynchronous to all of them.
+    wire clk_ram, clk_sys, clk_v25, clk_vid, clk_vid_90, pll_locked;
+mf_pll_ga2 mp (
+    .refclk(clk_74a), .rst(1'b0),
+    .outclk_0(clk_ram), .outclk_1(clk_sys), .outclk_2(clk_v25), .outclk_3(clk_vid), .outclk_4(clk_vid_90),
+    .locked(pll_locked));
+
+    wire pll_locked_74;
+synch_3 s_lock74 (pll_locked, pll_locked_74, clk_74a);
+    reg [1:0] lock_ram = 2'b00, lock_sys = 2'b00;
+always @(posedge clk_ram) lock_ram <= {lock_ram[0], pll_locked};
+always @(posedge clk_sys) lock_sys <= {lock_sys[0], pll_locked};
+    wire locked_r = lock_ram[1], locked_s = lock_sys[1];
+
+// ============================================================================================ bridge / host commands
+    wire            reset_n;
+    wire    [31:0]  cmd_bridge_rd_data;
+    wire            sd_ready, sd_ready_74;
+synch_3 s_rdy74 (sd_ready, sd_ready_74, clk_74a);
+
+// as the Jaguar core (K(J)): boot/setup wait for the SDRAM controller, not only the PLL
+    wire            status_boot_done  = pll_locked_74 & sd_ready_74;
+    wire            status_setup_done = pll_locked_74 & sd_ready_74;   // rising edge triggers the Ready-to-Run target command
+    wire            status_running    = reset_n;
+
+    wire            dataslot_requestread;
+    wire    [15:0]  dataslot_requestread_id;
+    wire            dataslot_requestread_ack = 1;
+    wire            dataslot_requestread_ok = 1;
+
+    wire            dataslot_requestwrite;
+    wire    [15:0]  dataslot_requestwrite_id;
+    wire    [31:0]  dataslot_requestwrite_size;
+    wire            dataslot_requestwrite_ack = 1;
+    wire            dataslot_requestwrite_ok = 1;
+
+    wire            dataslot_update;
+    wire    [15:0]  dataslot_update_id;
+    wire    [31:0]  dataslot_update_size;
+
+    wire            dataslot_allcomplete;
+
+    wire     [31:0] rtc_epoch_seconds;
+    wire     [31:0] rtc_date_bcd;
+    wire     [31:0] rtc_time_bcd;
+    wire            rtc_valid;
+
+    wire            savestate_supported = 0;
+    wire    [31:0]  savestate_addr = 0;
+    wire    [31:0]  savestate_size = 0;
+    wire    [31:0]  savestate_maxloadsize = 0;
+
+    wire            savestate_start;
+    wire            savestate_start_ack = 0;
+    wire            savestate_start_busy = 0;
+    wire            savestate_start_ok = 0;
+    wire            savestate_start_err = 0;
+
+    wire            savestate_load;
+    wire            savestate_load_ack = 0;
+    wire            savestate_load_busy = 0;
+    wire            savestate_load_ok = 0;
+    wire            savestate_load_err = 0;
+
+    wire            osnotify_inmenu;
+
+    wire            target_dataslot_read = 0;      // the core initiates no slot access
+    wire            target_dataslot_write = 0;
+    wire            target_dataslot_getfile = 0;
+    wire            target_dataslot_openfile = 0;
+    wire            target_dataslot_ack;
+    wire            target_dataslot_done;
+    wire    [2:0]   target_dataslot_err;
+    wire    [15:0]  target_dataslot_id = 0;
+    wire    [31:0]  target_dataslot_slotoffset = 0;
+    wire    [31:0]  target_dataslot_bridgeaddr = 0;
+    wire    [31:0]  target_dataslot_length = 0;
+    wire    [31:0]  target_buffer_param_struct = 0;
+    wire    [31:0]  target_buffer_resp_struct = 0;
+
+    wire    [9:0]   datatable_addr = 0;
+    wire            datatable_wren = 0;
+    wire    [31:0]  datatable_data = 0;
+    wire    [31:0]  datatable_q;
+
+always @(*) begin
+    casex (bridge_addr)
+    default:      bridge_rd_data <= 0;
+    32'hF8xxxxxx: bridge_rd_data <= cmd_bridge_rd_data;
+    endcase
+end
+
+core_bridge_cmd icb (
+    .clk                ( clk_74a ),
+    .reset_n            ( reset_n ),
+    .bridge_endian_little   ( bridge_endian_little ),
+    .bridge_addr            ( bridge_addr ),
+    .bridge_rd              ( bridge_rd ),
+    .bridge_rd_data         ( cmd_bridge_rd_data ),
+    .bridge_wr              ( bridge_wr ),
+    .bridge_wr_data         ( bridge_wr_data ),
+    .status_boot_done       ( status_boot_done ),
+    .status_setup_done      ( status_setup_done ),
+    .status_running         ( status_running ),
+    .dataslot_requestread       ( dataslot_requestread ),
+    .dataslot_requestread_id    ( dataslot_requestread_id ),
+    .dataslot_requestread_ack   ( dataslot_requestread_ack ),
+    .dataslot_requestread_ok    ( dataslot_requestread_ok ),
+    .dataslot_requestwrite      ( dataslot_requestwrite ),
+    .dataslot_requestwrite_id   ( dataslot_requestwrite_id ),
+    .dataslot_requestwrite_size ( dataslot_requestwrite_size ),
+    .dataslot_requestwrite_ack  ( dataslot_requestwrite_ack ),
+    .dataslot_requestwrite_ok   ( dataslot_requestwrite_ok ),
+    .dataslot_update            ( dataslot_update ),
+    .dataslot_update_id         ( dataslot_update_id ),
+    .dataslot_update_size       ( dataslot_update_size ),
+    .dataslot_allcomplete   ( dataslot_allcomplete ),
+    .rtc_epoch_seconds      ( rtc_epoch_seconds ),
+    .rtc_date_bcd           ( rtc_date_bcd ),
+    .rtc_time_bcd           ( rtc_time_bcd ),
+    .rtc_valid              ( rtc_valid ),
+    .savestate_supported    ( savestate_supported ),
+    .savestate_addr         ( savestate_addr ),
+    .savestate_size         ( savestate_size ),
+    .savestate_maxloadsize  ( savestate_maxloadsize ),
+    .savestate_start        ( savestate_start ),
+    .savestate_start_ack    ( savestate_start_ack ),
+    .savestate_start_busy   ( savestate_start_busy ),
+    .savestate_start_ok     ( savestate_start_ok ),
+    .savestate_start_err    ( savestate_start_err ),
+    .savestate_load         ( savestate_load ),
+    .savestate_load_ack     ( savestate_load_ack ),
+    .savestate_load_busy    ( savestate_load_busy ),
+    .savestate_load_ok      ( savestate_load_ok ),
+    .savestate_load_err     ( savestate_load_err ),
+    .osnotify_inmenu        ( osnotify_inmenu ),
+    .target_dataslot_read       ( target_dataslot_read ),
+    .target_dataslot_write      ( target_dataslot_write ),
+    .target_dataslot_getfile    ( target_dataslot_getfile ),
+    .target_dataslot_openfile   ( target_dataslot_openfile ),
+    .target_dataslot_ack        ( target_dataslot_ack ),
+    .target_dataslot_done       ( target_dataslot_done ),
+    .target_dataslot_err        ( target_dataslot_err ),
+    .target_dataslot_id         ( target_dataslot_id ),
+    .target_dataslot_slotoffset ( target_dataslot_slotoffset ),
+    .target_dataslot_bridgeaddr ( target_dataslot_bridgeaddr ),
+    .target_dataslot_length     ( target_dataslot_length ),
+    .target_buffer_param_struct ( target_buffer_param_struct ),
+    .target_buffer_resp_struct  ( target_buffer_resp_struct ),
+    .datatable_addr         ( datatable_addr ),
+    .datatable_wren         ( datatable_wren ),
+    .datatable_data         ( datatable_data ),
+    .datatable_q            ( datatable_q )
+);
+
+// ============================================================================================ slot bookkeeping (clk_74a)
+// download-active and all-complete latches as the Jaguar core / S2; slot sizes latched per id from requestwrite.
+    reg        allc_74 = 1'b0, dl_active_74 = 1'b0;
+    reg [24:0] size1_74 = 25'd0, size2_74 = 25'd0;
+always @(posedge clk_74a) begin
+    if (dataslot_requestwrite) begin
+        dl_active_74 <= 1'b1; allc_74 <= 1'b0;
+        if (dataslot_requestwrite_id == 16'd1) size1_74 <= dataslot_requestwrite_size[24:0];
+        if (dataslot_requestwrite_id == 16'd2) size2_74 <= dataslot_requestwrite_size[24:0];
+    end else if (dataslot_allcomplete) begin dl_active_74 <= 1'b0; allc_74 <= 1'b1; end
+end
+// into clk_ram. The sizes are quasi-static: written at each requestwrite, >= 1 s before allcomplete (they are only read
+// once the 3-flop all-complete synchronizer below is high and the 1024-cycle quiet window has passed), so a plain
+// two-register copy cannot be read while it changes. (A multi-bit crossing justified by this ordering, not by a FIFO.)
+    reg [2:0]  allc_s = 3'b000;
+    reg [24:0] size1_m = 25'd0, size1_r = 25'd0, size2_m = 25'd0, size2_r = 25'd0;
+always @(posedge clk_ram) begin
+    allc_s <= {allc_s[1:0], allc_74};
+    size1_m <= size1_74; size1_r <= size1_m;
+    size2_m <= size2_74; size2_r <= size2_m;
+end
+
+// ============================================================================================ APF loaders (clk_74a -> clk_sys)
+    wire        l1_en, l2_en;
+    wire [24:0] l1_addr, l2_addr;
+    wire [15:0] l1_data, l2_data;
+data_loader #(.ADDRESS_MASK_UPPER_4(4'h1), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot1_loader (
+    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
+    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
+    .write_en(l1_en), .write_addr(l1_addr), .write_data(l1_data));
+data_loader #(.ADDRESS_MASK_UPPER_4(4'h2), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot2_loader (
+    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
+    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
+    .write_en(l2_en), .write_addr(l2_addr), .write_data(l2_data));
+
+// ============================================================================================ SDRAM controller (upstream)
+    wire        wr_req, wr_ack; wire [24:1] wr_addr; wire [15:0] wr_din; wire [1:0] wr_be;
+    wire        p0_req, p0_burst, p0_ack; wire [24:1] p0_addr; wire [63:0] p0_dout;
+    wire        p1_req, p1_ack; wire [24:3] p1_addr; wire [63:0] p1_dout;
+    wire        p5_req, p5_ack; wire [24:3] p5_addr; wire [63:0] p5_dout;
+    wire        sd_ncs_unused;
+sdram sdram (
+    .clk(clk_ram), .init(~locked_r), .ready(sd_ready),
+    .SDRAM_DQ(dram_dq), .SDRAM_A(dram_a), .SDRAM_BA(dram_ba),
+    .SDRAM_DQML(dram_dqm[0]), .SDRAM_DQMH(dram_dqm[1]),
+    .SDRAM_nCS(sd_ncs_unused), .SDRAM_nCAS(dram_cas_n), .SDRAM_nRAS(dram_ras_n), .SDRAM_nWE(dram_we_n), .SDRAM_CKE(dram_cke),
+    .wr_req(wr_req), .wr_addr(wr_addr), .wr_din(wr_din), .wr_be(wr_be), .wr_ack(wr_ack),
+    .p0_req(p0_req), .p0_burst(p0_burst), .p0_addr(p0_addr), .p0_dout(p0_dout), .p0_ack(p0_ack),
+    .p1_req(p1_req), .p1_addr(p1_addr), .p1_dout(p1_dout), .p1_ack(p1_ack),
+    .p2_req(1'b0), .p2_addr(21'd0), .p2_dout(), .p2_ack(),
+    .p3_req(1'b0), .p3_addr(24'd0), .p3_dout(), .p3_ack(),
+    .p4_req(1'b0), .p4_addr(24'd0), .p4_dout(), .p4_ack(),
+    .p5_req(p5_req), .p5_addr(p5_addr), .p5_dout(p5_dout), .p5_ack(p5_ack)
+);
+// SDRAM clock pin: DDIO register pair clocked by clk_ram, high while clk_ram is low = clk_ram inverted (the 180-degree
+// forwarded clock the S2 chip model and upstream's CL2 capture assume), as pocket_jaguar rtl/upstream/mem/sdram_dual.sv.
+altddio_out #(
+    .extend_oe_disable("OFF"), .intended_device_family("Cyclone V"), .invert_output("OFF"), .lpm_hint("UNUSED"),
+    .lpm_type("altddio_out"), .oe_reg("UNREGISTERED"), .power_up_high("OFF"), .width(1)
+) sdramclk_ddr (
+    .datain_h(1'b0), .datain_l(1'b1), .outclock(clk_ram), .dataout(dram_clk),
+    .aclr(1'b0), .aset(1'b0), .oe(1'b1), .outclocken(1'b1), .sclr(1'b0), .sset(1'b0)
+);
+
+// ============================================================================================ load queue, read-back, reset
+    wire wq_empty;
+    wire [31:0] wq_in, wq_out, wq_overflow, wq_collide; wire [15:0] wq_max_fill;
+p1_load_wq wq (
+    .clk(clk_ram), .rst(~sd_ready),
+    .a_en(l1_en), .a_addr(l1_addr), .a_data(l1_data),
+    .b_en(l2_en), .b_addr(l2_addr), .b_data(l2_data),
+    .a_base(SDR_MAINCPU_BASE), .b_base(SDR_TILES_BASE),
+    .wr_req(wr_req), .wr_addr(wr_addr), .wr_din(wr_din), .wr_be(wr_be), .wr_ack(wr_ack),
+    .empty(wq_empty), .n_in(wq_in), .n_out(wq_out), .n_overflow(wq_overflow), .n_collide(wq_collide), .max_fill(wq_max_fill));
+
+// "loaders idle": all-complete seen, queue empty and no loader write for 1024 clk_ram (as S2)
+    reg [10:0] quiet = 11'd0;
+always @(posedge clk_ram)
+    if (!allc_s[2] || !wq_empty || l1_en || l2_en || wr_req) quiet <= 11'd0;
+    else if (!quiet[10]) quiet <= quiet + 1'd1;
+    wire load_done = quiet[10] && sd_ready;
+
+    wire        verify_done;
+    wire [31:0] v_sum0, v_fl0, v_sum1, v_fl1, v_cycles;
+d2_slot_verify ver (   // word-serial form of S2's p1_slot_verify (same sums; D2 fit run 42126911324 timing)
+    .clk(clk_ram), .rst(~sd_ready), .start(load_done),
+    .base0(SDR_MAINCPU_BASE), .bytes0(size1_r), .base1(SDR_TILES_BASE), .bytes1(size2_r),
+    .p5_req(p5_req), .p5_addr(p5_addr), .p5_dout(p5_dout), .p5_ack(p5_ack),
+    .done(verify_done), .sum0(v_sum0), .fl0(v_fl0), .sum1(v_sum1), .fl1(v_fl1), .cycles(v_cycles));
+// sums against the expected values of the GA2 (ga2u) slot files (checksums, not ROM data; BASELINE_S2.md section 2)
+    reg sums0_ok = 1'b0, sums1_ok = 1'b0;
+always @(posedge clk_ram) begin
+    sums0_ok <= verify_done && v_sum0 == EXP_SUM0 && v_fl0 == EXP_FL0;
+    sums1_ok <= verify_done && v_sum1 == EXP_SUM1 && v_fl1 == EXP_FL1;
+end
+
+// CPU reset: held until the read-back is done, the host has released reset_n and the PLL is locked; video reset follows
+// VIDEO_AFTER_RST clk_sys later (as S2).
+    wire reset_n_s;
+synch_3 s_rstn (reset_n, reset_n_s, clk_sys);
+    reg  [1:0]  vd_s = 2'b00;
+always @(posedge clk_sys) vd_s <= {vd_s[0], verify_done};
+    reg         rst_r = 1'b1, vrst_r = 1'b1;
+    reg  [31:0] vcnt_r = 32'd0;
+always @(posedge clk_sys) begin
+    if (!vd_s[1] || !reset_n_s || !locked_s) begin rst_r <= 1'b1; vrst_r <= 1'b1; vcnt_r <= 32'd0; end
+    else begin
+        rst_r <= 1'b0;
+        if (vcnt_r < VIDEO_AFTER_RST) vcnt_r <= vcnt_r + 32'd1; else vrst_r <= 1'b0;
+    end
+end
+
+// ============================================================================================ ce_cpu
+// CE_MODE 1: upstream's accumulator +21848/65536 (Arcade-SegaSystem32.sv cpu_ce_inc for GA2; the hardware-proven bus
+// cadence, plan section 3). CE_MODE 0: exactly every third clk_sys (WC-sim / S2 baseline run s2c).
+    reg [1:0]  c3 = 2'd0;
+    reg        ce_div3 = 1'b0;
+    reg [15:0] acc_cpu = 16'd0;
+    reg        ce_acc = 1'b0;
+always @(posedge clk_sys) begin
+    c3 <= (c3 == 2'd2) ? 2'd0 : c3 + 2'd1;
+    ce_div3 <= (c3 == 2'd2);
+    if (rst_r) begin ce_acc <= 1'b0; acc_cpu <= 16'd0; end
+    else {ce_acc, acc_cpu} <= {1'b0, acc_cpu} + 17'd21848;
+end
+    wire ce_cpu = (CE_MODE != 0) ? ce_acc : ce_div3;
+
+// ============================================================================================ SRAM work-RAM port
+    wire [15:0] wx_addr, wx_wdata, wx_q; wire [1:0] wx_be; wire wx_we, wx_rd, wx_rdy;
+    wire [15:0] sram_dq_o; wire sram_dq_oe, sram_sample_now;
+    wire [31:0] sram_reads, sram_writes, sram_overlap;
+d2_sram_port sram_port (
+    .clk(clk_sys), .rd_edges(3'(RD_EDGES)), .rst(rst_r), .addr(wx_addr), .wdata(wx_wdata), .be(wx_be), .we(wx_we),
+    .rd(wx_rd), .q(wx_q), .rdy(wx_rdy),
+    .sram_a(sram_a), .sram_dq_o(sram_dq_o), .sram_dq_oe(sram_dq_oe), .sram_dq_i(sram_dq),
+    .sram_oe_n(sram_oe_n), .sram_we_n(sram_we_n), .sram_ub_n(sram_ub_n), .sram_lb_n(sram_lb_n),
+    .sample_now(sram_sample_now), .n_reads(sram_reads), .n_writes(sram_writes), .overlap(sram_overlap));
+assign sram_dq = sram_dq_oe ? sram_dq_o : 16'hZZZZ;
+
+// ============================================================================================ the core
+    board_desc_t ga2_board;
+always_comb begin
+    ga2_board                   = '0;
+    ga2_board.multi32           = 1'b0;
+    ga2_board.has_v25           = 1'b1;
+    ga2_board.v25_table         = 1'b0;
+    ga2_board.has_adc           = 1'b0;
+    ga2_board.has_ppi           = 1'b1;
+    ga2_board.has_motor_hle     = 1'b0;
+    ga2_board.dual_pcb          = 1'b0;
+    ga2_board.prot_sel          = PROT_NONE;
+    ga2_board.comm_link_hle     = 1'b0;
+    ga2_board.sprite_bank_valid = 1'b1;
+    ga2_board.sprite_bank_mask  = 2'd3;
+end
+    wire [7:0] adc_ch [0:7];
+genvar gi;
+generate for (gi = 0; gi < 8; gi = gi + 1) begin : g_adc
+    assign adc_ch[gi] = 8'h80;
+end endgenerate
+
+    wire         c_p2_req, c_p3_req, c_p4_req, c_p5_req, c_wave_req, c_fb_er_req, c_fb_rd_req;
+    wire         c_p2_ack, c_p3_ack, c_p4_ack, c_p5_ack, c_wave_ack, c_fb_er_ack, c_fb_rd_ack;
+    wire [24:4]  c_p2_addr_u; wire [24:1] c_p3_addr_u, c_p4_addr_u, c_wave_addr_u; wire [24:3] c_p5_addr_u;
+    wire [15:0]  c_wave_data_u; wire [1:0] c_wave_be_u;
+    wire         fb_wr_start_u, fb_wr_valid_u, fb_wr_end_u, fb_wr_shadow_u;
+    wire [1:0]   fb_wr_buf_u, fb_er_buf_u, fb_rd_buf_u; wire [8:0] fb_wr_x_u, fb_rd_x_u; wire [7:0] fb_wr_y_u, fb_er_y_u, fb_rd_y_u;
+    wire [15:0]  fb_wr_pix_u;
+    wire [23:0]  rgb_a, rgb_b_unused;
+    wire         ce_pix, hs, vs, hb, vb, mode_416_active;
+    wire [15:0]  eep_rd_data_unused;
+    wire         eep_modified_unused, wheel_unused;
+    wire signed [15:0] audio_l_unused, audio_r_unused;
+    wire         irq_ack_v2;
+    wire [7:0]   irq_vec;
+
+// ============================================================================================ controls (D2-play)
+// See module d2_controls (top of this file).
+    wire  [7:0] g_p1a, g_svc12, g_ppi_pc;
+d2_controls ctl (.clk(clk_sys), .key(cont1_key[15:0]), .p1a(g_p1a), .svc12(g_svc12), .ppi_pc(g_ppi_pc));
+
+s32_core core (
+    .clk_sys(clk_sys), .clk_ram(clk_ram), .clk_v25(clk_v25),
+    .rst(rst_r), .video_rst(vrst_r),
+    .board(ga2_board),
+    .ce_cpu(ce_cpu), .ce_z80(1'b0), .ce_fm(1'b0), .ce_pcm(1'b0),
+    .pause(1'b0),
+    .fast_v60(1'b1),
+    .sdr_p0_req(p0_req), .sdr_p0_burst(p0_burst), .sdr_p0_addr(p0_addr), .sdr_p0_dout(p0_dout), .sdr_p0_ack(p0_ack),
+    .sdr_p1_req(p1_req), .sdr_p1_addr(p1_addr), .sdr_p1_dout(p1_dout), .sdr_p1_ack(p1_ack),
+    .sdr_p2_req(c_p2_req), .sdr_p2_addr(c_p2_addr_u), .sdr_p2_dout(128'd0), .sdr_p2_ack(c_p2_ack),
+    .sdr_p3_req(c_p3_req), .sdr_p3_addr(c_p3_addr_u), .sdr_p3_dout(16'd0), .sdr_p3_ack(c_p3_ack),
+    .sdr_p4_req(c_p4_req), .sdr_p4_addr(c_p4_addr_u), .sdr_p4_dout(16'd0), .sdr_p4_ack(c_p4_ack),
+    .sdr_wave_wr_req(c_wave_req), .sdr_wave_wr_addr(c_wave_addr_u),
+    .sdr_wave_wr_data(c_wave_data_u), .sdr_wave_wr_be(c_wave_be_u), .sdr_wave_wr_ack(c_wave_ack),
+    .sdr_p5_req(c_p5_req), .sdr_p5_addr(c_p5_addr_u), .sdr_p5_dout(64'd0), .sdr_p5_ack(c_p5_ack),
+    .fb_wr_start(fb_wr_start_u), .fb_wr_buf(fb_wr_buf_u), .fb_wr_x(fb_wr_x_u), .fb_wr_y(fb_wr_y_u),
+    .fb_wr_valid(fb_wr_valid_u), .fb_wr_pix(fb_wr_pix_u), .fb_wr_end(fb_wr_end_u),
+    .fb_wr_shadow(fb_wr_shadow_u), .fb_wr_busy(1'b0),
+    .fb_er_req(c_fb_er_req), .fb_er_buf(fb_er_buf_u), .fb_er_y(fb_er_y_u), .fb_er_ack(c_fb_er_ack),
+    .fb_rd_req(c_fb_rd_req), .fb_rd_buf(fb_rd_buf_u), .fb_rd_y(fb_rd_y_u), .fb_rd_ack(c_fb_rd_ack),
+    .fb_rd_x(fb_rd_x_u), .fb_rd_pix(16'hFFFF),
+    .wram_ext_addr(wx_addr), .wram_ext_wdata(wx_wdata), .wram_ext_be(wx_be), .wram_ext_we(wx_we), .wram_ext_rd(wx_rd),
+    .wram_ext_q(wx_q), .wram_ext_rdy(wx_rdy),
+    .dbg_irq_ack(irq_ack_v2), .dbg_irq_vector(irq_vec),
+    .v25_prg_wr(1'b0), .v25_prg_waddr(16'd0), .v25_prg_wdata(8'd0),
+    .eep_ld_wr(1'b0), .eep_ld_addr(6'd0), .eep_ld_data(16'd0),       // power-up EEPROM = erased (FFFF), as S2's image
+    .eep_rd_data(eep_rd_data_unused), .eep_rd_addr(6'd0),
+    .eep_upload(1'b0), .eep_modified(eep_modified_unused),
+    .in_p1a(g_p1a), .in_p2a(8'hff), .in_portc(8'hff),
+    .in_svc12(g_svc12), .in_svc34(8'hff),
+    .in_p1b(8'hff), .in_p2b(8'hff),
+    .in_portc_b(8'hff), .in_svc12_b(8'hff), .in_svc34_b(8'hff),
+    .adc_ch(adc_ch),
+    .track_p1_x(8'd0), .track_p1_y(8'd0), .track_p2_x(8'd0), .track_p2_y(8'd0),
+    .track_p3_x(8'd0), .track_p3_y(8'd0),
+    .track_p1_dir(4'd0), .track_p2_dir(4'd0), .track_p3_dir(4'd0),
+    .track_mouse_dx(9'sd0), .track_mouse_dy(9'sd0), .track_mouse_strobe(1'b0),
+    .trackball_y_invert(1'b0),
+    .ppi_pa(8'hff), .ppi_pb(8'hff), .ppi_pc(g_ppi_pc),
+    .rgb_a(rgb_a), .rgb_b(rgb_b_unused),
+    .ce_pix(ce_pix),
+    .hs(hs), .vs(vs), .hb(hb), .vb(vb),
+    .mode_416_active(mode_416_active),
+    .audio_l(audio_l_unused), .audio_r(audio_r_unused),
+    .out_lamps(),
+    .wheel_load_ch0(wheel_unused)
+);
+
+// client ports not served from memory (latency / hold as the S2 C++ stubs: 10 clk_ram for p2-p5, 4 for wave/framebuffer)
+    wire [15:0] n_p2, n_p3, n_p4, n_p5, n_wave, n_fb_er, n_fb_rd;
+d2_ack_stub #(.LAT(10)) st_p2 (.clk(clk_ram), .rst(rst_r), .req(c_p2_req),    .ack(c_p2_ack),    .n_req(n_p2));
+d2_ack_stub #(.LAT(10)) st_p3 (.clk(clk_ram), .rst(rst_r), .req(c_p3_req),    .ack(c_p3_ack),    .n_req(n_p3));
+d2_ack_stub #(.LAT(10)) st_p4 (.clk(clk_ram), .rst(rst_r), .req(c_p4_req),    .ack(c_p4_ack),    .n_req(n_p4));
+d2_ack_stub #(.LAT(10)) st_p5 (.clk(clk_ram), .rst(rst_r), .req(c_p5_req),    .ack(c_p5_ack),    .n_req(n_p5));
+d2_ack_stub #(.LAT(4))  st_wv (.clk(clk_ram), .rst(rst_r), .req(c_wave_req),  .ack(c_wave_ack),  .n_req(n_wave));
+d2_ack_stub #(.LAT(4))  st_fe (.clk(clk_ram), .rst(rst_r), .req(c_fb_er_req), .ack(c_fb_er_ack), .n_req(n_fb_er));
+d2_ack_stub #(.LAT(4))  st_fr (.clk(clk_ram), .rst(rst_r), .req(c_fb_rd_req), .ack(c_fb_rd_ack), .n_req(n_fb_rd));
+
+// ============================================================================================ video
+    wire [23:0] vid_rgb_pre;
+    wire        vid_de, vid_skip, vid_hs, vid_vs, vid_fallback;
+    wire [15:0] vid_blank_lines;
+ga2_video vbridge (
+    .clk_sys(clk_sys), .ce_pix(ce_pix), .rgb(rgb_a), .hs(hs), .vs(vs), .hblank(hb), .vblank(vb),
+    .clk_vid(clk_vid), .video_rgb(vid_rgb_pre), .video_de(vid_de), .video_skip(vid_skip),
+    .video_hs(vid_hs), .video_vs(vid_vs), .fallback(vid_fallback), .n_blank_lines(vid_blank_lines));
+
+// diagnostic band inputs: V2 acknowledges of the per-frame interrupt (IRQ 64 = vector 0x00 on this board) and a
+// heartbeat from the CPU's work-RAM traffic (V2's retirement is internal to the unmodified v2_core and not a port)
+    reg  [7:0]  irq64_cnt = 8'd0;
+    reg         irq_ack_d = 1'b0;
+    reg  [23:0] wram_acc = 24'd0;
+    reg         wx_rd_d = 1'b0, wx_we_d = 1'b0;
+always @(posedge clk_sys) begin
+    irq_ack_d <= irq_ack_v2; wx_rd_d <= wx_rd; wx_we_d <= wx_we;
+    if (rst_r) begin irq64_cnt <= 8'd0; wram_acc <= 24'd0; end
+    else begin
+        if (irq_ack_v2 && !irq_ack_d && irq_vec == 8'h00) irq64_cnt <= irq64_cnt + 8'd1;
+        if ((wx_rd && !wx_rd_d) || (wx_we && !wx_we_d)) wram_acc <= wram_acc + 24'd1;
+    end
+end
+    wire band_px;
+d2_diag_band #(.ROW0(BAND_ROW0)) band (
+    .clk_vid(clk_vid), .en(BAND_EN != 0),
+    .rgb_in(vid_rgb_pre), .de(vid_de), .skip(vid_skip), .vs(vid_vs), .rgb_out(video_rgb), .in_band(band_px),
+    .pll_locked(pll_locked), .sdram_ready(sd_ready), .all_complete(allc_s[2]), .verify_done(verify_done),
+    .sums0_ok(sums0_ok), .sums1_ok(sums1_ok), .cpu_running(!rst_r), .heartbeat(wram_acc[HB_BIT]), .irq64(irq64_cnt));
+
+assign video_rgb_clock    = clk_vid;
+assign video_rgb_clock_90 = clk_vid_90;
+assign video_de   = vid_de;
+assign video_skip = vid_skip;
+assign video_hs   = vid_hs;
+assign video_vs   = vid_vs;
+
+endmodule
+
+`default_nettype wire

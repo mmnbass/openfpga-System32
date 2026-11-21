@@ -1,0 +1,119 @@
+{
+ "date": "2026-10-30",
+ "head": "df09bd2",
+ "scope": {
+  "builder_sha256": "6ef0d3ce988b79f84ee981c34efcd4b5aff8d7f44f82a82cefca4a91d115bd55",
+  "production_diff": "empty",
+  "frozen": "MATCH 3720e1bab01c3959",
+  "expectations": 912,
+  "table_pins": "8/8"
+ },
+ "tests": {
+  "test_s0_compare": {
+   "passed": 156,
+   "failed": 0,
+   "before": 94
+  },
+  "run_r3_r3a": {
+   "groups": "77/77",
+   "controls": 284,
+   "caught": 281,
+   "equivalent": 3,
+   "missed": 0,
+   "before": 229,
+   "seconds": 154
+  },
+  "run_r3_stub": {
+   "groups": "58/64 (6 by design)",
+   "controls": 273,
+   "missed": 0,
+   "before": 219,
+   "seconds": 114
+  },
+  "identity": {
+   "pairs": 20248,
+   "identical": 20248,
+   "differ": 0,
+   "failed": 0,
+   "normalised_bytes": 36476995,
+   "drainrec_additive": "250/250",
+   "seconds": 120
+  },
+  "ab_default_r2b": {
+   "runs": 344,
+   "identical": 344
+  },
+  "log_scan": {
+   "run/logs": {
+    "logs": 4192,
+    "failures": 0
+   },
+   "reg3/run/logs": {
+    "logs": 4184,
+    "failures": 0
+   }
+  },
+  "r1b": "35/35 + 39/39, mutants 33 = 28 + 5",
+  "r2b": "79/79 + 107/107",
+  "refs": "105 agree, D1 rc 0",
+  "s1": "122 PASS; mutants 31 (26+5, 0 missed); ref_agreement 113/8/0/1",
+  "hwt": "ALL OK, 277 stores",
+  "m11_m12_dbcc_footer_removed_sha256_prefix": [
+   "840e5cd90fc7b041",
+   "223638e47a9f3860",
+   "534b4f74eb47a9ac"
+  ]
+ },
+ "codex_reproductions": {
+  "M R io before trap": {
+   "pre": "rc 0 PASS",
+   "now": "rc 1 memory-access record"
+  },
+  "MEMSTAT write wram 1": {
+   "pre": "rc 0 PASS",
+   "now": "rc 1 MEMSTAT: memory writes"
+  },
+  "CU 4 duplicate dr": {
+   "pre": "rc 0",
+   "now": "rc 1 duplicate field"
+  },
+  "CU 4 duplicate psw": {
+   "pre": "rc 0",
+   "now": "rc 1 duplicate field"
+  },
+  "D1 C 0 duplicate dr": {
+   "pre": "accepted",
+   "now": "rejected"
+  },
+  "L0/L1 swapped D1": {
+   "pre": "accepted",
+   "now": "rejected"
+  },
+  "L0/L1 swapped S0 both logs": {
+   "pre": "rc 0",
+   "now": "rc 1"
+  },
+  "identity SIMCHECK errors=7 ipc_errors=2": {
+   "pre": "accepted",
+   "now": "rejected"
+  },
+  "identity bare END then SIMCHECK errors=": {
+   "pre": "accepted",
+   "now": "rejected"
+  }
+ },
+ "rejection_cases_s0": {
+  "total": 56,
+  "rejected_now": 56,
+  "accepted_by_prefix_checker": 52
+ },
+ "limitations": [
+  "no real R3b log exists",
+  "DRAIN sampled at trap and end",
+  "+wide not covered by MEMSTAT fetch counts",
+  "run_s0.sh lacks +drainrec"
+ ],
+ "not_rerun": [
+  "run_d1.sh"
+ ]
+}

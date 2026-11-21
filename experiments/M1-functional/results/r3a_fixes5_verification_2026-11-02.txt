@@ -1,0 +1,35 @@
+R3a Codex r5 fixes (4 should-fixes, strict mode), 2026-11-02. Checkers/tests/docs only; nothing committed; R3a NOT claimed accepted. Outputs: build/M1/r3a/reg6 (r1, r2, refs, identity, superseded r3 runs), reg7 (valid r3 + stub runs).
+
+changed files (sha256):
+  69e493d034a3458ef7e0523a924446a341cee06b7ccd59c0b9f08dafef241c61  experiments/M1-functional/m1_probe_movea.py
+  1db377846c9680861e19ceff2e99bb197d8e53a515ecfa51e4d5ad09ed62bf88  experiments/M1-functional/m1_r1_check.py
+  1b446958feaa5dcd743b7f81eaceea1dacba58b6bd619ae1aa95b41bdfa18937  experiments/M1-functional/m1_r1_run.py
+  0f9e33926a4f8daa83b01187d2d3766ba2fb4520b96435f913b292724ae58543  experiments/M1-functional/m1_r2_check.py
+  b9ffffd6397984d870ae9cbb2a8d9fd0d22baf1c6e184513dc681ea002e7899d  experiments/M1-functional/m1_r2_run.py
+  be7e5e348594f8b906ead3822cb9ce1dec58916853e50948d275cbc414930bfa  experiments/M1-functional/m1_r3_check.py
+  08c0af2e198d72e9e28863c8e310c67379179774f651b06b36ab9e5e45162e93  experiments/M1-functional/m1_r3_run.py
+  52ced259edbdfd3ddfd1731d04659fd3c284674e3368e1f0152fdcdd3cac0f23  experiments/M1-functional/m1_r3a_negctl.py
+  06cfa92616a1a9b34aade907760e70dac03058a75121d8fa099bcabfc6a13172  experiments/S0-boot/s0_compare.py
+  084e739b0dfbaeee4139a21985b657bf1bad042c55956ccad7fb26e0e6249328  experiments/S0-boot/test_s0_compare.py
+  docs/r3-movea-plan.md (section 12d)
+
+runs:
+  [test_s0_compare.py] 379/379 (baseline 374) S0 COMPARE TESTS: 379 passed, 0 failed
+  [--verify-frozen] MATCH 3720e1bab01c3959 vs 3720e1bab01c3959, 912 expectations (same) 
+  [run_r3.sh r3a (all controls) reg7/r3full] 77/77 groups, 493/493 controls (baseline 77/77, 461/461 (+32 negctl_parsers5)) 261 s
+  [run_r3.sh R3b stub reg7/stubfull] 58/64 groups (same six by design), 482/482 controls (baseline 58/64, 450/450 (+32)) 230 s
+  [run_r1.sh r1b reg6/r1c] 35/35, 39/39; mutants 33 = 28 + 5 (same) 80 s
+  [run_r2.sh r2b reg6/r2c] 79/79, 107/107 (same) 70 s
+  [run_refs.sh 100 reg6/refs] 105 agree, D1 reproduces (same) 25 s
+  [m1_r3a_identity.py reg6/r3full] 20248/20248 identical; DRAINREC 250/250 (same) 116 s
+  [superseded: run_r3.sh r3a reg6/r3full] 77/77, 486/493 (7 MISSED: wrong message in new D1 controls) (fixed in evaluate()/needles, rerun as reg7) 260 s
+  [superseded: run_r3.sh stub reg6/stubfull] 58/64, 475/482 (same 7) (rerun as reg7) 231 s
+
+scans:
+  shared_evaluator_AB: HEAD (scratch copy of m1_r1/r2/r3_check) vs new on 10641 archived logs (8376 R3 + 993 R1 + 1272 R2): 0 differing failure lists; the same 8 fail in both
+  s0_log_facts_AB: old vs new log_facts on every *.log/*.up/*.ext/*.v2_* file under build/ (568088 log/side runs): 7 differ, all the new r5_banner_* test cases (intended rejections)
+  reproductions_old_vs_new: real a3_same V2 log: old PASS/PASS/PASS/PASS/PASS, new PASS/FAIL/FAIL/FAIL/FAIL for baseline, COUNTERS, REDIRECTS, MEMSTAT pair, Arabic banner
+
+disk: reg6 919588 KiB + reg7 509784 KiB = about 1.4 GB; free 8.9 GB before, minimum seen 6.0 GB; heavy.lock taken and released per suite.
+
+NOT run: run_d1.sh (hard-coded output dir build/M1/d1), M1.1/M1.2/DBcc/HW-001/S1, Codex.

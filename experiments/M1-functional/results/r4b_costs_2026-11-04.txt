@@ -1,0 +1,12 @@
+R4b cost report 2026-11-04 (SIMULATION ONLY; V2 microcode; measured with +retire on the V2 bench; pre-R4 = the frozen R3b images, new = R4b)
+control store words: production 253 -> 257 (+4: movea branch, movea_pcrel 2 words, jmp guard); --reset-native 249 -> 253; --smc-test 242, smc+merged 241, smc+reset 238, smc+merged+reset 237 (all unchanged, no PC-relative support there)
+per-instruction cost (exec = advancing microcycles; cycles = total incl. fetch stalls):
+  PC-relative MOVEA (new form, b1_v00):  exec 14; default 25 cycles (11 fetch); +wide 14 cycles.  Pre-R4: traps `mode` (no retire).
+  /abs MOVEA (a1_v00):                   exec 13 -> 14 (+1: the added condition-23 branch word); default 24 -> 25 cycles; +wide 13 -> 14
+  JMP /abs (a8_jmp_before):              exec 14 -> 15 (+1: the added guard word); default 45 -> 60 cycles (31 -> 45 fetch-stall cycles); +wide 29 -> 29
+the 102-program cost table (m1_costs.py over the M1.1 / M1.2 programs; default and +wide): IDENTICAL to the pre-R4 microcode (cmp of the two outputs, 0 differences);
+  it contains no /abs MOVEA, no JMP and no PC-relative operand.
+timing differences in default-output logs: results/r4b_identity_2026-11-04.json enumerates every program with a cycle difference and its delta
+  (1,113 /abs-MOVEA / JMP program-config pairs; in the DEFAULT config 180 pairs have delta 0, 61 have +1, 29 have +15, 3 have +45; with +memwait 0-1 (one +4); with +wide 0-9)
+  and the 95 F2-operand trap pairs (same trap kind and PC, different cycle count). FINDING: in the default fetch configuration a JMP-containing program gains about 15 cycles in
+  29 of the enumerated pairs (and 45 in 3) (one added micro-word interacts with the redirect / prefetch refill), not the estimated +1. It is a timing difference, architecturally identical.

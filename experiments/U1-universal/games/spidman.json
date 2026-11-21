@@ -1,0 +1,10 @@
+{
+  "set": "spidman",
+  "title": "Spider-Man: The Videogame (World)",
+  "mra": "references/s32/releases/Spider-Man The Videogame.mra",
+  "descriptor": "20000081000000000000000000000000",
+  "input_profile": 1,
+  "input_profile_note": "1 = World two-button wiring: Coin 1 on SERVICE12 bit 2, 1P Start on SERVICE12 bit 4, 8255 port C released (SpidPlay1, sm_derive.py replacement 2)",
+  "expected_sums": {"sum0": "963b8b00", "fl0": "2f965088", "sum1": "277545f8", "fl1": "773ac616", "sum2": "60dcfbd3", "fl2": "0e90eeeb"},
+  "expected_sums_source": "sm/spidman experiments/SM1-spidman/sm_derive.py SUMS (checksums of the slot files, not ROM data)"
+}
