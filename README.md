@@ -144,5 +144,4 @@ their respective rights holders.
 - **Trademarks:** Sega, System 32 and Golden Axe are trademarks of Sega Corporation. Spider-Man is a trademark of Marvel. Analogue and
   Analogue Pocket are trademarks of Analogue Enterprises Limited. All trademarks belong to their respective owners and are used here
   only to identify the hardware and games.
-- **No ROMs:** no copyrighted game ROMs are included. This repository and its releases contain no ROM, BIOS or game data. Making or
-  using ROM images from sets you do not own may be unlawful.
+- **No ROMs:** This repository and its releases do not include copyrighted game ROMs, BIOS files or game data. Users are responsible for obtaining and using ROM images in accordance with applicable law.
