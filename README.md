@@ -13,7 +13,7 @@ You choose the game at launch with its Game file: `ga2u.json` or `spidman.json`.
 
 - **Both games, two players:** complete two-player playthroughs on hardware (Analogue Pocket with the Dock), with no observed errors.
 - **Three or four players:** the core accepts controllers 3 and 4, but three- and four-player play has not yet been validated on hardware.
-- **Other System 32 games:** not supported.
+- **Other System 32 games:** not currently supported. This initial release supports two games, with plans to investigate and add support for more over time.
 
 ## Installing
 
