@@ -135,7 +135,14 @@ its packaging use are included.
 - **AI assistance:** Claude Code (Anthropic) wrote most of this project's code and documentation under the direction of mmnbass;
   OpenAI Codex served as an independent, read-only reviewer at development checkpoints. Project direction, design decisions, and
   hardware validation were led by mmnbass. The underlying System 32 hardware model is based on Meathax's work (see Upstream).
-- **Trademarks:** Sega, System 32 and Golden Axe are trademarks of Sega. Spider-Man is a trademark of Marvel. This project is not
-  affiliated with them.
-- **No ROM data:** this repository contains no ROM, BIOS or game data. Making or using ROM images from sets you do not own may be
-  unlawful.
+
+## Disclaimer
+
+This is an independent, community-developed project. It is not affiliated with, endorsed by or sponsored by Sega, Marvel, Analogue or
+their respective rights holders.
+
+- **Trademarks:** Sega, System 32 and Golden Axe are trademarks of Sega Corporation. Spider-Man is a trademark of Marvel. Analogue and
+  Analogue Pocket are trademarks of Analogue Enterprises Limited. All trademarks belong to their respective owners and are used here
+  only to identify the hardware and games.
+- **No ROMs:** no copyrighted game ROMs are included. This repository and its releases contain no ROM, BIOS or game data. Making or
+  using ROM images from sets you do not own may be unlawful.
