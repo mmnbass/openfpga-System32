@@ -131,6 +131,10 @@ its packaging use are included.
   unmodified, GPL-3.0). It includes s80x86 (GPL-3.0), JT12 and T80.
 - **Third-party notices:** `THIRD_PARTY_NOTICES.md`.
 - **Thanks:** Special thanks to Jade for helping test multiplayer!
+  Thanks also to the MAME project for reference behavior and ROM set definitions.
+- **AI assistance:** Claude Code (Anthropic) wrote most of this project's code and documentation under the direction of mmnbass;
+  OpenAI Codex served as an independent, read-only reviewer at development checkpoints. Project direction, design decisions, and
+  hardware validation were led by mmnbass. The underlying System 32 hardware model is based on Meathax's work (see Upstream).
 - **Trademarks:** Sega, System 32 and Golden Axe are trademarks of Sega. Spider-Man is a trademark of Marvel. This project is not
   affiliated with them.
 - **No ROM data:** this repository contains no ROM, BIOS or game data. Making or using ROM images from sets you do not own may be

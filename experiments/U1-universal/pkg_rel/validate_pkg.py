@@ -46,8 +46,12 @@ Rules (each one a check below):
       (the BSD-style T80 terms require them "in the documentation and/or other materials provided with the distribution" for the
       synthesized form) and every agg23 MIT file's copyright and permission notice. The blocks are extracted from the compiled
       source files themselves (the pinned upstream T80 files: <repo>/references/s32, or --upstream <dir>), so a missing or edited
-      notice fails."""
+      notice fails.
+  R8  AI-use declaration (release/s32-v0.1, Michael 2026-11-21): Cores/<core>/updaters.json is exactly {"declare_ai": DECLARE_AI}
+      (the openFPGA Library's updaters.json schema: an object whose declare_ai is an array of strings; the Library and its AI check
+      read it from the release zip). Claude Code was the primary implementation tool; OpenAI Codex a read-only reviewer."""
 import hashlib, json, os, re, shutil, subprocess, sys
+DECLARE_AI = ["Claude Code", "OpenAI Codex"]          # R8
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -175,7 +179,7 @@ def validate(pkg, rbf=None):
     files = {str(p.relative_to(pkg)).replace(os.sep, "/") for p in pkg.rglob("*") if p.is_file()}
     expected = {f"Cores/{CORE_DIR}/{n}" for n in ("core.json", "data.json", "video.json", "input.json", "audio.json", "interact.json",
                                                    "variants.json", "info.txt", "icon.bin", "bitstream.rbf_r",
-                                                   "LICENSE.txt", "THIRD_PARTY_NOTICES.txt")} | {
+                                                   "LICENSE.txt", "THIRD_PARTY_NOTICES.txt", "updaters.json")} | {
         f"Platforms/{PLATFORM}.json", f"Platforms/_images/{PLATFORM}.bin", f"{COMMON}/README.txt"} | {
         f"{COMMON}/{s}_u1cfg.bin" for s in G} | {f"{INST}/{s}.json" for s in G}
     for f in sorted(expected - files): E(f"R1 missing file: {f}")
@@ -349,6 +353,15 @@ def validate(pkg, rbf=None):
             E(f"R7 cannot read the notice sources (references/s32 checked out? --upstream): {ex}"); req = []
         for what, blk in req:
             if blk not in nt: E(f"R7 THIRD_PARTY_NOTICES.txt lacks the verbatim {what}")
+    # ---- R8 AI-use declaration (openFPGA Library updaters.json)
+    up = cdir / "updaters.json"
+    if up.is_file():
+        try:
+            u = json.loads(up.read_text())
+        except ValueError as ex:
+            E(f"R8 updaters.json is not valid JSON: {ex}"); u = None
+        if u is not None and u != {"declare_ai": DECLARE_AI}:
+            E(f"R8 updaters.json is not exactly {{\"declare_ai\": {DECLARE_AI}}}: {u}")
     rp = cdir / "bitstream.rbf_r"
     if rp.is_file():
         r = rp.read_bytes()
@@ -488,6 +501,9 @@ def selftest(work):
             "Copyright (c) 2022 Adam Gastineau", "")), "verbatim MIT"),
         ("notices_no_source_url", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
             SOURCE_URL, "the project page")), "source address"),
+        ("updaters_missing", lambda d: (d / cd / "updaters.json").unlink(), "missing file: Cores/mmnbass.System32/updaters.json"),
+        ("updaters_codex_dropped", lambda d: (d / cd / "updaters.json").write_text('{"declare_ai": ["Claude Code"]}\n'), "R8 updaters.json is not exactly"),
+        ("updaters_invalid_json", lambda d: (d / cd / "updaters.json").write_text('{"declare_ai": ["Claude Code", "OpenAI Codex"]\n'), "R8 updaters.json is not valid JSON"),
     ]
     for name, edit, want in cases:
         dst = work / f"neg_{name}"; shutil.copytree(stage, dst)
