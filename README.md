@@ -28,7 +28,24 @@ You choose the game at launch with its Game file: `ga2u.json` or `spidman.json`.
    - `Assets/segas32/common/`: the README and both games' configuration files
    - `Assets/segas32/mmnbass.System32/`: the Game files `ga2u.json` and `spidman.json`
 
-2. **Make the ROM images** from your own MAME ROM sets. They are not included and never will be.
+2. **Make the ROM images** from your own MAME ROM sets. They are not included and never will be. You supply `ga2u.zip`
+   and/or `spidman.zip`; the core zip from step 1 already provides the configuration files; the plugin below (or
+   `build_roms.py`) makes the eight ROM images from your zips.
+
+   **Recommended: the [Sega System 32 ROMs plugin](https://github.com/mmnbass/pocket-plugin-System32)** for pupdate and
+   Pocket Sync. It builds the images directly on the SD card, with the same checks as `build_roms.py` and byte for byte the
+   same result, and needs no Python or terminal.
+
+   1. Copy your `ga2u.zip` and/or `spidman.zip` into `Assets/segas32/common/` on the SD card. A split `ga2u` set also needs
+      its parent `ga2.zip`.
+   2. Install the plugin:
+      - **pupdate:** open **Plugins**, choose **Install from GitHub...** and enter `mmnbass/pocket-plugin-System32`.
+      - **Pocket Sync:** open **Plugins**, choose **Add Plugin** and enter `https://github.com/mmnbass/pocket-plugin-System32`.
+   3. Run **Sega System 32 ROMs**. It writes the ROM images into `Assets/segas32/common/` and reports each game as written
+      and verified, already installed and verified, or not built (with the missing parts listed). It writes only the ROM
+      images: the configuration files come from the core zip, so leave them in place.
+
+   **Manual alternative: `build_roms.py`.**
 
    1. Install Python 3.8 or newer from [python.org/downloads](https://www.python.org/downloads/) if you don't have it
       (on Windows, keep the option that installs the `py` launcher).
