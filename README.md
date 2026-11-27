@@ -22,7 +22,7 @@ You choose the game at launch with its Game file, named by its full title and ve
   (common or individual) can be set as on the original board; the core follows them. Every set starts with its own factory settings.
 - **High scores:** kept between sessions in Spider-Man and SegaSonic the Hedgehog (Rev C). Golden Axe and the SegaSonic prototype
   keep no high-score table of their own.
-- **Other System 32 games:** not currently supported.
+- **Other System 32 games:** not currently supported, but under investigation.
 
 ## Installing
 
