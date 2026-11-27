@@ -53,6 +53,18 @@ If upgrading from v0.1.0, remove the following obsolete game instance files if t
 
 This prevents duplicate entries from appearing in the game selection menu. Do not delete your ROM images or save files.
 
+**Save migration.** Before updating, back up your saves: copy the folder `Saves/segas32/mmnbass.System32/` from the SD card to
+your computer. Saves are now named after the new Game files, so v0.1.0's saves are no longer found under their old names. To keep
+your v0.1.0 operator settings, rename these two files in `Saves/segas32/mmnbass.System32/` on the SD card:
+
+| Old file | New file |
+| --- | --- |
+| `Saves/segas32/mmnbass.System32/ga2u.sav` | `Saves/segas32/mmnbass.System32/Golden Axe - The Revenge of Death Adder (US, Rev A).sav` |
+| `Saves/segas32/mmnbass.System32/spidman.sav` | `Saves/segas32/mmnbass.System32/Spider-Man - The Videogame (World).sav` |
+
+These v0.1.0 saves hold operator settings only (v0.1.0 did not save high scores). Rename each file only to the name for its own
+set; do not copy a save to another regional set.
+
 
 ## Additional notes
 

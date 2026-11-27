@@ -89,14 +89,20 @@ You choose the game at launch with its Game file, named by its full title and ve
 
 ### Upgrading from v0.1.0
 
-Merge the new zip's folders onto the card the same way (replacing individual files is fine). Then:
+First back up your saves: copy `Saves/segas32/mmnbass.System32/` from the SD card to your computer. Then merge the new zip's
+folders onto the card the same way (replacing individual files is fine), and:
 
 - **Remove the old Game files** `ga2u.json` and `spidman.json` from `Assets/segas32/mmnbass.System32/` if they are still there;
   otherwise those games are listed twice.
 - **Keep your ROM images and saves.** The ROM image names are unchanged, so your images keep working. Saves are now named after
-  the new Game files: to keep your v0.1.0 operator settings, rename them in `Saves/segas32/mmnbass.System32/`: `ga2u.sav` to
-  `Golden Axe - The Revenge of Death Adder (US, Rev A).sav` and `spidman.sav` to `Spider-Man - The Videogame (World).sav`.
-  (v0.1.0 saved settings only, no high scores.)
+  the new Game files: to keep your v0.1.0 operator settings, rename them in `Saves/segas32/mmnbass.System32/`:
+
+  | Old file | New file |
+  | --- | --- |
+  | `Saves/segas32/mmnbass.System32/ga2u.sav` | `Saves/segas32/mmnbass.System32/Golden Axe - The Revenge of Death Adder (US, Rev A).sav` |
+  | `Saves/segas32/mmnbass.System32/spidman.sav` | `Saves/segas32/mmnbass.System32/Spider-Man - The Videogame (World).sav` |
+
+  v0.1.0 saved settings only, no high scores. Rename a save only to its own set's name; never copy it to another regional set.
 
 ## Controls
 
