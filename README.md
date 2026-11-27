@@ -96,14 +96,15 @@ folders onto the card the same way (replacing individual files is fine), and:
 - **Remove the old Game files** `ga2u.json` and `spidman.json` from `Assets/segas32/mmnbass.System32/` if they are still there;
   otherwise those games are listed twice.
 - **Keep your ROM images and saves.** The ROM image names are unchanged, so your images keep working. Saves are now named after
-  the new Game files: to keep your v0.1.0 operator settings, rename them in `Saves/segas32/mmnbass.System32/`:
+  the new Game files: to preserve the EEPROM data in your existing v0.1.0 saves, rename them in `Saves/segas32/mmnbass.System32/`:
 
   | Old file | New file |
   | --- | --- |
   | `Saves/segas32/mmnbass.System32/ga2u.sav` | `Saves/segas32/mmnbass.System32/Golden Axe - The Revenge of Death Adder (US, Rev A).sav` |
   | `Saves/segas32/mmnbass.System32/spidman.sav` | `Saves/segas32/mmnbass.System32/Spider-Man - The Videogame (World).sav` |
 
-  v0.1.0 saved settings only, no high scores. Rename a save only to its own set's name; never copy it to another regional set.
+  v0.1.0 saves hold only the game's EEPROM data, no high scores. Rename a save only to its own set's name; never copy it to
+  another regional set.
 
 ## Controls
 
@@ -120,7 +121,12 @@ folders onto the card the same way (replacing individual files is fine), and:
 - With the Dock, controllers 1-4 are players 1-4. Handheld play is player 1 only.
 - The game pauses while the Pocket menu is open.
 - **Operator menu:** core menu > Operator buttons on, then R (Test) on controller 1 opens the game's own test menu, where cabinet
-  type and coin chutes are set. Turn Operator buttons off again for normal play.
+  type and coin chutes are set. In the menu, L moves the cursor and R selects. To return to the game, choose EXIT (from a
+  submenu, EXIT first returns to the main test menu; choose EXIT there too). In the SegaSonic prototype's menu the buttons are
+  reversed: R moves, L selects. Turn Operator buttons off again for normal play.
+- **After leaving the operator menu** (Spider-Man and SegaSonic Rev C, which keep high scores): let the game return to normal
+  operation for a few seconds before you open the Pocket menu or quit. Opening the Pocket menu while the game is restarting can
+  make it lose the saved high scores and keep its factory table.
 - **Saves:** one per Game file: the game's operator settings and, for Spider-Man and SegaSonic (Rev C), its high-score table.
 - Spider-Man may reassign existing credits when the cabinet size is changed with individual coin chutes, as the original arcade
   software does.

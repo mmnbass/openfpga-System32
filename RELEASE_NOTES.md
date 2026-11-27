@@ -26,7 +26,7 @@ SegaSonic the Hedgehog
 
 * Persistent high scores in Spider-Man and SegaSonic the Hedgehog (Rev C).
 * Operator menu access, including configurable cabinet sizes and common or individual coin chutes.
-* Expanded multiplayer support for native cabinet configurations.
+* Expanded multiplayer support for native cabinet configurations, including three- and four-player cabinets.
 * Persistent operator settings, with original regional factory defaults preserved.
 * D-pad support for SegaSonic's original trackball controls.
 * Full game titles and regional information in the game selection menu.
@@ -46,7 +46,8 @@ SegaSonic the Hedgehog
 
 Game instance filenames have changed to use full game titles and regional information.
 
-If upgrading from v0.1.0, remove the following obsolete game instance files if they are still present after updating:
+If upgrading from v0.1.0, remove the following obsolete game instance files from `Assets/segas32/mmnbass.System32/` if they are
+still present after updating:
 
 * `ga2u.json`
 * `spidman.json`
@@ -54,16 +55,16 @@ If upgrading from v0.1.0, remove the following obsolete game instance files if t
 This prevents duplicate entries from appearing in the game selection menu. Do not delete your ROM images or save files.
 
 **Save migration.** Before updating, back up your saves: copy the folder `Saves/segas32/mmnbass.System32/` from the SD card to
-your computer. Saves are now named after the new Game files, so v0.1.0's saves are no longer found under their old names. To keep
-your v0.1.0 operator settings, rename these two files in `Saves/segas32/mmnbass.System32/` on the SD card:
+your computer. Saves are now named after the new Game files, so v0.1.0's saves are no longer found under their old names. To
+preserve the EEPROM data in your existing v0.1.0 saves, rename these two files in `Saves/segas32/mmnbass.System32/` on the SD card:
 
 | Old file | New file |
 | --- | --- |
 | `Saves/segas32/mmnbass.System32/ga2u.sav` | `Saves/segas32/mmnbass.System32/Golden Axe - The Revenge of Death Adder (US, Rev A).sav` |
 | `Saves/segas32/mmnbass.System32/spidman.sav` | `Saves/segas32/mmnbass.System32/Spider-Man - The Videogame (World).sav` |
 
-These v0.1.0 saves hold operator settings only (v0.1.0 did not save high scores). Rename each file only to the name for its own
-set; do not copy a save to another regional set.
+These v0.1.0 saves hold only the game's EEPROM data (v0.1.0 did not save high scores). Rename each file only to the name for its
+own set; do not copy a save to another regional set.
 
 
 ## Additional notes
