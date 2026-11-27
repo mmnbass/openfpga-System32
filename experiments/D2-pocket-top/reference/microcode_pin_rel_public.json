@@ -2,25 +2,26 @@
  "args": [
   "--reset-native",
   "--mc-pack=tail,zero",
-  "--arith=mul,div"
+  "--gen=var,dbcc,cv,mul,div,addc,bit,sh,am,rv,sf,xc,pp,gp,js,up,ld,st,jx,mf,bs,cc",
+  "--pack-budget=20000"
  ],
  "builder": "experiments/M1-functional/m1_m11_microcode.py",
- "builder_sha256": "f1f5d21eab55961910d9d378e3c41845caef713597ce410ea0212368166d6ae8",
- "command": "m1_m11_microcode.py <out> --reset-native --mc-pack=tail,zero --arith=mul,div",
+ "builder_sha256": "36495809924c7df4ae5eb42aab2545ffdff2bf18688098ac38dd0ecb8d8298ad",
+ "command": "m1_m11_microcode.py <out> --reset-native --mc-pack=tail,zero --gen=var,dbcc,cv,mul,div,addc,bit,sh,am,rv,sf,xc,pp,gp,js,up,ld,st,jx,mf,bs,cc --pack-budget=20000",
  "images_sha256": {
-  "m1_cstore.hex": "9ea674812f9f36f234521b608208faeaf289e6c35064bb5ecc606ee3ca9fd95a",
-  "m1_dispatch.hex": "7e475e321d59a0be93996c635a9197e9f42eb5e903794d1c33988c270ff69842",
-  "m1_mode.hex": "671e9b84d6819a648191ca45e751901792b17b7321fafb63747df1c534bc1c56"
+  "m1_cstore.hex": "8a58b9168a09bbdbe3fe1af3f51c2709b3f3ed177cb5adb720bf76b991b93aba",
+  "m1_dispatch.hex": "3611799508c083e510bb2b335017fcf69189f82cc5bc47daf0ba3bab95e59e60",
+  "m1_mode.hex": "2044cb3792ff03e5b2b54a8f9b4c72ed1508af6e8fa6f6543e194f5d51cc2444"
  },
  "schema": 1,
  "source": {
-  "m1_functional_tree": "da96d5fbb8d9dc10fef12f9f64b78a12ed8a0dea",
-  "repo_commit": "09ee345f65cbf49757f23ff09f8d6d70d2cd8733"
+  "m1_functional_tree": "0102d26fdda48f99938fafa22ef1fefb45817aef",
+  "repo_commit": "9e24d6ad40ab2830c16e60668b29972d6fd0348b"
  },
  "v25_microcode_bin_sha256": "243e3c78e0390153e5b0a6dd36c5a941a91038992b6fd09b1182c5df9c6dc7d7",
  "what": "Microcode pin for the D2 d2rbf build: sha256 of the V2 microcode images produced by the builder below at source.repo_commit (experiments/M1-functional, --reset-native); see tools/microcode_pin.py",
  "word_counts": {
-  "m1_cstore.hex": 1547,
+  "m1_cstore.hex": 1934,
   "m1_dispatch.hex": 256,
   "m1_mode.hex": 512
  }
