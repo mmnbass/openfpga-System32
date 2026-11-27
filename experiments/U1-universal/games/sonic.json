@@ -1,0 +1,24 @@
+{
+  "set": "sonic",
+  "title": "SegaSonic The Hedgehog (Japan, rev. C)",
+  "mra": "references/s32/releases/SegaSonic The Hedgehog.mra",
+  "descriptor": "00300783000000000000000000000000",
+  "descriptor_note": "byte 1 = 0x30: analog_profile 3 (trackball); byte 2 = 0x07: prot_sel 7 (SegaSonic level-load responder); byte 3 = 0x83: sprite banks",
+  "input_profile": 1,
+  "input_profile_note": "1 = World wiring: Coin 1 on SERVICE12 bit 2, 1P Start on SERVICE12 bit 4. With the trackball profile the d-pads of pads 1 / 2 drive the trackball directions (u1_controls)",
+  "video_options": 0,
+  "video_options_note": "0: the sprite-over-NBG0 tie rule already follows from prot_sel = 7 (upstream's expression); the explicit bit stays available",
+  "expected_sums": {
+    "sum0": "c905d6dc",
+    "fl0": "ac449fa0",
+    "sum1": "93913fa1",
+    "fl1": "573c2af7",
+    "sum2": "06d312af",
+    "fl2": "565fc0af"
+  },
+  "expected_sums_source": "checksums of the slot files built privately from the game's ROM set (not ROM data); band off, not consumed",
+  "hiscore": {"wram_offset": "ce00", "bytes": 120, "first_byte": "2c", "marker_byte": "0d", "marker_offset": "76", "tag": "0004"},
+  "hiscore_note": "TOP 15 ranking (shown in attract): 15 records of 8 bytes at work RAM 0xCE00, rank 15 first: score (16-bit), character (0 Sonic, 1 Ray, 2 Mighty), stage, three initials (A = 0), pad. Found 2026-11-25 in simulation work-RAM dumps; written by the game before frame 100 and unchanged through a full attract cycle. Markers: byte 0 = 0x2C (rank 15's default score 300, low byte) and byte 0x76 = 0x0D (rank 1's last initial, 'N' of SON). MAME's hiscore.dat has no entry for this set. Own tag. The prototype (sonicp) has no ranking: no table in work RAM, no ranking screen, no name entry",
+  "coin_chute": {"eeprom_word": 13, "bit": 0, "individual_value": 1},
+  "coin_chute_note": "COIN ASSIGNMENTS > COIN CHUTE TYPE is EEPROM word 13 bit 0 (0 = COMMON, 1 = INDIVIDUAL; copy at word 45); GAME ASSIGNMENT > CABINET TYPE 2P / 3P is set in the same menu. Measured 2026-11-25 by changing the setting in the game's own test menu and diffing the saved EEPROM; with INDIVIDUAL and a 3P cabinet the attract screen shows three credit counters. With COMMON the game ignores COIN3, so the core then routes player 3's coin into chute 1"
+}

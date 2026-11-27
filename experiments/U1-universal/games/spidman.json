@@ -5,6 +5,26 @@
   "descriptor": "20000081000000000000000000000000",
   "input_profile": 1,
   "input_profile_note": "1 = World two-button wiring: Coin 1 on SERVICE12 bit 2, 1P Start on SERVICE12 bit 4, 8255 port C released (SpidPlay1, sm_derive.py replacement 2)",
-  "expected_sums": {"sum0": "963b8b00", "fl0": "2f965088", "sum1": "277545f8", "fl1": "773ac616", "sum2": "60dcfbd3", "fl2": "0e90eeeb"},
-  "expected_sums_source": "sm/spidman experiments/SM1-spidman/sm_derive.py SUMS (checksums of the slot files, not ROM data)"
+  "expected_sums": {
+    "sum0": "963b8b00",
+    "fl0": "2f965088",
+    "sum1": "277545f8",
+    "fl1": "773ac616",
+    "sum2": "60dcfbd3",
+    "fl2": "0e90eeeb"
+  },
+  "expected_sums_source": "sm/spidman experiments/SM1-spidman/sm_derive.py SUMS (checksums of the slot files, not ROM data)",
+  "hiscore": {
+    "wram_offset": "8c00",
+    "bytes": 128,
+    "first_byte": "a0",
+    "marker_byte": "57",
+    "marker_offset": "7e",
+    "tag": "0001"
+  },
+  "hiscore_note": "score-block persistence (u1_hiscore): the block MAME's public hiscore.dat lists for this set (work RAM, 127 bytes, first byte a0, last 57), rounded to 64 words; four tables of four 8-byte entries, confirmed in simulation",
+  "coin_chute": {"eeprom_word": 8, "bit": 8, "individual_value": 1},
+  "coin_chute_note": "COIN ASSIGNMENTS > COIN CHUTE TYPE is EEPROM word 8 bits 15:8 (0x00 = COMMON, 0xFF = INDIVIDUAL; bit 8 read); CABINET TYPE is word 8 bits 7:0 (0 = 2P, 1 = 3P, 2 = 4P). Measured 2026-11-25 by changing the setting in the game's own test menu and diffing the saved EEPROM; the three regional sets run the same program (their saves are byte-identical). The core routes the coin inputs from this bit",
+  "cabinet": {"eeprom_word": 8, "low_bit": 0},
+  "cabinet_note": "GAME ASSIGNMENTS > CABINET TYPE is EEPROM word 8 bits 1:0 of its low byte (0 = 2P, 1 = 3P, 2 = 4P; menu-written saves). With INDIVIDUAL chutes the game counts its coin lines (8255 PC b3, PC b2, SERVICE12 b3, SERVICE12 b2) by cabinet type exactly as Golden Axe: an N-player cabinet counts the last N for players 1..N (measured 2026-11-26, rel_derive.py CB); the core reads this field to route the coins"
 }

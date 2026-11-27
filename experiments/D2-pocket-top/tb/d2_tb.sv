@@ -11,6 +11,7 @@ module d2_tb #(
 ) (
     input  wire         clk_74a,
     input  wire  [31:0] cont1_key_in,    // Pocket controller 1 key bitmap, driven by the C++ bench (--keys), clk_74a domain
+    input  wire  [31:0] cont2_key_in, cont3_key_in, cont4_key_in,   // MP: controllers 2-4 (--keys2/3/4; type nibble 2 = docked game controller)
     input  wire         pll_c0, pll_c1, pll_c2, pll_c3, pll_c4, pll_lock,
     // APF bridge (clk_74a)
     input  wire  [31:0] bridge_addr,
@@ -139,7 +140,7 @@ core_top #(.CE_MODE(CE_MODE), .RD_EDGES(RD_EDGES)) ic (
     .audio_mclk(audio_mclk), .audio_adc(1'b0), .audio_dac(audio_dac), .audio_lrck(audio_lrck),
     .bridge_endian_little(bridge_endian_little), .bridge_addr(bridge_addr), .bridge_rd(bridge_rd),
     .bridge_rd_data(bridge_rd_data), .bridge_wr(bridge_wr), .bridge_wr_data(bridge_wr_data),
-    .cont1_key(cont1_key_in), .cont2_key(32'd0), .cont3_key(32'd0), .cont4_key(32'd0),
+    .cont1_key(cont1_key_in), .cont2_key(cont2_key_in), .cont3_key(cont3_key_in), .cont4_key(cont4_key_in),   // MP
     .cont1_joy(32'd0), .cont2_joy(32'd0), .cont3_joy(32'd0), .cont4_joy(32'd0),
     .cont1_trig(16'd0), .cont2_trig(16'd0), .cont3_trig(16'd0), .cont4_trig(16'd0)
 );

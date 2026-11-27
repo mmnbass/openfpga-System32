@@ -122,17 +122,19 @@ def check_tables(sym, dtab, mtab, smc_test):
     # R4b: the memory descriptors are /abs (0x14C) and disp32[PC] (0x88C); B1 adds modm 1 [Rn+] (0x210) and [-Rn] (0x410) for every register
     # (bit 4 = the TEMPORARY register-based-memory-mode tag, read only by ucond 22)
     ipc_ = [0x0F8, 0x0F9] if "mpi" in sym else []          # SP3-B: [d8 / d16[PC]] (absent only in the TEST-ONLY sm3_ipc_off build)
-    assert odd == list(range(0x00, 0xC0)) + [0x0F0, 0x0F1, 0x0F2, 0x0F3] + ipc_ + list(range(0x100, 0x160)) + list(range(0x180, 0x1E0)), f"production: non-register non-immediate entries {odd}"   # R-play1: 0x80..0xBF are memory descriptors, 0xC0..0xDF carry the immediate bit
+    am6_ = list(range(0xC0, 0xE0)) if _AM else []           # S3-A: [d32[Rn]] is a memory descriptor
+    am7_ = [0x0FA, 0x0FB, 0x0FC, 0x0FD, 0x0FE] if _AM else []   # S3-A: [d32[PC]], [abs], the three PC double displacements
+    assert odd == list(range(0x00, 0xC0)) + am6_ + [0x0F0, 0x0F1, 0x0F2, 0x0F3] + ipc_ + am7_ + list(range(0x100, 0x160)) + list(range(0x180, 0x1E0)), f"production: non-register non-immediate entries {odd}"   # R-play1: 0x80..0xBF are memory descriptors, 0xC0..0xDF carry the immediate bit
     assert {i: mtab[i] >> 12 for i in (0x0F2, 0x0F3)} == {0x0F3: 0x14C, 0x0F2: 0x88C}, "production: memory descriptors {0x0F3: 0x14C, 0x0F2: 0x88C}"
     assert all(mtab[0x180 + r] >> 12 == 0xA10 and mtab[0x1A0 + r] >> 12 == 0xC10 for r in range(32)), "production: [Rn+] / [-Rn] descriptors"
-    assert all(mtab[0x1C0 + r] >> 12 == 0x830 and all(mtab[g + r] >> 12 == {0x80: 0x1D4, 0xA0: 0x1D8, 0xC0: 2}[g] and (mtab[g + r] & 0xFFF) == sym["mdd"] for g in (0x80, 0xA0, 0xC0)) for r in range(32)), "production: index-prefix / mdd descriptors (R-play1: [d8[Rn]] 0x1D4, [d16[Rn]] 0x1D8, [d32[Rn]] bit 1)"
+    assert all(mtab[0x1C0 + r] >> 12 == 0x830 and all(mtab[g + r] >> 12 == {0x80: 0x1D4, 0xA0: 0x1D8, 0xC0: 0x1DC if _AM else 2}[g] and (mtab[g + r] & 0xFFF) == sym["mdd"] for g in (0x80, 0xA0, 0xC0)) for r in range(32)), "production: index-prefix / mdd descriptors (R-play1: [d8[Rn]] 0x1D4, [d16[Rn]] 0x1D8, [d32[Rn]] bit 1)"
     # R-post1: in bank 0 only the [d16[Rn]] entries are "register direct" (the index-base REGDIR branches rely on it); every bank-0 entry with bit 0 or 1 that is
     # not #q / #imm runs `mdd`
     assert sorted(i for i in range(0x100) if (mtab[i] >> 12) & 1) == [], "R-play1: no bank-0 entry is register direct (the R-post1 [d16[Rn]] bit 0 is gone)"
     assert all((mtab[i] & 0xFFF) == sym["mdd"] for i in range(0x80, 0xE0)), "R-post1: bank-0 indirect entries run mdd"
     assert all([mtab[r] >> 12, mtab[0x20 + r] >> 12, mtab[0x40 + r] >> 12, mtab[0x60 + r] >> 12] == [0x014, 0x018, 0x01C, 0x010] for r in range(32)), \
         "production: d8/d16/d32[Rn] / [Rn] descriptors"
-    assert sorted(i for i, v in mtab.items() if (v & 0xFFF) not in (trap, tmode) and (v >> 16) & 1) == list(range(0x00, 0xC0)) + [0x0F0, 0x0F1] + ipc_ + list(range(0x100, 0x160)) + list(range(0x180, 0x1E0)), \
+    assert sorted(i for i, v in mtab.items() if (v & 0xFFF) not in (trap, tmode) and (v >> 16) & 1) == list(range(0x00, 0xC0)) + am6_ + [0x0F0, 0x0F1] + ipc_ + am7_ + list(range(0x100, 0x160)) + list(range(0x180, 0x1E0)), \
         "production: descriptor bit 4 exactly on the register-based memory entries (SM1: + d8[PC] / d16[PC]; SP3-B: + [d8 / d16[PC]])"
     if ipc_:
         assert [mtab[0x0F8], mtab[0x0F9]] == [(0x1D4 << 12) | sym["mdd"], (0x1D8 << 12) | sym["mdd"]], "SP3-B: F8 / F9 = [d8 / d16[Rn]]'s descriptors and routine (mdd -> mpi)"
@@ -160,14 +162,14 @@ def check_tag(p, sym, mtab, smc_test, mut=None):
             or f(w_, "RES_SEL") in (RES["AGU"], RES["AGUSTEP"]) or 9 <= f(w_, "CONSUME") <= 11]
     starts0 = sorted((a, n) for n, a in sym.items())
     owner = lambda ix: [n for a, n in starts0 if a <= ix][-1]
-    bad = [(ix, owner(ix)) for ix in live if not (owner(ix).startswith(("ea0", "ea1")) or owner(ix).endswith("_di") or owner(ix).startswith("movcu") or owner(ix) in ("irq_core", "src1_imm", "movea_c23", "jsr_rb2", "gf_imm") or owner(ix) in ("movea_rb", "movea_c23_b", "movea_f1_rb", "src0_imm", "movea_f1_idx", "movea_f1_idx_b", "jsr_x"))]
+    bad = [(ix, owner(ix)) for ix in live if not (owner(ix).startswith(("ea0", "ea1")) or owner(ix).endswith("_di") or owner(ix).startswith(("movcu", "cmpc")) or owner(ix) in ("irq_core", "src1_imm", "movea_c23", "jsr_rb2", "gf_imm") or owner(ix) in ("movea_rb", "movea_c23_b", "movea_f1_rb", "src0_imm", "movea_f1_idx", "movea_f1_idx_b", "jsr_x"))]
     assert not bad, f"B2: DEC_EA / AGU words outside the ea0 / ea1 subroutines and movea_rb: {bad}"
     if smc_test:
         assert not live, f"smc_test: DEC_EA words {live}"
     if smc_test:
         assert tagged == [] and c23 == [], f"smc_test: tagged entries {tagged} / condition-23 words {c23} (must be none)"
         return
-    assert tagged == [0x0F2] + list(range(0x100, 0x160)) + list(range(0x180, 0x1E0)), f"production: tagged (bit 11) supported entries {[hex(i) for i in tagged]}, expected 0x0F2, the [Rn+] / [-Rn] and the index-prefix entries"
+    assert tagged == [0x0F2] + ([0x0FC, 0x0FD, 0x0FE] if _AM else []) + list(range(0x100, 0x160)) + list(range(0x180, 0x1E0)), f"production: tagged (bit 11) supported entries {[hex(i) for i in tagged]}, expected 0x0F2, the [Rn+] / [-Rn] and the index-prefix entries"
     starts = sorted((a, n) for n, a in sym.items())
     names = {a: n for n, a in sym.items()}
     got = []
@@ -205,11 +207,11 @@ def check_ldpr(p, sym, dtab, fix, start, chk_start, end):
     # (3) isolation from the test-only [Rn] store path: no jump from the routine into dst / dst_reg / store code
     for i, name in fix:
         if start <= i < end:
-            assert name in ("trap_priv", "trap_mode", "trap_regid", "disp") or name.startswith("mstub"), \
+            assert name in ("trap_priv", "trap_mode", "trap_regid", "disp", "ld_f2", "ld_s", "ld_i") or name.startswith("mstub"), \
                 f"LDPR references {name}"
     # (4) dispatch: the privileged flag only on dtab[0x12]
     assert (dtab[0x12] >> 12) & 0x80 and (dtab[0x12] & 0xFFF) == sym["ldpr"], "dtab[0x12] = ldpr with the privileged flag"
-    assert [op for op, v in dtab.items() if (v >> 12) & 0x80] == [0x12], "only LDPR is privileged"
+    assert sorted(op for op, v in dtab.items() if (v >> 12) & 0x80) in ([0x12], [0x02, 0x12]), "only LDPR (and S3-C STPR) is privileged"
 
 
 def check_movea(p, sym, dtab, mtab, fix, start, end, smc_test):
@@ -254,19 +256,62 @@ def self_check():
             for rn in (False, True):
                 build(st, sm, rn)
 
-
-# ---- V60 S1 mul / div on the release (research/v60-s1md dadc239 / 7176b33, 2026-11-19): `mul`, `div` of research/v60-s1 (17d5c8f) = P1.1 /
-# P1.2's shared arithmetic routine g_mulg (multiply, divide, remainder in every operand form), ported alone onto the pinned release builder.
-# C1 slice 1 (var, dbcc, cv) and ADDC / SUBC (addc) are NOT ported.
-# release/s32-v1-ro2 (Codex S1MD r1 finding 3): the routine is selected ONLY by the explicit builder argument `--arith=mul,div` (recorded in the
-# microcode pin's `args`); without it this file builds the release image byte for byte. The research switch C1_GEN is not honoured here: an
-# ambient C1_GEN (any value) makes the builder refuse, so the environment can change neither the default nor the selected image.
+# ---- C1 slice 1 (research/c1-slice1, 2026-11-19): three switches of the P1.2 experimental builder, ported onto the release union. With C1_GEN unset
+# this file builds the pinned release image byte for byte (pin rel). Only `var`, `dbcc` and `cv` exist here; P1.2's mul / div / addc / bit / sh are
+# NOT ported. Each switch only replaces a branch to a trap, or adds a dispatch entry for an opcode that trapped.
+# ---- fit/s32-dmap SN (SegaSonic integration, 2026-11-23): this file is research/v60-sonic-cpu1's builder (e9ca4da: S1 to S3-C, indexed JSR, MOVCFU)
+# plus the release's HALT word (17ac6bc). As on the release, the switch set is selected ONLY by an explicit builder argument, recorded in the
+# microcode pin's `args`: `--arith=mul,div` (the v0.1.0 image, byte for byte) or `--gen=<comma list>` (any subset of the ported switches). An
+# ambient C1_GEN or MC_PACK_BUDGET makes the builder refuse; the pack search budget is the argument `--pack-budget=<n>`. The arguments are read
+# here, at import, because the switch-derived constants below are module level; a tool that imports this file gets the release default (no switch).
 import os as _c1os
-if "C1_GEN" in _c1os.environ:
-    raise SystemExit("refusing: C1_GEN is set in the environment; this builder selects the S1 multiply / divide routine only by --arith=mul,div")
+import sys as _c1sys
+if "C1_GEN" in _c1os.environ or "MC_PACK_BUDGET" in _c1os.environ:
+    raise SystemExit("refusing: C1_GEN / MC_PACK_BUDGET is set in the environment; this builder takes --arith=mul,div or --gen=<list>, and --pack-budget=<n>")
 ARITH_ARG = "--arith=mul,div"
-_C1GEN = set()                                           # set to {"mul", "div"} by main() for --arith=mul,div only
-_S1 = False
+GEN_PREFIX = "--gen="
+BUDGET_PREFIX = "--pack-budget="
+_C1GEN = set()
+if __name__ == "__main__":
+    for _a in _c1sys.argv[2:]:
+        if _a.startswith("--arith"):
+            if _a != ARITH_ARG:
+                raise SystemExit(f"refusing: {_a!r}: the only arithmetic selector is {ARITH_ARG!r}")
+            _C1GEN |= {"mul", "div"}
+        elif _a.startswith(GEN_PREFIX):
+            _C1GEN |= set(_a[len(GEN_PREFIX):].split(",")) - {""}
+        elif _a.startswith(BUDGET_PREFIX):
+            _c1os.environ["MC_PACK_BUDGET"] = str(int(_a[len(BUDGET_PREFIX):]))   # read by mc_pack.py in this process only
+# ---- V60 completion stage S1 (research/v60-s1): `mul`, `div`, `addc` = P1.1 / P1.2's shared arithmetic routine g_mulg (multiply, divide, remainder,
+# ADDC / SUBC in every operand form). P1.2's bit and shift families are NOT ported (S2).
+# ---- V60 completion stage S2 (research/v60-s2): `bit` = SET1 / CLR1 / NOT1 on g_mulg (P1.2's bit core); `sh` = P1.2's generic shift / rotate path
+# (every SHL / SHA / ROT form that trapped; ROTC in all three sizes, so ROTC.H; the ROT zero-count fix).
+# ---- V60 completion stage S3-A (research/v60-s3): `am` = the nine missing addressing modes ([d32[Rn]], [d32[PC]], [abs], their indexed forms through the
+# existing index-base lookup, d8 / d16 / d32[d8 / d16 / d32[PC]]) and MOVEA from [Rn+], [-Rn], dd32[Rn]. Only mode-table entries that trapped, one trap
+# branch of the indirect lookup and one trap branch of MOVEA are retargeted: no word of a form that already executes changes.
+# ---- V60 completion stage S3-B (research/v60-s3): integer forms, one switch per group: `rv` RVBIT; `sf` SETF with any condition source and the
+# register-field form; `xc` XCH in the two-specifier format with a memory first operand; `pp` PUSH / POP with bank-1 memory operands; `gp` GETPSW to
+# memory; `js` JSR to a double-displacement target; `up` UPDPSW in the single-specifier format. Each only retargets a trap branch or fills a trap entry.
+assert _C1GEN <= {"var", "dbcc", "cv", "mul", "div", "addc", "bit", "sh", "am", "rv", "sf", "xc", "pp", "gp", "js", "up", "ld", "st", "jx", "mf", "bs", "cc"}, f"C1_GEN: not ported: {_C1GEN}"
+_AM = "am" in _C1GEN
+_S3B = {k: k in _C1GEN for k in ("rv", "sf", "xc", "pp", "gp", "js", "up")}
+assert not any(_S3B.values()) or "cv" in _C1GEN, "S3-B groups use the cv store path"
+# ---- V60 completion stage S3-C (research/v60-s3): privileged registers, microcode only (no RTL). `ld` = LDPR with any source operand and the register ID
+# from any operand, IDs 0-9 and 15-28 (the existing #imm32 / #quick 2-5 path executes the same words as before: only its trap branches are retargeted);
+# `st` = STPR (02) for IDs 0-9 and 15 by a compare chain (the privileged read address is a microcode constant). Reserved IDs 10-14, IDs above 28 and,
+# for STPR, IDs 16-28 trap `regid`: a conservative policy, not established architecture (experiments/V60-S3C/README.md).
+_S3C = {k: k in _C1GEN for k in ("ld", "st")}
+_CC = "cc" in _C1GEN          # string compare CMPC.B / CMPC.H (58 / 5A, sub-opcode 0): experiments/V60-CC
+_BS = "bs" in _C1GEN          # bit-string moves MOVBSU / MOVBSD (5B, sub-opcodes 8 / 9): experiments/V60-BS
+_MF = "mf" in _C1GEN          # SegaSonic CPU step 2: MOVCFU (.B / .H): MOVCU, then the rest of the destination filled with R26
+_JX = "jx" in _C1GEN          # SegaSonic CPU step 1: JSR with an index prefix on any direct base (register-based, d8 / d16[PC], /abs)
+assert not any(_S3C.values()) or "cv" in _C1GEN, "S3-C uses the generic operand readers and the cv store path"
+LDPR_INVALID = 0xE0007C00                 # bit n set: register ID n is reserved (10-14) or invalid (29-31)
+STPR_IDS = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15)
+_S1 = bool(_C1GEN & {"mul", "div", "addc", "bit"})
+_SH = "sh" in _C1GEN                                    # P1.2: the missing shift / rotate forms fall through to the generic path (sg_*)
+_CV = "cv" in _C1GEN                                    # P1.2: the missing MOVS / MOVT forms
+
 
 
 def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
@@ -468,7 +513,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
     operand(MS_OP0)
     br(C_REGDIR, "getpsw_reg")
     br(C_IMM, "trap_immdest")                           # an immediate destination
-    jmp("trap_mode")                                    # R1b: anything else is a mode trap
+    jmp("gp_mem" if _S3B["gp"] and not smc_test else "trap_mode")   # R1b: anything else is a mode trap; S3-B gp: a memory destination
     at("getpsw_reg")
     w(ASEL=A["PSW"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=3, CONSUME=1)
     jmp("disp")
@@ -531,20 +576,21 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
     ldpr_start = len(p)
     if not mut.get("no_priv_check"):
         br(C_PRIV, "trap_priv")                          # privileged instruction at EL != 0 (dtab privileged flag)
+    _ld = _S3C["ld"] and not smc_test                    # S3-C ld: the four trap branches below lead to the general forms; no word is added or removed here
     if not mut.get("no_f1_guard"):
-        br(C_F1, "trap_mode", pol=1)                     # format I encodings (byte 1 bit 7 = 0): out of scope
+        br(C_F1, "ld_f2" if _ld else "trap_mode", pol=1)   # format I encodings (byte 1 bit 7 = 0): out of scope; S3-C: the register-field format
     p.append(word(CONSUME=2))                            # opcode + format byte
     operand(MS_B6)
     if not mut.get("no_src_imm_guard"):
-        br(C_IMM, "trap_mode", pol=1)                    # the source must be an immediate ...
+        br(C_IMM, "ld_s" if _ld else "trap_mode", pol=1)   # the source must be an immediate ...; S3-C: any source
     if not mut.get("no_src_quick_guard"):
-        br(C_QUICK, "trap_mode")                         # ... and not #q (OI-3: MAME history-dependent)
+        br(C_QUICK, "ld_s" if _ld else "trap_mode")      # ... and not #q (OI-3: MAME history-dependent); S3-C: the quick value
     w(IMM_LD=1, IMM_OFS=mut.get("imm_ofs", 1), IMM_SZ=mut.get("imm_sz", 2), CONSUME=mut.get("imm_consume", 5),
       ASEL=A["IMM"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0,
       **({"FLAG_UPD": mut["flag_upd_imm"]} if "flag_upd_imm" in mut else {}))
     operand(MS_B5)
     if not mut.get("no_regid_quick_guard"):
-        br(C_QUICK, "trap_mode", pol=1)                  # the register ID must be #q (OI-5: register / memory regID)
+        br(C_QUICK, "ld_i" if _ld else "trap_mode", pol=1)   # the register ID must be #q (OI-5: register / memory regID); S3-C: any ID operand
     # regID check: res = ((q & 15) + 30) & 28 is zero exactly for q = 2..5; result-only ALU words, chained
     # through the result bypass (no temp, no FLAG_UPD)
     w(IMM_LD=1, IMM_OFS=0, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=15,
@@ -557,7 +603,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
       RES_SEL=RES["ALU"], **({"FLAG_UPD": mut["flag_upd_and"]} if "flag_upd_and" in mut else {}))
     p.extend([word()] * 2)                               # res_q is registered: the branch issues 3 words after the result word
     if not mut.get("no_id_check"):
-        br(C_ZERO, "trap_regid", pol=1)                  # nonzero: not one of the IDs 2..5
+        br(C_ZERO, "ld_i" if _ld else "trap_regid", pol=1)   # nonzero: not one of the IDs 2..5; S3-C: the general ID check
     w(TADDR=T0, ASEL=A["RT"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=mut.get("wr_dst", WR["PRIV"]),
       WR_ASEL=mut.get("wr_asel", 3), RCONST=mut.get("wr_rconst", 0),
       CONSUME=mut.get("final_consume", 1),               # the #q byte
@@ -762,7 +808,8 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         # ---- DBR Rn, disp16 (C6, byte 1 = 101 rrrrr; Format VI): Rn <- Rn - 1 (32 bits, as MAME); if Rn != 0: PC <- start + sext(disp16),
         # else PC <- start + 4. Flags unchanged. The other DBcc sub-opcodes (byte 1 bits 7:5 != 101) trap `opcode`.
         at("dbr")
-        chk_hi3(1, 5, "trap")
+        chk_hi3(1, 5, "db_tree" if "dbcc" in _C1GEN else "trap")
+        at("db_yes")                                     # C1: a label only (no word): where the taken DBcc joins DBR
         w(RB_SEL=1, BSEL=A["RB"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=1)     # Rn <- Rn - 1 (res_q: the new value)
         p.extend([word()] * 2)
         br(C_ZERO, "dbr_fall")
@@ -772,6 +819,55 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         at("dbr_fall")
         w(CONSUME=4)
         jmp("disp")
+        if "dbcc" in _C1GEN:
+            # ---- P1.2: the other 13 DBcc (C6 / C7, byte 1 = sss rrrrr). MAME opDBxx: Rn <- Rn - 1 always; branch if the condition holds and Rn != 0.
+            # Reached only from the sub-opcode checks of DBR / TB / DBNE that used to trap, so those three keep their words and cycles.
+            # Conditions from the PSW (ucond 2 Z, 3 CY, 4 S, 5 OV); C7 is the complement (dispatch fmt[8], ucond 17).
+            def db_node(k, zero):
+                w(IMM_LD=1, IMM_OFS=1, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=5 + k, SH_OP=6, RES_SEL=RES["SHIFT"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+                p.extend([word()] * 2)
+                br(C_ZERO, zero)
+            at("db_tree")
+            db_node(2, "db_0xx")
+            db_node(1, "db_10x")
+            db_node(0, "db_6")
+            br(2, "db_T")                                    # 7 LE / GT: Z or (S xor OV)
+            at("db_6")                                       # 6 LT / GE: S xor OV
+            br(4, "db_6s")
+            br(5, "db_T")
+            jmp("db_F")
+            at("db_6s")
+            br(5, "db_F")
+            jmp("db_T")
+            at("db_10x")
+            db_node(0, "db_4")
+            jmp("trap")                                      # sub-opcode 5 never arrives here (DBR / TB)
+            at("db_4")                                       # 4 N / P
+            br(4, "db_T")
+            jmp("db_F")
+            at("db_0xx")
+            db_node(1, "db_00x")
+            db_node(0, "db_2")
+            br(3, "db_T")                                    # 3 NH / H: CY or Z
+            at("db_2")                                       # 2 E / NE
+            br(2, "db_T")
+            jmp("db_F")
+            at("db_00x")
+            db_node(0, "db_0")
+            br(3, "db_T")                                    # 1 L / NL
+            jmp("db_F")
+            at("db_0")                                       # 0 V / NV
+            br(5, "db_T")
+            jmp("db_F")
+            at("db_T")
+            br(17, "db_no")
+            jmp("db_yes")
+            at("db_F")
+            br(17, "db_yes")
+            at("db_no")
+            w(RB_SEL=1, BSEL=A["RB"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=1)
+            jmp("dbr_fall")
 
         # ---- MOVEA.B <src>, [-Rn] (Format II / V2 F1; B1): [-Rn] <- the 32-bit EFFECTIVE ADDRESS of the source (/abs or disp32[PC]), as a word store:
         # R[op2] <- R[op2] - 4 (the autodecrement of a word operand), then a word store at the new R[op2]. Reached from `movea` after
@@ -959,7 +1055,13 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             jmp("jsr_tail")
         at("jsr_rb2")
         w(DEC_EA=1, IMM_LD=1, IMM_OFS=0, RA_SEL=3, ASEL=A["RA"], RES_SEL=RES["AGU"], WR_DST=WR["TEMP"], TADDR=1, CONSUME=10)     # T1 = the target
-        p.extend([word()] * 3)
+        if _JX and not smc_test and not mut.get("jx_no_fix"):
+            # jx: the third wait word becomes a branch on fmt[8] (ucond 17), which only the E9 dispatch entry sets: an indexed JSR that came through
+            # jsr_rb (below, jsr_xi) leaves to its fix-up. Never taken for E8, where it costs the same one word as the wait word it replaces.
+            p.extend([word()] * 2)
+            br(17, "jsr_xfix")
+        else:
+            p.extend([word()] * 3)
         jmp("jsr_tail")
 
         # ---- PUSH #q (EE, short format, modm 0): SP <- SP - 4; word store of q (4 bits, zero-extended) at [SP]. Flags unchanged.
@@ -1062,10 +1164,13 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
 
         at("src0")                                        # operand 1 (bank by ifl[6]) -> T0, zero-extended to its size
         operand(MS_B6)
+        at("src0_b")                                      # S3-B: entry for a caller that has already looked the specifier up (a label only, no word)
         br(C_REGDIR, "src0_reg")
         br(C_QUICK, "src0_q")
         br(C_IMM, "src0_imm")
         call("ea0")
+        if _BS:
+            at("src0_rd")                                 # bs: a label only (no word): the size-1 read at MAR -> MDR (and T0), then RETURN
         p.append(word())
         p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=0))
         pad(4)
@@ -1126,7 +1231,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         # lenop & 0x1F; it trapped before). jsr never sets T15 for group 7 (jsr_g3 traps after the pointer read).
         if not mut.get("sm3_ipc_off"):
             at("mpi")
-            chk_hi3(0, 0x1F, "trap_mode", sh=3)
+            chk_hi3(0, 0x1F, "md32" if _AM else "trap_mode", sh=3)        # S3-A: bank-0 group 6 = [d32[Rn]] -> md32 (was trap `mode`)
             w(IMM_LD=1, IMM_OFS=0, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])    # mode-byte bit 0: F9 = d16
             pad(2)
             br(C_ZERO, "mpi16", pol=1)
@@ -1143,6 +1248,34 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
                     p.append(word())
                 else:
                     w(IMM_LD=1, IMM_OFS=1, IMM_SZ=isz_, IMM_SX=sx_, ASEL=A["IMM"], BSEL=A["MDR"], ALU_OP=ALU["SUB"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])   # MDR = P - sext(disp)
+                pad(3)
+                ret()
+
+        if _AM:
+            # ---- S3-A: [d32[Rn]] (bank-0 0xC0..0xDF; MAME am DisplacementIndirect32): the [d8 / d16[Rn]] scheme at 32 bits. Reached from mdd -> mdd_i -> mpi's
+            # group check (so T15 = 1 lookups, jsr indirect and the movcu register length, return from `mdd` before, as they did). Descriptor 0x1DC = register-based
+            # memory, AGU base MDR, 32-bit displacement: every consumer's DEC_EA word yields the pointer P and consumes the mode byte + 4.
+            at("md32")
+            mdd_i_body(2)
+            # ---- S3-A: [d32[PC]] (FA; PCDisplacementIndirect32) and [abs] (FB; DirectAddressDeferred): EA = the word at ipc + disp32 / at abs32. Same bias scheme and
+            # descriptor. A lookup with T15 = 1 (the movcu register length) traps `mode` as before.
+            at("mpx")
+            w(ASEL=A["RT"], TADDR=15, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "mpx_go")
+            jmp("trap_mode")
+            at("mpx_go")
+            poll(4, MS_ZERO)
+            w(IMM_LD=1, IMM_OFS=0, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])    # mode-byte bit 0: FB = [abs]
+            pad(2)
+            br(C_ZERO, "mpx_abs", pol=1)
+            for nm_, base_ in (("mpx_pc", dict(ASEL=A["PC"], BSEL=A["IMM"], ALU_OP=ALU["ADD"])), ("mpx_abs", dict(ASEL=A["IMM"], ALU_OP=ALU["PASSA"]))):
+                at(nm_)
+                w(IMM_LD=1, IMM_OFS=1, IMM_SZ=2, RES_SEL=RES["ALU"], WR_DST=WR["MAR"], **base_)                                  # MAR = ipc + disp32 / abs32
+                pad(2)
+                p.append(word(BUS_OP=1, BUS_SIZE=3))                   # the pointer
+                pad(4)
+                w(IMM_LD=1, IMM_OFS=1, IMM_SZ=2, ASEL=A["IMM"], BSEL=A["MDR"], ALU_OP=ALU["SUB"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])   # MDR = P - disp32
                 pad(3)
                 ret()
 
@@ -1287,13 +1420,14 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             elif mut.get("rp3_dd_hi"):
                 chk_hi3(0, 0, "trap_mode", sh=7)             # TEST-ONLY mutant: top bit only (dd32 accepted)
             else:
-                chk_hi3(0, 0, "trap_mode", sh=6)             # R-post3: mode byte >> 6 == 0, i.e. dd8 (0x00..0x1F) or dd16 (0x20..0x3F); dd32 and the stepped modes trap
+                chk_hi3(0, 0, "movea_dd_go" if _AM else "trap_mode", sh=6)   # R-post3: mode byte >> 6 == 0, i.e. dd8 or dd16; S3-A: dd32[Rn], [Rn+], [-Rn] and the PC double displacements take the same ea0 path (was trap `mode`)
         if mut.get("rp_mdd_nodref"):                     # TEST-ONLY: EA = Rn + disp1 (no pointer read, no disp2)
             poll(4, MS_ZERO)
             w(DEC_EA=1, IMM_LD=1, IMM_OFS=0, RA_SEL=3, ASEL=A["RA"], RES_SEL=RES["AGU"], WR_DST=WR["GPR"], WR_ASEL=1, CONSUME=10)
             w(CONSUME=2)
             jmp("disp")
         else:
+            at("movea_dd_go")
             call("ea0")
             pad(3)
             w(ASEL=A["MAR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=1)
@@ -1359,6 +1493,10 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             at(f"{nm_}_d1")
             call("src0")
             pad(3)
+            if _SH and nm_ == "g_rot":                   # P1.2: MAME opROTB/H/W clear CY for a zero count (the rotator gives bit 0 of the value); as sm_rot_d0 does
+                w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["ZEXT"], SIZE_SEL=3, RCONST=0, RES_SEL=RES["ALU"])
+                pad(2)
+                br(C_ZERO, "rot_d1z")
             # the shifter supplies CY / OV; its Z / S are 32-bit, so S and Z come from a size-masked ALU pass of the shifted value (result bypass)
             w(RA_SEL=1, ASEL=A["RA"], TADDR=T0, BSEL=A["RT"], SH_OP=shop_, RES_SEL=RES["SHIFT"], FLAG_UPD=0b1100, SIZE_SEL=1)
             w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], FLAG_UPD=0b0011, SIZE_SEL=1, WR_DST=WR["GPR"], WR_ASEL=1, BE_MODE=0)
@@ -1372,12 +1510,16 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             at(f1nm_)
             call("src0")
             operand(MS_B5)
-            br(C_REGDIR, "trap_mode")
+            br(C_REGDIR, "sg_dreg" if _SH else "trap_mode")
             br(C_IMM, "trap_immdest")
             call("ea1")
             p.append(word())
             p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=1))
             pad(4)
+            if _SH and f1nm_ == "rot_f1":                # P1.2: the zero count, as above; the unchanged value is stored back as MAME does
+                w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["ZEXT"], SIZE_SEL=3, RCONST=0, RES_SEL=RES["ALU"])
+                pad(2)
+                br(C_ZERO, "rot_f1z")
             w(ASEL=A["MDR"], TADDR=T0, BSEL=A["RT"], SH_OP=f1op_, RES_SEL=RES["SHIFT"],
               FLAG_UPD=0 if f1nm_ == "shl_f1" and mut.get("p6_shl_f1_nocyov") else 0b1100, SIZE_SEL=1)
             w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], FLAG_UPD=0 if f1nm_ == "shl_f1" and mut.get("p6_shl_f1_nosz") else 0b0011, SIZE_SEL=1, WR_DST=WR["MDR"])
@@ -1429,7 +1571,11 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         w(ASEL=A["MAR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=3)           # T3 = dst address
         poll(0, MS_ZERO)
         lenget("mcp", 4)
-        pad(2)
+        if _MF and not mut.get("mf_no_t15clr"):
+            w(**T15_CLR)                                 # mf: T15 <- 0 in the first of the two wait words (no cycle): the copy loop below reads T15 as "then fill"
+            pad(1)
+        else:
+            pad(2)
         ret()
 
         def movcu_routine(nm, bsz, step):
@@ -1497,12 +1643,20 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
                     pad(1)
                 jmp("disp")
                 return
+            # mf: the second wait word after each length test reads the flag T15 (a result-only word: no cycle); `done`'s wait word, three words later
+            # on either exit, branches on it to the fill (MOVCFU sets T15 before entering the loop; mc_parse clears it for every variant).
+            def flag_():
+                if _MF:
+                    pad(1)
+                    w(ASEL=A["RT"], TADDR=15, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                else:
+                    pad(2)
             at(f"{nm}_loop")
             w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
-            pad(2)
+            flag_()
             br(C_ZERO, f"{nm}_done")
             w(ASEL=A["RT"], TADDR=4, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
-            pad(2)
+            flag_()
             br(C_ZERO, f"{nm}_done")
             mar_from_temp(1)
             p.append(word())
@@ -1522,12 +1676,253 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             jmp(f"{nm}_loop")
             at(f"{nm}_done")
             w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=0, RCONST=28)
-            pad(1)
+            if _MF and not mut.get("mf_no_fill"):
+                br(C_ZERO, "movcu_f_fill", pol=1)            # mf: T15 != 0 (MOVCFU) -> the fill; never taken for MOVCU, where it costs the wait word it replaces
+            else:
+                pad(1)
             w(ASEL=A["RT"], TADDR=3, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=0, RCONST=27)
             jmp("disp")
 
 
         movcu_routine("movcu", 0, 0)                     # MOVCU / MOVCD, .B (58) and .H (5A): one routine, the element size is the table's size1 (fmt[8] marks .H)
+        if _MF:
+            # ---- mf: MOVCFU.B / .H (58 / 5A, sub-opcode 0x0A; MAME opMOVSTRU*(fill)): copy min(len1, len2) elements upward exactly as MOVCU (the shared parse
+            # and copy loop), R28 <- the source end; then the remaining len2 - copied destination elements <- the fill character (R26, element size);
+            # R27 <- the destination end. Flags unchanged. Reached from the last sub-opcode check (sch_chk), which trapped `opcode`.
+            # T1 source pointer, T2 / T4 remaining lengths, T3 destination pointer, T15 = 1 while the instruction runs (cleared at the end).
+            at("movcu_f_chk")
+            w(IMM_LD=1, IMM_OFS=1, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=0x1F, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=0x0A, ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "cmpc_chk" if _CC else "trap", pol=1)          # cc: the last check goes on to CMPC's (a zero-cycle retarget)
+            p.append(word(CONSUME=2))
+            call("mc_parse")
+            w(**T15_SET)
+            pad(1)
+            jmp("movcu_u_loop")
+            at("movcu_f_fill")                               # from movcu_u_done's branch: R28 is written; T3 / T4 = the destination pointer / elements left
+            w(RA_SEL=0, RCONST=mut.get("mf_fillreg", 26), ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])     # MDR <- R26 (kept over the loop)
+            at("movcu_f_loop")
+            w(ASEL=A["RT"], TADDR=2 if mut.get("mf_cnt_t2") else 4, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "movcu_f_fin")
+            mar_from_temp(1 if mut.get("mf_dst_src") else 3)
+            pad(2)
+            p.append(word(BUS_OP=2, BUS_SIZE=0, SIZE_SEL=0))             # element write at the destination pointer
+            pad(5)
+            w(TADDR=4, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            pad(1)
+            w(AGU_BASE=6, TADDR=3, AGU_OFF=3, RES_SEL=RES["AGU"], WR_DST=WR["TEMP"], SIZE_SEL=0)             # pointer += element size
+            pad(1)
+            jmp("movcu_f_loop")
+            at("movcu_f_fin")
+            w(ASEL=A["RT"], TADDR=3, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=0, RCONST=27)
+            w(**T15_CLR)
+            jmp("disp")
+
+        if _CC:
+            # ---- cc: CMPC.B / CMPC.H (58 / 5A, sub-opcode 0; MAME opCMPSTRB / opCMPSTRH (0, 0), upstream s32_v60 S_STR_*): compare the first
+            # min(len1, len2) elements unsigned. First difference: S = (element 1 > element 2), Z = 0. None: S = (len1 > len2), Z = (len1 == len2).
+            # R28 = len1 + i * size, R27 = len2 + i * size, i = the index of the difference (or min(len1, len2)) -- MAME and upstream agree (lengths, not
+            # addresses). CY and OV unchanged. Operands / lengths: mc_parse (T1 / T3 addresses, T2 / T4 lengths, immediate or register lengths).
+            # T5 / T6 = len1 / len2 + elements compared * size (R28 / R27 at either exit), T7 = element 1, then element 1 - element 2.
+            def cc_flags(kind):                                  # Z / S only (FLAG_UPD = s, z), from a word-size constant: -1 S, 1 neither, 0 Z
+                if kind == "gt":
+                    w(ASEL=A["CONST"], RCONST=1, ALU_OP=ALU["NEG"], RES_SEL=RES["ALU"], FLAG_UPD=0b0011, SIZE_SEL=2)
+                elif kind == "lt":
+                    w(ASEL=A["CONST"], RCONST=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], FLAG_UPD=0b0011, SIZE_SEL=2)
+                else:
+                    w(ASEL=A["ZERO"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], FLAG_UPD=0b0011, SIZE_SEL=2)
+            at("cmpc_chk")
+            w(IMM_LD=1, IMM_OFS=1, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=0x1F, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "trap", pol=1)                            # sub-opcode != 0 (CMPCF, CMPCS, MOVCFD, ...): trap `opcode` as before
+            p.append(word(CONSUME=2))
+            call("mc_parse")
+            for ts_, td_ in ((2, 5), (4, 6)):
+                w(ASEL=A["RT"], TADDR=ts_, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=td_)
+            at("cmpc_loop")
+            w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "cmpc_end")
+            w(ASEL=A["RT"], TADDR=4, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "cmpc_end")
+            mar_from_temp(1)
+            p.append(word())
+            p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=0))             # element 1 (operand 1)
+            pad(4)
+            w(ASEL=A["MDR"], ALU_OP=ALU["ZEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=7)
+            mar_from_temp(3)
+            p.append(word())
+            p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=0))             # element 2 (operand 2)
+            pad(4)
+            w(ASEL=A["MDR"], ALU_OP=ALU["ZEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=7, ALU_OP=ALU["SUB"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])   # T7 = element 1 - element 2 (SUB = B - A)
+            pad(2)
+            br(C_ZERO, "cmpc_eq")
+            w(ASEL=A["RT"], TADDR=7, BSEL=A["CONST"], RCONST=31, SH_OP=6, RES_SEL=RES["SHIFT"])              # negative (element 1 < element 2)?
+            pad(2)
+            br(C_ZERO, "cmpc_gt")
+            at("cmpc_lt")
+            cc_flags("lt")
+            jmp("cmpc_fin")
+            at("cmpc_gt")
+            cc_flags("gt")
+            jmp("cmpc_fin")
+            at("cmpc_eq")
+            for t_ in (1, 3, 5, 6):
+                w(AGU_BASE=6, TADDR=t_, AGU_OFF=3, RES_SEL=RES["AGU"], WR_DST=WR["TEMP"], SIZE_SEL=0)         # += element size
+                pad(1)
+            for t_ in (2, 4):
+                w(TADDR=t_, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                pad(1)
+            pad(1)
+            jmp("cmpc_loop")
+            at("cmpc_end")                                       # min(len1, len2) elements equal: the lengths decide (T2 != 0: len1 > len2)
+            w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "cmpc_e2")
+            jmp("cmpc_gt")
+            at("cmpc_e2")
+            w(ASEL=A["RT"], TADDR=4, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "cmpc_z")
+            jmp("cmpc_lt")
+            at("cmpc_z")
+            cc_flags("eq")
+            at("cmpc_fin")
+            for tr_, rg_ in ((5, 28), (6, 27)):
+                w(ASEL=A["RT"], TADDR=tr_, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=0, RCONST=rg_)
+            jmp("disp")
+
+        if _BS:
+            # ---- bs: MOVBSU / MOVBSD (5B, sub-opcode 8 / 9; MAME opMOVBSU / opMOVBSD, upstream s32_v60 S_BS_MOV*): copy `len` bits from the bit
+            # string at operand 1 to the bit string at operand 2, upward from the first bit (MOVBSU) or downward from the last (MOVBSD). Format VIIb:
+            # opcode, sub-opcode, operand 1, a length byte (immediate 0..127, or bit 7 set: R[byte & 31]), operand 2. A bit operand is a byte base
+            # address and a signed bit offset: d8 / d16 / d32[Rn] (base Rn, offset = the displacement), [Rn] (offset 0), and the double displacements
+            # [d[Rn]]d (base = the word at Rn + d1, offset = d2). Every other mode traps `mode` before any register or memory write; the other 5B
+            # sub-opcodes trap `opcode` as before. The bit at offset o is bit (o & 7) of the byte at base + floor(o / 8).
+            # As the references, the copy is bit by bit on a cached source byte and a cached destination byte: the source byte is read when the
+            # string enters it, the destination byte is read when the string enters it and written when the string leaves it or ends. R28 / R27 <-
+            # the source / destination byte address of the last bit copied (unchanged when len = 0). Flags unchanged.
+            # T1 / T2 source byte address / bit offset, T13 / T14 destination, T8 bits left, T9 / T10 the cached bytes, T11 the step (+1 / -1),
+            # T12 0 / -1 (MOVBSD), T5 = -3, T7 scratch. The advance leaves the offsets un-normalised (-1 or 8 = "the string left the byte").
+            # No word selects a result-mux input, shifter operation or ALU operation that the image did not use before (the shifter's arithmetic
+            # shift by the count -3 in T5 gives offset >> 3; the bit-field unit is not used), so no constant control-store bit starts to vary for it.
+            def bs_out(to):                                  # result != 0: the offset T[to] is outside 0..7
+                w(ASEL=A["RT"], TADDR=to, BSEL=A["CONST"], RCONST=3, SH_OP=6, RES_SEL=RES["SHIFT"])
+
+            def bs_norm_rd(ta, to, tb):                      # address += offset >> 3 (signed), offset &= 7, read the byte there -> T[tb]
+                w(ASEL=A["RT"], TADDR=to, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=5, SH_OP=6 if mut.get("bs_shr_logical") else 1, RES_SEL=RES["SHIFT"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=ta, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MAR"])
+                w(ASEL=A["RT"], TADDR=to, BSEL=A["CONST"], RCONST=7, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                call("src0_rd")
+                w(ASEL=A["MDR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=tb)
+
+            at("movbs")
+            w(IMM_LD=1, IMM_OFS=1, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])          # sub-opcode bit 0: 1 = MOVBSD
+            w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["NEG"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=12)                             # T12 = 0 / -1
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["OR"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=11)   # T11 = +1 / -1
+            w(IMM_LD=1, IMM_OFS=1, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=0x1E, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=mut.get("bs_sub", 8), ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "trap", pol=1)                        # not sub-opcode 8 / 9
+            p.append(word(CONSUME=2))
+            operand(MS_B6)
+            call("bs_op")                                    # MDR = base 1, MAR = base 1 + offset 1
+            poll(0, MS_ZERO)
+            w(IMM_LD=1, IMM_OFS=0, IMM_SZ=0, CONSUME=1, ASEL=A["IMM"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=8)   # T8 = the length byte
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=7, SH_OP=6, RES_SEL=RES["SHIFT"])
+            w(ASEL=A["MDR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)                                      # T1 = base 1
+            w(ASEL=A["MDR"], BSEL=A["MAR"], ALU_OP=ALU["SUB"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=2)                         # T2 = offset 1
+            fix.append((len(p), "bs_li"))                    # br(C_ZERO, bs_li) that also addresses T8: the register file's index (RIDX) is the temp
+            p.append(word(NXT=2, CPOL=0, TADDR=0 if mut.get("bs_ridx_prev") else 8, **cond(C_ZERO)))   # read launched by the word BEFORE the indexed word
+            if not mut.get("bs_no_reglen"):
+                w(TADDR=8, RIDX=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])                           # bit 7: T8 = R[T8 & 31]
+            at("bs_li")
+            operand(MS_B5)
+            call("bs_op")                                    # MDR = base 2, MAR = base 2 + offset 2
+            w(ASEL=A["MDR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=13)                                     # T13 = base 2
+            w(ASEL=A["CONST"], RCONST=3, ALU_OP=ALU["NEG"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=5)                            # T5 = -3 (the shift count)
+            w(ASEL=A["MDR"], BSEL=A["MAR"], ALU_OP=ALU["SUB"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=14)                        # T14 = offset 2
+            for to_ in (2, 14):                              # MOVBSD starts at the last bit: offset += len - 1 (T12 = -1), else + 0
+                w(TADDR=8, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=12, ALU_OP=ALU["PASSA" if mut.get("bs_d_nomask") else "AND"], RES_SEL=RES["ALU"])
+                if not mut.get("bs_d_noadj_dst" if to_ == 14 else "bs_d_noadj_src"):
+                    w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=to_, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                else:
+                    pad(1)
+            # the source enters the loop one byte "behind" (address - 1, offset 8..15), so that the loop's own byte-entry step reads its first byte
+            w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=5, SH_OP=1, RES_SEL=RES["SHIFT"])
+            w(BSEL=A["RES"], FWD_EN=1, ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            w(ASEL=A["RT"], TADDR=8, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])                                                          # len = 0: nothing to do
+            w(ASEL=A["RT"], TADDR=2, BSEL=A["CONST"], RCONST=7, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=8, ALU_OP=ALU["OR"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=2)
+            br(C_ZERO, "bs_drd", pol=1)
+            at("bs_done")
+            jmp("disp")
+
+            at("bs_w")                                       # write the destination byte (it is complete, or the string ended in it)
+            w(ASEL=A["RT"], TADDR=10, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])
+            mar_from_temp(13)
+            w(ASEL=A["RT"], TADDR=8, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])                                                          # bits left?
+            if mut.get("bs_no_write"):
+                pad(1)
+            else:
+                p.append(word(BUS_OP=2, BUS_SIZE=0, SIZE_SEL=0))
+            pad(1)
+            br(C_ZERO, "bs_done")
+            pad(3)                                           # no temp read in the five words after the bus word
+            at("bs_drd")                                     # the destination enters a byte: normalise, read it
+            bs_norm_rd(13, 14, 10)
+            at("bs_top")
+            bs_out(2)                                        # has the source left its byte?
+            w(ASEL=A["RT"], TADDR=13, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=0, RCONST=mut.get("bs_r27", 27))   # R27 <- the destination byte address (in a wait word)
+            pad(1)
+            br(C_ZERO, "bs_cp")
+            bs_norm_rd(1, 2, 9)
+            at("bs_cp")                                      # T10 bit (T14) <- T9 bit (T2): T10 ^= (((T10 >> T14) ^ (T9 >> T2)) & 1) << T14
+            w(ASEL=A["RT"], TADDR=10, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=14, SH_OP=6, RES_SEL=RES["SHIFT"])
+            w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=7)
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=0, RCONST=mut.get("bs_r28", 28))    # R28 <- the source byte address
+            w(ASEL=A["RT"], TADDR=9, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=2, SH_OP=6, RES_SEL=RES["SHIFT"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=7, ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=mut.get("bs_mask", 1), ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=14, SH_OP=0, RES_SEL=RES["SHIFT"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=10, ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            w(ASEL=A["RT"], TADDR=11, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])                                                          # advance: both offsets += step, bits left -= 1
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=14, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            if mut.get("bs_no_count"):
+                pad(1)
+            else:
+                w(TADDR=8, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            w(ASEL=A["RT"], TADDR=11, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=2, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            bs_out(14)                                       # has the destination left its byte?
+            w(ASEL=A["RT"], TADDR=8, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])                                                           # ... is the string over?
+            pad(1)
+            if mut.get("bs_no_cross_wr"):
+                pad(1)
+            else:
+                br(C_ZERO, "bs_w", pol=1)                    # left the byte: write it
+            br(C_ZERO, "bs_top", pol=1)                      # bits left, same destination byte
+            jmp("bs_w")                                      # the string ended inside the byte
+
+            at("bs_op")                                      # one bit operand, looked up by the caller: MDR = the byte base, MAR = base + bit offset
+            w(IMM_LD=1, IMM_OFS=0, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=7, SH_OP=6, RES_SEL=RES["SHIFT"])                  # mode byte bit 7
+            w(RA_SEL=3, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])                                       # MDR = R[mode register] (the base of a displacement mode), in a wait word
+            pad(1)
+            br(C_ZERO, "trap_mode", pol=1)                   # bank 0: indirect / PC / abs groups; bank 1: stepped, indexed
+            br(22, "trap_mode", pol=1)                       # not register-based memory: register direct (bank 1 group 3)
+            jmp("ea0")                                       # MAR = the mode's ordinary effective address (a double displacement leaves its pointer in MDR); returns to the caller
 
         # ---- SETF #cc, <dst byte> (47, Format II): dst <- 1 if condition cc (the operand's low nibble, evaluated on the current flags) else 0.
         # cc = 2 b + k: base condition b (OV, CY, Z, CY|Z, S, true, S^OV, (S^OV)|Z), inverted when k = 1 (as the Bcc condition table). The condition value is
@@ -1537,11 +1932,11 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         br(C_F1, "sf_ok1")
         if not mut.get("pl_setf_nod1"):
             br(C_D, "sf_ok1")                                # R-play1: SETF #cc, Rf (F2 D=1; 065DC4 setf #4, R14) -> the condition byte to R[fld1]
-        jmp("trap_mode")
+        jmp("sf_d0" if _S3B["sf"] else "trap_mode")          # S3-B sf: F2 D=0 (the condition code is R[fld1], the specifier the destination)
         at("sf_ok1")
         operand(MS_B6)
         br(C_QUICK, "sf_ok2")
-        jmp("trap_mode")
+        jmp("sf_nq" if _S3B["sf"] else "trap_mode")          # S3-B sf: a condition code that is not #quick (register, immediate, memory)
         at("sf_ok2")
         w(IMM_LD=1, IMM_OFS=0, IMM_SZ=0, CONSUME=1, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=15, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)   # T1 = cc
         pad(3)
@@ -1551,6 +1946,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             pad(2)
             br(C_ZERO, target, pol=1)
 
+        at("sf_tree")
         sf_bit(3, "sf_b4")                               # b = cc >> 1, bits (b2 b1 b0) = cc bits 3..1
         sf_bit(2, "sf_b2")
         sf_bit(1, "sf_b1")
@@ -1598,12 +1994,226 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         w(ASEL=A["RT"], TADDR=1, BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
         w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=2, ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"])
         w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)          # T0 = the condition byte (0 / 1)
-        pad(2)
-        br(C_F1, "sf_f1_tail")                           # R-play1: the last wait word became this branch (same cycle count for F1)
+        if _S3B["sf"]:
+            # S3-B sf: wait, wait, F1 branch becomes wait, F1 branch, D branch. The F1 path executes wait, branch, jump (three words, as before) and
+            # the D=1 path wait, branch, branch, then its write word (as before); F2 D=0 falls through to the destination specifier.
+            pad(1)
+            br(C_F1, "sf_f1_w")
+            br(C_D, "sf_wr1")
+            operand(MS_B6)
+            pad(1)
+            jmp("s3_wo")
+            at("sf_f1_w")
+            jmp("sf_f1_tail")
+        else:
+            pad(2)
+            br(C_F1, "sf_f1_tail")                           # R-play1: the last wait word became this branch (same cycle count for F1)
+        at("sf_wr1")
         jmp("disp", TADDR=T0, ASEL=A["RT"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=2 if mut.get("pl_setf_word") else 1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=1)     # F2 D=1: R[fld1].b <- the condition byte
         at("sf_f1_tail")
         operand(MS_B5)
         jmp("gf_dst")
+        if _S3B["sf"]:
+            at("sf_d0")
+            w(RA_SEL=1, ASEL=A["RA"], BSEL=A["CONST"], RCONST=15, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)      # T1 = R[fld1] & 15
+            pad(3)
+            jmp("sf_tree")
+            at("sf_nq")
+            call("src0_b")                                   # T0 = the condition operand (register, immediate, memory), consumed
+            pad(3)
+            w(ASEL=A["RT"], TADDR=T0, BSEL=A["CONST"], RCONST=15, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)                               # T1 = cc
+            pad(3)
+            jmp("sf_tree")
+        if any(_S3B.values()) or _S3C["st"]:
+            # ---- S3-B shared write-only tail: the specifier has been looked up, T0 holds the value: register destination, or memory through the cv store
+            at("s3_wo")
+            br(C_REGDIR, "gf_c_wo0")
+            br(C_IMM, "trap_immdest")
+            jmp("cv_mem")
+        if _S3B["rv"]:
+            # ---- S3-B rv: RVBIT (08; MAME opRVBIT): destination byte <- the source byte with its bits reversed (the shifter's op 4); flags unchanged
+            rvb = dict(BSEL=A["CONST"], RCONST=0, SH_OP=4, RES_SEL=RES["SHIFT"])
+            at("g_rvbit")
+            p.append(word(CONSUME=2))
+            br(C_F1, "rv_f1")
+            br(C_D, "rv_d1")
+            w(RA_SEL=1, ASEL=A["RA"], WR_DST=WR["TEMP"], TADDR=T0, **rvb)                                    # F2 D=0: T0 = rev(R[fld1])
+            operand(MS_B6)
+            pad(1)
+            jmp("s3_wo")
+            at("rv_d1")                                                                                      # F2 D=1: <src> -> R[fld1]
+            call("src0")
+            pad(3)
+            w(ASEL=A["RT"], TADDR=T0, **rvb)
+            jmp("disp", ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=1)
+            at("rv_f1")
+            call("src0")
+            pad(3)
+            w(ASEL=A["RT"], TADDR=T0, WR_DST=WR["TEMP"], **rvb)
+            operand(MS_B5)
+            pad(1)
+            jmp("s3_wo")
+        if _S3B["gp"]:
+            # ---- S3-B gp: GETPSW to memory (F6, and F7 with a bank-1 memory operand): the PSW word through the cv store (dispatch sizes = word)
+            at("gp_mem")
+            w(ASEL=A["PSW"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)
+            jmp("cv_mem")
+        if _S3B["xc"]:
+            # ---- S3-B xc: XCH.B / .H / .W in the two-specifier format with a MEMORY first operand (MAME opXCHB/H/W): both operands are read, then written
+            # swapped. A register first operand in this format still traps `mode` (its register number is gone once the second specifier is at the head).
+            at("xch_f1")
+            operand(MS_B6)
+            br(C_REGDIR, "trap_mode")
+            br(C_IMM, "trap_mode")
+            call("ea0")
+            p.append(word())
+            p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=0))
+            pad(4)
+            w(ASEL=A["MDR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)             # T0 = operand 1
+            w(ASEL=A["MAR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=2)              # T2 = its address
+            operand(MS_B5)
+            br(C_REGDIR, "xf_reg")
+            br(C_IMM, "trap_immdest")
+            call("ea1")
+            p.append(word())
+            p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=1))
+            pad(4)
+            w(ASEL=A["MDR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)              # T1 = operand 2
+            w(TADDR=T0, ASEL=A["RT"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])
+            pad(2)
+            p.append(word(BUS_OP=2, BUS_SIZE=0, SIZE_SEL=1))                                                   # operand 2 <- operand 1
+            pad(5)
+            at("xf_wr1")
+            w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MAR"])
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MDR"])
+            pad(2)
+            p.append(word(BUS_OP=2, BUS_SIZE=0, SIZE_SEL=0))                                                   # operand 1 <- operand 2
+            jmp("disp")
+            at("xf_reg")
+            w(RA_SEL=3, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)     # T1 = R[mreg]
+            pad(3)
+            w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=3, CONSUME=1, SIZE_SEL=1, BE_MODE=0)   # R[mreg] <- operand 1
+            jmp("xf_wr1")
+        if _S3B["js"]:
+            # ---- S3-B js: JSR dd8 / dd16 / dd32[Rn] (E9, bank 1): target = the effective address ([Rn + d1] + d2, through ea0); return address = ipc + 4 / 6 / 10.
+            # [Rn+], [-Rn] and an index prefix on a base other than disp32[PC] still trap `mode`.
+            at("jsr_dd")
+            for g_, ln_ in ((0, 4), (1, 6), (2, 10)):
+                chk_hi3(0, g_, f"jsr_dd{g_ + 1}" if g_ < 2 else "trap_mode")
+                w(ASEL=A["PC"], BSEL=A["CONST"], RCONST=ln_, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)
+                if g_ < 2:
+                    jmp("jsr_dd_go")
+                    at(f"jsr_dd{g_ + 1}")
+            at("jsr_dd_go")
+            call("ea0")
+            pad(3)
+            w(ASEL=A["MAR"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)              # T1 = the target
+            pad(3)
+            jmp("jsr_tail")
+        if _S3B["up"]:
+            # ---- S3-B up: UPDPSW.W / .H in the single-specifier format: D=0: v = R[fld1], m = the specifier; D=1: v = the specifier, m = R[fld1]
+            at("up_f2")
+            br(C_D, "up_d1")
+            call("src0")                                                                                       # T0 = m
+            pad(3)
+            w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)    # T1 = m
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)   # T0 = v = R[fld1]
+            pad(1)
+            jmp("up_go")
+            at("up_d1")
+            call("src0")                                                                                       # T0 = v
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)    # T1 = m = R[fld1]
+            pad(1)
+            jmp("up_go")
+
+        if _S3C["ld"]:
+            # ---- S3-C ld: LDPR (12) general forms. T0 = the value (operand 1, a word; a memory source loads the VALUE, as the upstream RTL does), T1 = the
+            # register ID (operand 2, a word). ld_chk: the ID must be below 32 and not reserved / invalid (bit T1 of LDPR_INVALID clear), else trap `regid`;
+            # then privileged[T1] <- T0 through the temp-indexed write address. Only the shadow slot is written: R31 never moves.
+            mv_ = dict(ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            at("ld_s")                                                                                         # F1, a source that is not #imm (looked up)
+            call("src0_b")
+            call("src1")
+            jmp("ld_chk")
+            at("ld_i")                                                                                         # F1, #imm source in T0; the ID specifier is looked up
+            call("src1_b")
+            jmp("ld_chk")
+            at("ld_f2")
+            p.append(word(CONSUME=2))
+            br(C_D, "ld_d1")
+            call("src0")                                                                                       # D=0: value = R[fld1], ID = the specifier
+            pad(3)
+            w(ASEL=A["RT"], TADDR=T0, **mv_)
+            w(ASEL=A["RES"], FWD_EN=1, WR_DST=WR["TEMP"], TADDR=1, **mv_)                                      # T1 = the ID
+            w(RA_SEL=1, ASEL=A["RA"], WR_DST=WR["TEMP"], TADDR=T0, **mv_)                                      # T0 = R[fld1]
+            jmp("ld_chk")
+            at("ld_d1")
+            call("src0")                                                                                       # D=1: value = the specifier, ID = R[fld1]
+            w(RA_SEL=1, ASEL=A["RA"], WR_DST=WR["TEMP"], TADDR=1, **mv_)
+            at("ld_chk")
+            assert LDPR_INVALID == ((7 << 19) | 31) << 10
+            w(ASEL=A["CONST"], RCONST=7, **mv_)
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=19, SH_OP=0, RES_SEL=RES["SHIFT"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=mut.get("s3c_ld_or", 31), ALU_OP=ALU["OR"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=10, SH_OP=0, RES_SEL=RES["SHIFT"])            # the bitmap of reserved / invalid IDs
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, SH_OP=6, RES_SEL=RES["SHIFT"])                  # >> ID (count = its low byte)
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
+            pad(2)
+            if not mut.get("s3c_ld_no_bitmap"):
+                br(C_ZERO, "trap_regid", pol=1)
+            w(ASEL=A["RT"], TADDR=1, BSEL=A["CONST"], RCONST=mut.get("s3c_ld_range", 5), SH_OP=6, RES_SEL=RES["SHIFT"])   # ID >> 5: zero for 0..31
+            pad(2)
+            if not mut.get("s3c_ld_no_range"):
+                br(C_ZERO, "trap_regid", pol=1)
+            w(ASEL=A["RT"], TADDR=1 if mut.get("s3c_ld_val_id") else T0, **mv_)                                # the value ...
+            w(ASEL=A["RES"], FWD_EN=1, TADDR=T0 if mut.get("s3c_ld_idx_t0") else 1, **mv_)                     # ... carried one word while rt_data <- T1 (the index)
+            w(ASEL=A["RES"], FWD_EN=1, TADDR=1, RIDX=1, WR_DST=WR["GPR" if mut.get("s3c_ld_gpr") else "PRIV"], **mv_)   # privileged[T1] <- the value
+            jmp("disp")
+        if _S3C["st"]:
+            # ---- S3-C st: STPR (02): destination word <- privileged[ID], ID = operand 1 (a word). The privileged read address is a microcode constant, so
+            # the ID is compared with each supported one (a pipelined chain: every word tests one ID and branches on the result three words back) and the
+            # matching one-word reader returns the slot in T0. Anything else traps `regid`. The slot is read, never the live stack pointer.
+            mv_ = dict(ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            at("g_stpr")
+            if not mut.get("s3c_st_no_priv"):
+                br(C_PRIV, "trap_priv")
+            p.append(word(CONSUME=2))
+            br(C_F1, "st_f1")
+            br(C_D, "st_d1")
+            w(RA_SEL=1, ASEL=A["RA"], WR_DST=WR["TEMP"], TADDR=T0, **mv_)                                      # F2 D=0: ID = R[fld1], destination = the specifier
+            pad(2)
+            call("st_tree")
+            operand(MS_B6)
+            pad(1)
+            jmp("s3_wo")
+            at("st_d1")                                                                                        # F2 D=1: ID = the specifier, destination = R[fld1]
+            call("src0")
+            pad(2)
+            call("st_tree")
+            pad(3)
+            jmp("disp", ASEL=A["RT"], TADDR=T0, WR_DST=WR["GPR"], WR_ASEL=1, **mv_)
+            at("st_f1")                                                                                        # two specifiers
+            call("src0")
+            pad(2)
+            call("st_tree")
+            operand(MS_B5)
+            pad(1)
+            jmp("s3_wo")
+            at("st_tree")
+            ids_ = STPR_IDS
+            for i_ in range(len(ids_) + 3):
+                f_ = dict(ASEL=A["RT"], TADDR=T0, BSEL=A["CONST"], RCONST=ids_[i_], ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"]) if i_ < len(ids_) else {}
+                if i_ >= 3:
+                    fix.append((len(p), f"st_r{ids_[i_ - 3]}"))
+                    p.append(word(NXT=2, CPOL=0, SIZE_SEL=2, BE_MODE=1, **cond(C_ZERO), **f_))
+                else:
+                    w(**f_)
+            jmp("trap_regid")
+            for k_ in ids_:
+                at(f"st_r{k_}")
+                ret(ASEL=A["RP"], RCONST=mut.get("s3c_st_rd", {}).get(k_, k_), WR_DST=WR["TEMP"], TADDR=T0, SIZE_SEL=2, BE_MODE=1, **mv_)
 
         # ====================================================================================================================
         # B3 (CPU batch 3): ROTC.W, MULU.W, TEST1, XCHW (production builds only; same exploratory standard).
@@ -1727,7 +2337,12 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
                     at("mg_sg")
                 ex_ = ALU["SEXT" if sg_ else "ZEXT"]
                 w(ASEL=A["RT"], TADDR=T0, ALU_OP=ex_, SIZE_SEL=0, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
-                pad(3)
+                if "addc" in _C1GEN:                                                                            # P1.2: ADDC / SUBC = fmt[8] and fmt[10] both set; the test sits in wait words,
+                    br(19, f"mg_q{sg_}")                                                                        # so no multiply pays for it
+                    pad(2)
+                    at(f"mg_j{sg_}")
+                else:
+                    pad(3)
                 w(ASEL=A["RT"], TADDR=1, ALU_OP=ex_, SIZE_SEL=0, RES_SEL=RES["ALU"])
                 w(ASEL=A["RT"], TADDR=T0, BSEL=A["RES"], FWD_EN=1, MD_START=1, MD_SIGNED=sg_, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"])
                 if not sg_:
@@ -1754,11 +2369,24 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             w(ASEL=A["PSW"], BSEL=A["CONST"], RCONST=4, ALU_OP=ALU["OR"], RES_SEL=RES["ALU"], WR_DST=WR["PSW"])  # OV <- 1
             at("mg_ret")
             ret()
+            if "addc" in _C1GEN:
+                # ---- P1.2 ADDC / SUBC core (MAME opADDCB/H/W, opSUBCB/H/W): operand 2 <- operand 2 +/- operand 1 +/- CY at the instruction's size; all four flags.
+                for sg_, an_ in ((0, "ADDC"), (1, "SUBC")):
+                    at(f"mg_q{sg_}")
+                    br(17, f"ac_core{sg_}")
+                    jmp(f"mg_j{sg_}")                                                                           # a word multiply: back in step
+                    at(f"ac_core{sg_}")
+                    pad(1)
+                    w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                    w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU[an_], FLAG_UPD=0b1111, SIZE_SEL=1, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                    jmp("bt_ret")
             # ---- P1.1 divide / remainder core. Dispatch fmt: fmt[9] (ucond 18) = this family, fmt[8] (ucond 17) = REM, fmt[11] (ucond 20) = signed.
             # MAME opDIVB/H/W, opDIVUB/UH/UW, opREMB/H/W, opREMUB/UH/UW: the result starts as operand 2; a nonzero divisor replaces it by the size-wide
             # quotient / remainder; signed DIV of the most negative value by -1 leaves it and sets OV; Z S from the result; OV = 0 otherwise; CY unchanged.
             # Signed DIV by -1 is done as a sized NEG: it gives the quotient and exactly that OV, without a size-dependent constant.
             at("dv_core")
+            if "bit" in _C1GEN:
+                br(19, "bt_core")                                                                               # fmt[10] with fmt[9]: the bit family
             br(20, "dv_sg")
             w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["ZEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
             pad(2)
@@ -1791,10 +2419,200 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             at("dv_keep")
             w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], FLAG_UPD=0b0111, SIZE_SEL=1, RES_SEL=RES["ALU"])      # Z S from the sized result, OV <- 0
             ret()
+            if "bit" in _C1GEN:
+                # ---- P1.2 bit core: SET1 / CLR1 / NOT1 <bit>, <word> in every operand form. fmt[9] and fmt[10] = this family; fmt[8] (ucond 17) = CLR1,
+                # fmt[11] (ucond 20) = NOT1. MAME opSET1 / opCLR1 / opNOT1: CY <- the bit (number mod 32) before the change, Z <- not CY; S, OV unchanged.
+                at("bt_core")
+                w(ASEL=A["RT"], TADDR=T0, BSEL=A["CONST"], RCONST=31, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                pad(3)
+                w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=T0, SH_OP=6, RES_SEL=RES["SHIFT"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=1, ALU_OP=ALU["AND"], FLAG_UPD=0b0001, RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["ZERO"], ALU_OP=ALU["SUB"], FLAG_UPD=0b1000, RES_SEL=RES["ALU"])
+                w(ASEL=A["CONST"], RCONST=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=T0, SH_OP=0, RES_SEL=RES["SHIFT"])
+                w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=2)      # T2 = 1 << bit
+                br(17, "bt_clr")
+                br(20, "bt_not")
+                pad(1)
+                w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["OR"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                jmp("bt_ret")
+                at("bt_not")
+                pad(1)
+                w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+                jmp("bt_ret")
+                at("bt_clr")
+                pad(2)
+                w(ASEL=A["RT"], TADDR=2, ALU_OP=ALU["NOT"], RES_SEL=RES["ALU"])
+                w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            at("bt_ret")                                                                                        # shared return tail of the ADDC / SUBC and bit cores
+            pad(2)
+            ret()
             at("dv_m1")
             w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["NEG"], FLAG_UPD=0b0111, SIZE_SEL=1, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
             pad(2)
             ret()
+
+        if _SH:
+            # ==== P1.2: the generic shift / rotate path =========================================================================================
+            # Every form the form-at-a-time routines (g_shl, g_rot, g_sha, g_shah) do not implement falls through to here instead of trapping; ROTC is
+            # dispatched here outright. The operand handling is g_mulg's, word for word; sh_core does the operation: in T0 = the count operand (raw),
+            # T1 = the value (raw); out T1 = the result (the caller writes its low size bits), flags set. The kind is in the dispatch fmt:
+            # fmt[10] (ucond 19) = rotate, fmt[11] (ucond 20) = SHA / ROTC; ROTC also carries fmt[8] = byte, fmt[9] (ucond 18) = word (the ring length).
+            # SHL / SHA / ROT use the same shifter words as the existing forms, so every form of an instruction behaves alike.
+            at("g_shg")
+            p.append(word(CONSUME=2))
+            br(C_F1, "sg_f1")
+            br(C_D, "sg_d1")
+            at("sg_d0")
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)     # F2 D=0: T0 = R[fld1] (the count)
+            operand(MS_B6)
+            at("sg_dst")
+            br(C_REGDIR, "sg_dreg")
+            br(C_IMM, "trap_immdest")
+            call("ea1")
+            p.append(word())
+            p.append(word(BUS_OP=1, BUS_SIZE=0, SIZE_SEL=1))                                                    # read operand 2
+            pad(4)
+            mdr_to_temp(1)
+            call("sh_core")
+            jmp("gf_rmw_wr", ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=1, WR_DST=WR["MDR"])
+            at("sg_dreg")
+            w(RA_SEL=3, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)
+            call("sh_core")
+            jmp("disp", ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=3, CONSUME=1)
+            at("sg_d1")
+            call("src0")
+            pad(3)
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)
+            call("sh_core")
+            jmp("disp", ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=1)
+            at("sg_f1")
+            call("src0")
+            operand(MS_B5)
+            jmp("sg_dst")
+            at("sg_d0m")                                                                                        # from a D=0 routine after its own specifier lookup
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)
+            jmp("sg_dst")
+
+            at("sh_core")
+            br(20, "sh_k1")
+            br(19, "sh_rot")
+            for nm_, op_ in (("sh_shl", 0), ("sh_rot2", 2)):                                                    # SHL; ROT with a non-zero count
+                at(nm_)
+                w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+                jmp("sh_wr", ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=T0, SH_OP=op_, RES_SEL=RES["SHIFT"], FLAG_UPD=0b1100, SIZE_SEL=1)
+            at("sh_wr")                                                                                         # entered by a jump WORD that is itself the shifter word (result bypass)
+            w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], FLAG_UPD=0b0011, SIZE_SEL=1, WR_DST=WR["TEMP"], TADDR=1)
+            pad(2)
+            ret()
+            at("sh_rot")                                                                                        # MAME opROTB/H/W: a zero count clears CY
+            w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["ZEXT"], SIZE_SEL=3, RCONST=0, RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "sh_cnt0")
+            jmp("sh_rot2")
+            at("sh_cnt0")                                                                                       # the value unchanged; CY = OV = 0, S Z from it
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], FLAG_UPD=0b1111, SIZE_SEL=1, RES_SEL=RES["ALU"])
+            ret()
+            at("rot_d1z")
+            jmp("disp", RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], FLAG_UPD=0b1111, SIZE_SEL=1, RES_SEL=RES["ALU"])
+            at("rot_f1z")
+            jmp("gf_rmw_wr", ASEL=A["MDR"], ALU_OP=ALU["PASSA"], FLAG_UPD=0b1111, SIZE_SEL=1, RES_SEL=RES["ALU"], WR_DST=WR["MDR"])
+            at("sh_k1")
+            br(19, "rc_core")
+            # SHA (the g_shah scheme): OV from a pass with count - 1, CY from the pass with count, S Z from the size-masked result
+            w(TADDR=T0, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            pad(3)
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=T0, SH_OP=1, RES_SEL=RES["SHIFT"], FLAG_UPD=0b0100, SIZE_SEL=1)
+            w(TADDR=T0, BSEL=A["RT"], ALU_OP=ALU["INC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            pad(3)
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            jmp("sh_wr", ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=T0, SH_OP=1, RES_SEL=RES["SHIFT"], FLAG_UPD=0b1000, SIZE_SEL=1)
+            # ---- ROTC, every size and count (MAME opROTCB/H/W): count > 0: that many left rotations through CY; count < 0: -count right rotations,
+            # done as the equivalent number of left ones on the ring of size + 1 bits (the smallest L >= 1 with L = count + k * ring); count = -128:
+            # nothing rotates (MAME's int8 negation leaves -128, so its loop does not run) and CY is kept; count = 0: CY <- 0. OV <- 0, S Z from the value.
+            at("rc_core")
+            w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["SEXT"], SIZE_SEL=3, RCONST=0, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])       # T0 = the count, sign-extended
+            pad(2)
+            br(C_ZERO, "sh_cnt0")
+            w(ASEL=A["RT"], TADDR=T0, BSEL=A["CONST"], RCONST=31, SH_OP=6, RES_SEL=RES["SHIFT"], SIZE_SEL=2)               # its sign
+            pad(2)
+            br(C_ZERO, "rc_pos")
+            w(ASEL=A["RT"], TADDR=T0, BSEL=A["CONST"], RCONST=25, SH_OP=0, RES_SEL=RES["SHIFT"], SIZE_SEL=2)               # count << 25: zero only for -128
+            pad(2)
+            br(C_ZERO, "rc_fin")
+            w(TADDR=T0, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])                            # x = count - 1 (< 0)
+            pad(3)
+            at("rc_mod")                                                                                                   # x += ring until x >= 0
+            br(17, "rc_ring9")
+            br(18, "rc_ring33")
+            w(ASEL=A["CONST"], RCONST=17, BSEL=A["RT"], TADDR=T0, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            jmp("rc_sgn")
+            at("rc_ring9")
+            w(ASEL=A["CONST"], RCONST=9, BSEL=A["RT"], TADDR=T0, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            jmp("rc_sgn")
+            at("rc_ring33")
+            w(ASEL=A["CONST"], RCONST=31, BSEL=A["RT"], TADDR=T0, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=2, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)
+            pad(1)
+            at("rc_sgn")                                                                                                   # the sign of x, read back from T0 (no result bypass across the jumps)
+            pad(2)
+            w(ASEL=A["RT"], TADDR=T0, BSEL=A["CONST"], RCONST=31, SH_OP=6, RES_SEL=RES["SHIFT"], SIZE_SEL=2)
+            pad(2)
+            br(C_ZERO, "rc_mod", pol=1)                                                                                    # still negative
+            w(TADDR=T0, BSEL=A["RT"], ALU_OP=ALU["INC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])                            # L = x + 1
+            pad(1)
+            at("rc_pos")
+            pad(2)
+            at("rc_loop")                                                                                                  # T0 = the left rotations still to do
+            w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            pad(2)
+            br(C_ZERO, "rc_fin")
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["ADDC"], FLAG_UPD=0b1000, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], SIZE_SEL=1)   # T1 = 2 T1 + CY; CY <- the top bit
+            w(TADDR=T0, BSEL=A["RT"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])
+            pad(2)
+            jmp("rc_loop")
+            at("rc_fin")
+            w(ASEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA"], FLAG_UPD=0b0111, SIZE_SEL=1, RES_SEL=RES["ALU"])                 # OV 0, S, Z; CY from the last rotation
+            ret()
+
+        if _CV:
+            # ==== P1.2: the missing MOVS / MOVT forms (MAME opMOVSBH/BW/HW, opMOVTHB/WB/WH) ==========================================================
+            # The value is converted in T0 (MOVS: sign-extended from size1; MOVT: that, truncated to size2 with OV = the discarded bits are not the
+            # sign extension, other flags unchanged); a register destination is written in place, a memory one through g_gen's MOV store.
+            mt_ov = dict(ALU_OP=ALU["TRUNC"], FLAG_UPD=0b0100, SIZE_SEL=1, RES_SEL=RES["ALU"])
+            at("movs_f1r")                                                                                      # MOVS F1 <src>, Rn
+            w(TADDR=T0, ASEL=A["RT"], ALU_OP=ALU["SEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"])
+            jmp("disp", ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=3, CONSUME=1)
+            at("movs_d0m")                                                                                      # MOVS Rf, <memory> (F2 D=0)
+            br(C_IMM, "trap_immdest")
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["SEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)
+            at("cv_mem")
+            call("ea1")
+            p.append(word())
+            jmp("gf_b_wo0")
+            at("mt_f2")
+            br(C_D, "mt_d1")
+            w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["SEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"])                       # MOVT Rf, <register | memory> (F2 D=0)
+            w(ASEL=A["RES"], FWD_EN=1, WR_DST=WR["TEMP"], TADDR=T0, **mt_ov)
+            operand(MS_B6)
+            pad(1)
+            br(C_REGDIR, "gf_c_wo0")
+            br(C_IMM, "trap_immdest")
+            jmp("cv_mem")
+            at("mt_d1")                                                                                         # MOVT <src>, Rf (F2 D=1)
+            call("src0")
+            pad(3)
+            w(TADDR=T0, ASEL=A["RT"], ALU_OP=ALU["SEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"])
+            jmp("disp", ASEL=A["RES"], FWD_EN=1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=1, **mt_ov)
+            at("mt_f1r")                                                                                        # MOVT F1 <src>, Rn
+            w(TADDR=T0, ASEL=A["RT"], ALU_OP=ALU["SEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"])
+            jmp("disp", ASEL=A["RES"], FWD_EN=1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=3, CONSUME=1, **mt_ov)
+
 
         at("g_mulu")
         p.append(word(CONSUME=2))
@@ -1854,7 +2672,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         xb_wr = {} if mut.get("p3_xchb_fullwr") else dict(SIZE_SEL=0, BE_MODE=0)
         at("g_xchw")
         p.append(word(CONSUME=2))
-        br(C_F1, "trap_mode")
+        br(C_F1, "xch_f1" if _S3B["xc"] else "trap_mode")
         w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)      # T0 = R[fld1]
         operand(MS_B6)
         br(C_REGDIR, "xchw_reg")
@@ -1950,6 +2768,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         # ---- src1 (B3): operand 2 (bank by ifl[5]) as a VALUE -> T1, zero-extended to its size (the src0 body with size2 / ea1)
         at("src1")
         operand(MS_B5)
+        at("src1_b")                                      # S3-C: entry for a caller that has already looked the specifier up (a label only, no word)
         br(C_REGDIR, "src1_reg")
         br(C_QUICK, "src1_q")
         br(C_IMM, "src1_imm")
@@ -1978,10 +2797,11 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             at(nm_)
             p.append(word(CONSUME=2))
             br(C_F1, nm_ + "_f1")
-            jmp("trap_mode")
+            jmp("up_f2" if _S3B["up"] else "trap_mode")
             at(nm_ + "_f1")
             call("src0")
             call("src1")
+            at("up_go")
             br(17, nm_ + "_h")
             w(ASEL=A["ZERO"], ALU_OP=ALU["NOT"], RES_SEL=RES["ALU"])
             jmp(nm_ + "_j", SIZE_SEL=2, BE_MODE=1, ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=8, SH_OP=6, RES_SEL=RES["SHIFT"])       # 0x00FFFFFF
@@ -2425,7 +3245,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         # ---- DBNE Rn, disp16 (C7, byte 1 = 010 rrrrr; 130C26): Rn <- Rn - 1; if Rn != 0 and Z = 0: PC <- start + sext(disp16) else PC <- start + 4 (MAME opDBNE).
         # Flags unchanged. Reached from g_tb's sub-opcode check; the other C7 sub-opcodes still trap `opcode`.
         at("g_dbne")
-        chk_hi3(1, 2, "trap")
+        chk_hi3(1, 2, "db_tree" if "dbcc" in _C1GEN else "trap")
         w(RB_SEL=1, BSEL=A["RB"], ALU_OP=ALU["DEC"], RES_SEL=RES["ALU"], WR_DST=WR["GPR"], WR_ASEL=1)
         pad(2)
         br(C_ZERO, "dbne_fall")
@@ -2497,7 +3317,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         w(IMM_LD=1, IMM_OFS=1, IMM_SZ=0, ASEL=A["IMM"], BSEL=A["CONST"], RCONST=0x1F, ALU_OP=ALU["AND"], RES_SEL=RES["ALU"])
         w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=0x18, ALU_OP=ALU["XOR"], RES_SEL=RES["ALU"])
         pad(2)
-        br(C_ZERO, "trap", pol=1)
+        br(C_ZERO, "movcu_f_chk" if _MF else ("cmpc_chk" if _CC else "trap"), pol=1)  # mf: the last sub-opcode check goes on to MOVCFU's (a zero-cycle retarget)
         br(17, "trap")                                   # the .H entry (5A) with sub-opcode 0x18 is SCHCU.H
         p.append(word(CONSUME=2))
         operand(MS_B6)
@@ -2608,11 +3428,11 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         # shifter word and flags as the #count form (g_shl_d1). Only the .W table entry carries fmt[8]; SHL.B / .H and memory operands trap `mode`.
         at("g_shl_d0")
         br(17, "shl_d0_ok")
-        jmp("trap_mode")
+        jmp("sg_d0" if _SH else "trap_mode")
         at("shl_d0_ok")
         operand(MS_B6)
         br(C_REGDIR, "shl_d0_reg")
-        jmp("trap_mode")
+        jmp("sg_d0m" if _SH else "trap_mode")
         at("shl_d0_reg")
         w(RA_SEL=3, ASEL=A["RA"], RB_SEL=0 if mut.get("rp_shl_rb0") else 1, RCONST=0, BSEL=A["RB"], SH_OP=0, RES_SEL=RES["SHIFT"], FLAG_UPD=0b1100, SIZE_SEL=1)
         w(ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], FLAG_UPD=0b0011, SIZE_SEL=1, WR_DST=WR["GPR"], WR_ASEL=3, BE_MODE=0, CONSUME=1)
@@ -2695,12 +3515,12 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         at("g_movt")
         p.append(word(CONSUME=2))
         br(C_F1, "movt_f1")
-        jmp("trap_mode")
+        jmp("mt_f2" if _CV else "trap_mode")
         at("movt_f1")
         call("src0")
         operand(MS_B5)
         if not mut.get("rp_movt_nodstchk"):
-            br(C_REGDIR, "trap_mode")
+            br(C_REGDIR, "mt_f1r" if _CV else "trap_mode")
         br(C_IMM, "trap_immdest")
         call("ea1")
         p.append(word())
@@ -2827,8 +3647,8 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         at("g_sha")
         p.append(word(CONSUME=2))
         if not mut.get("rp3_sha_anyf1"):
-            br(C_F1, "trap_mode")
-        br(C_D, "trap_mode", pol=1)
+            br(C_F1, "sg_f1" if _SH else "trap_mode")
+        br(C_D, "sg_d0" if _SH else "trap_mode", pol=1)
         operand(MS_B6)
         # GA2Play7: the #q count is accepted (0605A4 / 0605BC / 0605D4 sha.w #8, R1, the map-camera keyframe step of the stage-1 -> stage-2 map sequence;
         # src0's #q path gives T0 = q, 0..15, a positive = left count as MAME's (int8)(modval & 0x0F)). The trap branch is replaced by an empty word so
@@ -2862,7 +3682,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             br(17, "trap_mode", pol=1)
         operand(MS_B6)
         if not mut.get("rp3_movs_d0_anyreg"):
-            br(C_REGDIR, "trap_mode", pol=1)
+            br(C_REGDIR, "movs_d0m" if _CV else "trap_mode", pol=1)
         w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["ZEXT" if mut.get("rp3_movs_d0_zext") else "SEXT"], SIZE_SEL=0, RES_SEL=RES["ALU"])
         jmp("disp", ASEL=A["RES"], FWD_EN=1, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], SIZE_SEL=2 if mut.get("rp3_movs_d0_word") else 1, BE_MODE=0, WR_DST=WR["GPR"], WR_ASEL=1 if mut.get("rp3_movs_d0_wrf") else 3, CONSUME=1)
 
@@ -2883,27 +3703,54 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         at("jsr_x")
         p.append(word(CONSUME=1))                        # opcode
         operand(MS_OP0)
-        chk_hi3(0, 6, "trap_mode")                       # the index prefix only
+        chk_hi3(0, 6, "jsr_dd" if _S3B["js"] else "trap_mode")   # the index prefix only; S3-B js: the double displacements
         w(RB_SEL=3, AGU_BASE=5, AGU_OFF=0, AGU_IDX=1, RES_SEL=RES["AGU"], WR_DST=WR["TEMP"], TADDR=5, CONSUME=1, SIZE_SEL=0)       # T5 = Rx (size1 = byte); the prefix is consumed
         operand(MS_ZERO)
         if not mut.get("pl_jsrx_anybase"):
             br(C_TAG, "jsr_xb")
-            jmp("trap_mode")
+            jmp("jsr_xi" if _JX else "trap_mode")        # jx: the other direct bases (a zero-cycle retarget of the trap branch)
         at("jsr_xb")
         w(IMM_LD=1, IMM_OFS=1, IMM_SZ=2, CONSUME=5, ASEL=A["PC"], BSEL=A["IMM"], ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)       # T1 = ipc + disp32
+        if _JX:
+            at("jsr_xb2")
         w(ASEL=A["PC"], BSEL=A["CONST"], RCONST=6 if mut.get("pl_jsrx_ret6") else 7, ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)                                 # T0 = ipc + 7
-        pad(2)
+        if _JX and not mut.get("jx_no_ddguard"):
+            # jx: the tagged class also holds the PC double displacements (FC / FD / FE, S3-A; bit 4 set), which are not an indexed base: they were taken
+            # for disp32[PC] here. The first wait word becomes the guard (never taken for disp32[PC] or /abs: no cycle change), before any effect.
+            br(22, "trap_mode")
+            pad(1)
+        else:
+            pad(2)
         w(ASEL=A["RT"], TADDR=5, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
         w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA" if mut.get("pl_jsrx_noidx") else "ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])                    # T1 += Rx
         pad(3)
         jmp("jsr_tail")
+        if _JX:
+            # ---- jx: JSR <base>(Rx) (E9, index prefix) on the other direct bases. Here the prefix is consumed, T5 = Rx (scale 1: JSR's operand is a byte
+            # address, MAME moddim 0) and the base specifier is looked up, at window offset 0: exactly the state of a plain JSR (E8) after its opcode.
+            #   register-based d8 / d16 / d32[Rn], [Rn], and d8 / d16[PC]: through the existing jsr_rb (T0 = ipc + 1 + base length, T1 = the base address);
+            #       jsr_rb2's fmt[8] branch then comes to jsr_xfix: T0 += 1 (the prefix byte), T1 += Rx.
+            #   /abs: T1 = the 32-bit address, then jsr_xb's own tail (T0 = ipc + 7, T1 += Rx).
+            # Immediate bases and the memory-indirect bases ([d[Rn]], [d[PC]], [/abs]) trap `mode` (jsr_rb's group checks), as before.
+            at("jsr_xi")
+            br(C_IMM, "trap_mode")
+            if not mut.get("jx_no_rb"):
+                br(22, "jsr_rb")
+            w(IMM_LD=1, IMM_OFS=1, IMM_SZ=2, CONSUME=5, ASEL=A["PC" if mut.get("jx_abs_pc") else "ZERO"], BSEL=A["IMM"], ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)   # T1 = the address
+            jmp("jsr_xb2")
+            at("jsr_xfix")
+            w(ASEL=A["RT"], TADDR=T0, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["CONST"], RCONST=mut.get("jx_ret", 1), ALU_OP=ALU["ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0)     # T0 = ipc + 2 + base length
+            w(ASEL=A["RT"], TADDR=1 if mut.get("jx_idx_t1") else 5, ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"])
+            w(ASEL=A["RES"], FWD_EN=1, BSEL=A["RT"], TADDR=1, ALU_OP=ALU["PASSA" if mut.get("jx_noidx") else "ADD"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"])   # T1 += Rx
+            jmp("jsr_tail")
 
         # ---- PUSH Rn (EF, bank 1; 064915 push R0): SP <- SP - 4; word store of R[n] (the value before the SP update) at [SP]. Other bank-1 operands trap `mode`.
         at("push_r")
         p.append(word(CONSUME=1))
         operand(MS_OP0)
         br(C_REGDIR, "push_rr")
-        jmp("trap_mode")
+        jmp("push_m" if _S3B["pp"] else "trap_mode")     # S3-B pp: a bank-1 memory operand ([Rn+], [-Rn], double displacement, indexed) -> the memory path
         at("push_rr")
         jmp("push_tail", RA_SEL=3, ASEL=A["RA"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=T0, CONSUME=1, SIZE_SEL=2, BE_MODE=1)
 
@@ -2912,7 +3759,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         p.append(word(CONSUME=1))
         operand(MS_OP0)
         br(C_REGDIR, "pop_rr")
-        jmp("trap_mode")
+        jmp("pop_m_go" if _S3B["pp"] else "trap_mode")   # S3-B pp: a bank-1 memory operand -> the memory path
         at("pop_rr")
         w(ASEL=A["SP"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MAR"])
         pad(2)
@@ -2934,7 +3781,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         call("src0")
         operand(MS_B5)
         if not mut.get("p3_movs_f1_anydst"):
-            br(C_REGDIR, "trap_mode")
+            br(C_REGDIR, "movs_f1r" if _CV else "trap_mode")
         br(C_IMM, "trap_immdest")
         call("ea1")
         p.append(word())
@@ -2973,7 +3820,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         # ---- XCH.H Rf, Rn (43, F2 D=0, register specifier; 133C86 xch.h R3, R4): the low halves swap, the upper halves stay. Flags unchanged.
         at("g_xchh")
         p.append(word(CONSUME=2))
-        br(C_F1, "trap_mode")
+        br(C_F1, "xch_f1" if _S3B["xc"] else "trap_mode")
         if mut.get("p8_xchh_d1_trap"):
             br(C_D, "trap_mode")
         else:
@@ -3150,7 +3997,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         p.append(word(CONSUME=2))
         br(C_F1, "shah_f1")
         br(C_D, "shah_d1")
-        jmp("trap_mode")
+        jmp("sg_d0" if _SH else "trap_mode")
         at("shah_d1")
         call("src0")
         w(RA_SEL=1, ASEL=A["RA"], ALU_OP=ALU["SEXT"], SIZE_SEL=1, RES_SEL=RES["ALU"], WR_DST=WR["TEMP"], TADDR=1)
@@ -3176,7 +4023,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         at("shah_f1")
         call("src0")
         operand(MS_B5)
-        br(C_REGDIR, "trap_mode")
+        br(C_REGDIR, "sg_dreg" if _SH else "trap_mode")
         br(C_IMM, "trap_immdest")
         call("ea1")
         p.append(word())
@@ -3250,6 +4097,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         p.append(word(CONSUME=1))
         operand(MS_OP0)
         br(C_IMM, "trap_immdest")
+        at("pop_m_go")
         w(ASEL=A["SP"], ALU_OP=ALU["PASSA"], RES_SEL=RES["ALU"], WR_DST=WR["MAR"])
         pad(2)
         bus(1, 3)
@@ -3572,7 +4420,7 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             at("sm_rot_d0")
             operand(MS_B6)
             br(C_REGDIR, "sm_rot_d0r")
-            jmp("trap_mode")
+            jmp("sg_d0m" if _SH else "trap_mode")
             at("sm_rot_d0r")
             if not mut.get("sm_rot_cnt0_keepcy"):
                 # MAME opROTB/H/W: a zero count clears CY (and OV); Z S from the value. The rotator leaves CY unchanged at count 0.
@@ -3667,6 +4515,8 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
         dtab[0xA5] = (gfmt(2, 2) << 12) | sym["g_div"]
         dtab[0x5A] = ((gfmt(1, 1, False) | (1 << 8)) << 12) | sym["movcu"]
         dtab[0x58] = (gfmt(0, 0, False) << 12) | sym["movcu"]
+        if _BS:
+            dtab[0x5B] = (gfmt(0, 0, False) << 12) | sym["movbs"]     # bs: MOVBSU / MOVBSD (byte accesses)
         dtab[0x48] = sym["bsr"]
         dtab[0xCA] = sym["rsr"]
         for sz_, (o_inc, o_test, o_dec) in enumerate(((0xD9, 0xF1, 0xD1), (0xDB, 0xF3, 0xD3), (0xDD, 0xF5, 0xD5))):
@@ -3701,6 +4551,8 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             dtab[0xE6] = sym["pop_m"]                                                   # GA2Play8: POP <memory> (bank 0)
         dtab[0xBB] = (gfmt(0, 1) << 12) | sym["g_shah"]                                 # SHA.H
         dtab[0xE9] = sym["jsr_x"]                                                       # JSR disp32[PC](Rx) (bank 1)
+        if _JX and not mut.get("jx_no_fmt"):
+            dtab[0xE9] |= (1 << 8) << 12                                                # jx: fmt[8] marks E9 for jsr_rb2's branch (sizes stay byte)
         dtab[0xEF] = sym["push_r"]                                                      # PUSH Rn
         dtab[0xE7] = sym["pop_r"]                                                       # POP Rn
         dtab[0xB5] = (gfmt(2, 2) << 12) | sym["g_divu"]
@@ -3769,6 +4621,13 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             mtab[0x100 | 0x20 | r] = (0x818 << 12) | sym["mret"]
             mtab[0x100 | 0x40 | r] = (0x81C << 12) | sym["mret"]
             mtab[0x100 | 0xC0 | r] = (0x830 << 12) | sym["mret"]   # B2 modm 1: the index prefix (Rx = r): bits 11 + 4 (the stepped-class tag pair, told apart by the mode byte) + 5 (index)
+    if _AM and not smc_test:
+        for r in range(32):
+            mtab[0xC0 | r] = (0x1DC << 12) | sym["mdd"]              # [d32[Rn]]: base MDR, disp32, register-based memory
+        mtab[0x0FA] = (0x1DC << 12) | sym["mpx"]                     # [d32[PC]]
+        mtab[0x0FB] = (0x1DC << 12) | sym["mpx"]                     # [abs]
+        for i_, d_ in ((0x0FC, 0x894), (0x0FD, 0x898), (0x0FE, 0x89C)):   # d8 / d16 / d32 [d8 / d16 / d32 [PC]]: the dd[Rn] descriptors (tags 11 + 4) with AGU base 2 = ipc; ea0 / ea1's
+            mtab[i_] = (d_ << 12) | sym["mret"]                      # double-displacement words do the rest (the mode byte >> 5 is 7: not stepped, not an index prefix)
     for k, v in (mut.get("mv_mtab") or {}).items():       # TEST-ONLY mode-table mutants (structural)
         mtab[k] = (v & ~0xFFF) | sym["mret"]
     check_tables(sym, dtab, mtab, smc_test)
@@ -3779,6 +4638,9 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
     if not smc_test and not mut.get("no_irq_stubs"):
         # B3: every supported opcode is dispatched through a two-word stub `br(irq_pending, irq_entry); jmp routine`: the dispatch has latched ipc = the
         # instruction's own start, so an interrupt is taken exactly at an instruction boundary and the frame's return PC is ipc.
+        if "var" in _C1GEN and "g_movt" in sym:                                                              # P0 E1 / P1.2: size variants by dispatch entry
+            # ROTC.H (0x9B) is NOT enabled: on the release's g_rotc it differs from MAME (91 of 1,530 vectors); deferred to the shift-family slice.
+            dtab[0x29] = (gfmt(2, 0) << 12) | sym["g_movt"]                                                  # MOVT.WB
         if "mul" in _C1GEN and "g_mulg" in sym:                                                              # S1 (P1.1): the six multiplies -> g_mulg
             for op_, sz_, sg_ in ((0x81, 0, 1), (0x83, 1, 1), (0x85, 2, 1), (0x91, 0, 0), (0x93, 1, 0), (0x95, 2, 0)):
                 dtab[op_] = ((sz_ | (sz_ << 2) | ((1 << 8) if sz_ == 0 else 0) | ((1 << 10) if sz_ == 2 else 0) | (sg_ << 11)) << 12) | sym["g_mulg"]
@@ -3786,25 +4648,68 @@ def build(smc_test=False, smc_merged=False, reset_native=False, mut=None):
             for op_, sz_, sg_, rm_ in ((0xA1, 0, 1, 0), (0xA3, 1, 1, 0), (0xA5, 2, 1, 0), (0xB1, 0, 0, 0), (0xB3, 1, 0, 0), (0xB5, 2, 0, 0),
                                        (0x50, 0, 1, 1), (0x52, 1, 1, 1), (0x54, 2, 1, 1), (0x51, 0, 0, 1), (0x53, 1, 0, 1), (0x55, 2, 0, 1)):
                 dtab[op_] = ((sz_ | (sz_ << 2) | (rm_ << 8) | (1 << 9) | (sg_ << 11)) << 12) | sym["g_mulg"]
-        stub = {}
-        NEWOPS = [0x19, 0x3B, 0xB5, 0xBD, 0x2B, 0x81, 0x83, 0xA1, 0xA3, 0x50, 0x94, 0x43, 0xBB, 0xE9, 0xEF, 0xE7, 0xB1, 0x51, 0xE6]
-        for op in [o for o in range(256) if o not in NEWOPS] + NEWOPS:      # R-post2 / 3: the new stubs are allocated last, so no existing stub moves relative to the others
-            ua = dtab[op] & 0xFFF
-            if ua == sym["trap"]:
-                continue
-            if ua not in stub:
-                stub[ua] = len(p)
-                p.append(word(NXT=2, CPOL=0, JADDR=sym["irq_entry"], **cond(10)))
-                p.append(word(NXT=1, JADDR=ua))
-            dtab[op] = (dtab[op] & ~0xFFF) | stub[ua]
+        if "addc" in _C1GEN and "g_mulg" in sym:                                                             # S1 (P1.2): ADDC / SUBC -> the generic routine's own core
+            for sz_, (oa_, os_) in enumerate(((0x90, 0x98), (0x92, 0x9A), (0x94, 0x9C))):
+                dtab[oa_] = ((sz_ | (sz_ << 2) | (1 << 8) | (1 << 10)) << 12) | sym["g_mulg"]
+                dtab[os_] = ((sz_ | (sz_ << 2) | (1 << 8) | (1 << 10) | (1 << 11)) << 12) | sym["g_mulg"]
+        if _SH and "g_shg" in sym:                                                                           # S2 (P1.2): the kind bits of the generic shift path; ROTC outright
+            for sz_, (o_shl, o_rot, o_sha, o_rc) in enumerate(((0xA9, 0x89, 0xB9, 0x99), (0xAB, 0x8B, 0xBB, 0x9B), (0xAD, 0x8D, 0xBD, 0x9D))):
+                dtab[o_rot] |= (1 << 10) << 12
+                dtab[o_sha] |= (1 << 11) << 12
+                dtab[o_rc] = ((gfmt(0, sz_) | (1 << 10) | (1 << 11) | ((1 << 8) if sz_ == 0 else 0) | ((1 << 9) if sz_ == 2 else 0)) << 12) | sym["g_shg"]
+        if "bit" in _C1GEN and "g_mulg" in sym:                                                              # S2 (P1.2): SET1 / CLR1 / NOT1 -> the generic routine
+            for op_, k_ in ((0x97, 0), (0xA7, 1 << 8), (0xB7, 1 << 11)):
+                dtab[op_] = ((2 | (2 << 2) | (1 << 9) | (1 << 10) | k_) << 12) | sym["g_mulg"]
+        if _S3B["rv"]:
+            dtab[0x08] = (gfmt(0, 0) << 12) | sym["g_rvbit"]                                                 # S3-B rv: RVBIT
+        if _S3C["ld"]:
+            dtab[0x12] |= gfmt(2, 2) << 12                                                                   # S3-C ld: word sizes for the generic operand readers (the flag and the routine stay)
+        if _S3C["st"]:
+            dtab[0x02] = ((gfmt(2, 2) | (1 << 7)) << 12) | sym["g_stpr"]                                      # S3-C st: STPR, privileged
+        if _S3B["gp"]:
+            dtab[0xF6] = (gfmt(2, 2) << 12) | sym["getpsw"]                                                  # S3-B gp: GETPSW, bank 0 (memory); word sizes for the store
+            dtab[0xF7] = (gfmt(2, 2) << 12) | sym["getpsw"]
+        if _S3B["pp"]:
+            dtab[0xEF] = (gfmt(2, 2) << 12) | sym["push_r"]                                                  # S3-B pp: word sizes for the stepped operands of PUSH / POP
+            dtab[0xE7] = (gfmt(2, 2) << 12) | sym["pop_r"]
+        if "dbcc" in _C1GEN and "g_tb" in sym:
+            dtab[0xC7] = ((1 << 8) << 12) | sym["g_tb"]                                                      # fmt[8]: the complemented conditions
+        stubs_pending = True                                # CC-1: the stubs are added below (after compaction when it runs)
+    assert len(p) <= 4096 and max(sym.values()) < 4096, f"the uncompacted program has {len(p)} words: microcode addresses are 12 bits (a routine above 4,095 corrupts its table entry; CC-1: the stubs no longer count)"
+    stubs_pending = locals().get("stubs_pending", False)
     if not mut.get("no_compact") and not _NO_COMPACT:
         compact(p, sym, dtab, mtab)
+        if stubs_pending:
+            _add_irq_stubs(p, sym, dtab)
+            assert len(p) <= 4096, f"{len(p)} words after compaction and stubs"
         if _PACK:
             if str(HERE) not in sys.path:                  # copies of this builder (mutant tools) rewrite HERE to this directory
                 sys.path.insert(0, str(HERE))
             from mc_pack import pack
             pack(p, sym, dtab, mtab, _PACK, keep_bits=not smc_test, ref_key=None if smc_test else ("rn" if reset_native else "prod"))
+    elif stubs_pending:
+        _add_irq_stubs(p, sym, dtab)
+        assert len(p) <= 4096 and max(sym.values()) < 4096, f"the uncompacted program has {len(p)} words (with stubs): no compaction in this build"
     return p, sym, dtab, mtab
+
+
+def _add_irq_stubs(p, sym, dtab):
+    """The interrupt-check stubs: for every distinct dispatch target (except trap), two words (check the interrupt line, then jump
+    to the routine); every dispatch entry is redirected to its target's stub. CC-1 (2026-11-24): called AFTER compaction when the
+    build compacts (the stubs are then generated from the renumbered tables, at the same final positions: appended after the kept
+    words, in the same order), so the 4,096-word limit of the 12-bit addresses applies to the code alone, not to code + stubs.
+    Tools that need the uncompacted layout (no compaction) still get them at the old point."""
+    stub = {}
+    NEWOPS = [0x19, 0x3B, 0xB5, 0xBD, 0x2B, 0x81, 0x83, 0xA1, 0xA3, 0x50, 0x94, 0x43, 0xBB, 0xE9, 0xEF, 0xE7, 0xB1, 0x51, 0xE6] + ([0x5B] if _BS else [])   # bs: its stub last, as every new stub
+    for op in [o for o in range(256) if o not in NEWOPS] + NEWOPS:      # R-post2 / 3: the new stubs are allocated last, so no existing stub moves relative to the others
+        ua = dtab[op] & 0xFFF
+        if ua == sym["trap"]:
+            continue
+        if ua not in stub:
+            stub[ua] = len(p)
+            p.append(word(NXT=2, CPOL=0, JADDR=sym["irq_entry"], **cond(10)))
+            p.append(word(NXT=1, JADDR=ua))
+        dtab[op] = (dtab[op] & ~0xFFF) | stub[ua]
 
 
 LAST_COMPACTION = {}
@@ -3867,14 +4772,10 @@ def compact(p, sym, dtab, mtab):
 
 
 def main():
-    global _PACK, _C1GEN, _S1
+    global _PACK
     for a_ in sys.argv[2:]:
         if a_.startswith("--mc-pack="):
             _PACK = a_.split("=", 1)[1]
-        elif a_.startswith("--arith"):
-            if a_ != ARITH_ARG:
-                raise SystemExit(f"refusing: {a_!r}: the only arithmetic selector is {ARITH_ARG!r}")
-            _C1GEN, _S1 = {"mul", "div"}, True
     out = Path(sys.argv[1])
     out.mkdir(parents=True, exist_ok=True)
     self_check()

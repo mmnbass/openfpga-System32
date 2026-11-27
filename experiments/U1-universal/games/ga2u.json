@@ -1,11 +1,15 @@
 {
   "set": "ga2u",
-  "title": "Golden Axe: The Revenge of Death Adder (US)",
+  "title": "Golden Axe: The Revenge of Death Adder (US, Rev A)",
   "mra": "references/s32/releases/Golden Axe The Revenge of Death Adder.mra",
   "mra_note": "upstream's MRA is the World set (ga2); ga2u runs on the same board, so the descriptor bytes are the same",
   "descriptor": "22000083000000000000000000000000",
   "input_profile": 0,
   "input_profile_note": "0 = GA2 US wiring: Coin 1 on 8255 port C bit 3 (MAME ga2u counts SERVICE12 bit 2 as COIN4), Start on SERVICE12 bit 4",
   "expected_sums": {"sum0": "a54f8e76", "fl0": "9e152dfa", "sum1": "5e9bf850", "fl1": "39aeff9a", "sum2": "bcd81c86", "fl2": "f5dfbf9c"},
-  "expected_sums_source": "GA2Play8 d2_core_top_sp.sv parameters EXP_SUM0..EXP_FL2 (checksums of the slot files, not ROM data)"
+  "expected_sums_source": "GA2Play8 d2_core_top_sp.sv parameters EXP_SUM0..EXP_FL2 (checksums of the slot files, not ROM data)",
+  "coin_chute": {"eeprom_word": 8, "bit": 0, "individual_value": 1},
+  "coin_chute_note": "COIN ASSIGNMENTS > COIN CHUTE TYPE is EEPROM word 8 bit 0 (0 = COMMON, 1 = INDIVIDUAL); CABINET TYPE is word 7 bits 15:8 (0 = 2P, 1 = 3P, 2 = 4P). Measured 2026-11-25 by changing each setting in the game's own test menu and diffing the saved EEPROM (factory: World / Japan 2P COMMON, US 4P INDIVIDUAL); the same program in all three regions. The core routes the coin inputs from this bit, so the coin slots follow the setting the operator chose",
+  "cabinet": {"eeprom_word": 7, "low_bit": 8},
+  "cabinet_note": "GAME ASSIGNMENTS > CABINET TYPE is EEPROM word 7 bits 9:8 (0 = 2P, 1 = 3P, 2 = 4P; menu-written saves, all three regions). With INDIVIDUAL chutes the game counts its coin lines (8255 PC b3, PC b2, SERVICE12 b3, SERVICE12 b2) by cabinet type: an N-player cabinet counts the last N for players 1..N (measured 2026-11-26, rel_derive.py CB); the core reads this field to route the coins"
 }

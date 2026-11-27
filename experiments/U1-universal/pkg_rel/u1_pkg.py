@@ -22,9 +22,10 @@ U1 = HERE.parent
 sys.path.insert(0, str(U1))
 import u1_cfg  # noqa: E402
 
-PLATFORM, CORE = "segas32", "mmnbass.System32"   # provisional public identifiers (Michael 2026-11-19)
-INST_DIR = HERE / "Assets" / PLATFORM / CORE
-EEPROM_DEFAULT = {"spidman": "spidman_eeprom.bin"}          # SpidPlay1's optional factory-default image; GA2 has none
+import os
+PLATFORM, CORE = os.environ.get("PKG_PLATFORM", "segas32"), os.environ.get("PKG_CORE", "mmnbass.System32")   # SN: overridable (package_sn.sh)
+INST_DIR = Path(os.environ.get("PKG_TEMPLATES", HERE)) / "Assets" / PLATFORM / CORE
+EEPROM_DEFAULT = {"spidman": "spidman_eeprom.bin", "spidmanu": "spidmanu_eeprom.bin", "spidmanj": "spidmanj_eeprom.bin"}          # SpidPlay1's optional factory-default image; GA2 has none
 
 
 def rom_files(s):
@@ -51,22 +52,26 @@ def sets():
     return [p.stem for p in u1_cfg.games()]
 
 
+def inst_name(s):   # the instance file of set s: its full title (u1_cfg.instance_stem)
+    return u1_cfg.instance_stem(json.loads((U1 / "games" / f"{s}.json").read_text())) + ".json"
+
+
 def main(a):
     if a and a[0] == "write":
         INST_DIR.mkdir(parents=True, exist_ok=True)
         for s in sets():
-            (INST_DIR / f"{s}.json").write_text(text(s)); print(f"wrote {INST_DIR / (s + '.json')}")
+            (INST_DIR / inst_name(s)).write_text(text(s)); print(f"wrote {INST_DIR / inst_name(s)}")
         return 0
     if a and a[0] == "check":
         bad = 0
         have = sorted(p.name for p in INST_DIR.iterdir()) if INST_DIR.is_dir() else []
-        want = sorted(f"{s}.json" for s in sets())
+        want = sorted(inst_name(s) for s in sets())
         if have != want:
             bad += 1; print(f"FAIL instance files {have} != {want}")
         for s in sets():
-            p = INST_DIR / f"{s}.json"
+            p = INST_DIR / inst_name(s)
             ok = p.is_file() and p.read_text() == text(s); bad += not ok
-            print(f"{'ok  ' if ok else 'FAIL'} {p.relative_to(HERE)} == generated")
+            print(f"{'ok  ' if ok else 'FAIL'} {p.relative_to(INST_DIR.parents[2])} == generated")
         print("U1 PKG CHECK", "PASS" if not bad else f"FAIL ({bad})"); return 1 if bad else 0
     if len(a) == 2 and a[0] == "cfg":
         d = Path(a[1]); d.mkdir(parents=True, exist_ok=True)

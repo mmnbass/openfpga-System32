@@ -26,6 +26,16 @@
             "key": "pad_btn_y"
           },
           {
+            "id": 4,
+            "name": "Service (operator buttons on)",
+            "key": "pad_trig_l"
+          },
+          {
+            "id": 5,
+            "name": "Test (operator buttons on)",
+            "key": "pad_trig_r"
+          },
+          {
             "id": 20,
             "name": "Start",
             "key": "pad_btn_start"

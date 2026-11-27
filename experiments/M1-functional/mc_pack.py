@@ -364,12 +364,19 @@ def keep_table_bits(p, sym, dtab, mtab, ref, maxpad=3):
         return newaddr, old
 
     best = None
+    # S3-B: MC_PACK_BUDGET = the number of layouts to try before giving up (unset: the exhaustive search, as before). The search is factorial in the
+    # number of blocks; when no cheap layout exists it does not end in practical time. Giving up raises the same assertion as "no layout exists",
+    # which pack() records (table_bits unsatisfied, newly_varying_tables) for images built against the frozen reference.
+    import os as _os
+    budget = int(_os.environ.get("MC_PACK_BUDGET", "0")); tried = 0
     for total in range(0, maxpad * (len(blocks) + 1) + 1):
         for spad in range(min(maxpad, total) + 1):
             for pads in itertools.product(range(maxpad + 1), repeat=len(blocks)):
                 if sum(pads) + spad != total:
                     continue
                 for order in itertools.permutations(blocks):
+                    tried += 1
+                    assert not budget or tried <= budget, f"table constant bits: search budget of {budget} layouts exhausted"
                     if ok(layout(order, pads, spad)[0]):
                         best = (order, pads, spad)
                         break

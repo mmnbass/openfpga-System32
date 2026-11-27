@@ -146,6 +146,68 @@ REPS += [(a, b, 1) for a, b in SM_REPS]
 CORE_REPS = [
     ("wire        v25_stub_sel = m_req && !m_we && sel_v25;   // D2-play: whole DPRAM window (S2 variant: A[11:1] 080..0AF only)\n",
      "wire        v25_stub_sel = m_req && !m_we && sel_v25 && cfg_has_v25;   // U1: only on a board with a V25 (else open bus FFFF, as MAME)\n", 1),
+    # DM (fit/s32-dmap, Michael 2026-11-22: one private fit): the Pocket configuration video option, OR'd with upstream's expression
+    ("    input  board_desc_t board,\n", "    input  board_desc_t board,\n    input             cfg_sprite_over_nbg0,   // DM: Pocket configuration video option\n", 1),
+    ("wire sprite_over_nbg0 = (cfg_prot_sel == PROT_SONIC) ||", "wire sprite_over_nbg0 = cfg_sprite_over_nbg0 || (cfg_prot_sel == PROT_SONIC) ||", 1),
+    # SN (SegaSonic, Michael 2026-11-23): the work RAM's protection port on the external SRAM (u1_wram_pr time-shares the single
+    # SRAM port between the CPU and upstream's protection client). With pr_req never raised (every board without a responder) the
+    # module is transparent and the three edits below reduce to the previous text.
+    ("reg         pr_ack;\n", "wire        pr_ack;      // SN: a pulse per completed access (u1_wram_pr)\nwire        wram_pr_busy, wram_cpu_rdy;\n"
+     "wire [15:0] wram_cpu_addr, wram_cpu_wdata; wire [1:0] wram_cpu_be; wire wram_cpu_we, wram_cpu_rd;\n", 1),
+    ("// P1-POCKET-TOP VARIANT: no on-chip work RAM. The CPU port goes to the external SRAM port (wram_ext_*). Port B\n"
+     "// (protection) is unused on GA2 (PROT_NONE): it reads open bus; a write to it is reported in simulation.\n"
+     "assign wram_ext_addr  = 16'(wram_a);\n"
+     "assign wram_ext_wdata = m_wdata;\n"
+     "assign wram_ext_be    = m_be;\n"
+     "assign wram_ext_we    = m_req && m_we && sel_wram;\n"
+     "assign wram_ext_rd    = m_req && !m_we && sel_wram;\n"
+     "assign wram_q         = wram_ext_q;\n"
+     "assign pr_q           = 16'hffff;\n"
+     "`ifdef SIMULATION\n"
+     "always @(posedge clk_sys) if (work_pr_we) $display(\"P1 VARIANT ERROR: write to work-RAM port B (protection), which this variant does not have\");\n"
+     "`endif\n\n"
+     "always @(posedge clk_sys)\n    pr_ack <= pr_req;\n",
+     "// P1-POCKET-TOP VARIANT: no on-chip work RAM. The CPU port goes to the external SRAM port (wram_ext_*).\n"
+     "// SN: port B (protection, pr_*) shares that port through u1_wram_pr; Burning Rival's byte port (br_pram_we) is not provided.\n"
+     "assign wram_cpu_addr  = 16'(wram_a);\n"
+     "assign wram_cpu_wdata = m_wdata;\n"
+     "assign wram_cpu_be    = m_be;\n"
+     "assign wram_cpu_we    = m_req && m_we && sel_wram;\n"
+     "assign wram_cpu_rd    = m_req && !m_we && sel_wram;\n"
+     "assign wram_q         = wram_ext_q;\n"
+     "u1_wram_pr wram_pr (\n"
+     "    .clk(clk_sys), .rst(rst),\n"
+     "    .cpu_addr(wram_cpu_addr), .cpu_wdata(wram_cpu_wdata), .cpu_be(wram_cpu_be), .cpu_we(wram_cpu_we), .cpu_rd(wram_cpu_rd),\n"
+     "    .cpu_rdy(wram_cpu_rdy),\n"
+     "    .pr_req(pr_req), .pr_we(pr_we), .pr_addr(16'(pr_wram_a)), .pr_wdata(pr_wdata), .pr_be(pr_be), .pr_q(pr_q), .pr_ack(pr_ack),\n"
+     "    .busy(wram_pr_busy),\n"
+     "    .x_addr(wram_ext_addr), .x_wdata(wram_ext_wdata), .x_be(wram_ext_be), .x_we(wram_ext_we), .x_rd(wram_ext_rd),\n"
+     "    .x_q(wram_ext_q), .x_rdy(wram_ext_rdy));\n"
+     "`ifdef SIMULATION\n"
+     "always @(posedge clk_sys) if (br_pram_we) $display(\"P1 VARIANT ERROR: write to work-RAM byte port (Burning Rival), which this variant does not have\");\n"
+     "`endif\n", 1),
+    ("        else if (!m_we && sel_wram && !wram_ext_rdy) begin end   // P1-POCKET-TOP VARIANT: wait for the external SRAM sample\n",
+     "        else if (!m_we && sel_wram && !wram_cpu_rdy) begin end   // P1-POCKET-TOP VARIANT: wait for the external SRAM sample\n"
+     "        else if (m_we && sel_wram && wram_pr_busy) begin end     // SN: a protection access owns the SRAM port; the write starts after it\n", 1),
+    # HS (persistent score block, Michael 2026-11-23): a second client on the work RAM's second port (u1_pr_mux, in rtl/u1_hiscore.sv).
+    # The protection responder is passed through combinationally; with hs_req never raised (a top that leaves the ports open, or a
+    # game without the feature) the port behaves exactly as before.
+    ("    input             cfg_sprite_over_nbg0,   // DM: Pocket configuration video option\n",
+     "    input             cfg_sprite_over_nbg0,   // DM: Pocket configuration video option\n"
+     "    input             hs_req, hs_we,          // HS: score-block engine (u1_hiscore), work-RAM second-port client\n"
+     "    input      [15:0] hs_addr, hs_wdata,\n"
+     "    output     [15:0] hs_q,\n"
+     "    output            hs_ack,\n", 1),
+    ("u1_wram_pr wram_pr (\n",
+     "wire        mx_req, mx_we, mx_ack; wire [15:0] mx_addr, mx_wdata; wire [1:0] mx_be;   // HS\n"
+     "u1_pr_mux pr_mux (.clk(clk_sys), .rst(rst),\n"
+     "    .a_req(pr_req), .a_we(pr_we), .a_addr(16'(pr_wram_a)), .a_wdata(pr_wdata), .a_be(pr_be), .a_ack(pr_ack),\n"
+     "    .b_req(hs_req), .b_we(hs_we), .b_addr(hs_addr), .b_wdata(hs_wdata), .b_ack(hs_ack),\n"
+     "    .m_req(mx_req), .m_we(mx_we), .m_addr(mx_addr), .m_wdata(mx_wdata), .m_be(mx_be), .m_ack(mx_ack));\n"
+     "assign hs_q = pr_q;\n"
+     "u1_wram_pr wram_pr (\n", 1),
+    ("    .pr_req(pr_req), .pr_we(pr_we), .pr_addr(16'(pr_wram_a)), .pr_wdata(pr_wdata), .pr_be(pr_be), .pr_q(pr_q), .pr_ack(pr_ack),\n",
+     "    .pr_req(mx_req), .pr_we(mx_we), .pr_addr(mx_addr), .pr_wdata(mx_wdata), .pr_be(mx_be), .pr_q(pr_q), .pr_ack(mx_ack),\n", 1),
 ]
 HDR_TOP = ("// *** U1 UNIVERSAL DERIVED COPY. Generated by experiments/U1-universal/univ_derive.py from\n"
            "// experiments/D2-pocket-top/rtl/derived/d2_core_top_sp.sv; edit the generator, never this file.\n")

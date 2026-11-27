@@ -86,6 +86,11 @@ module s32_core #(
     input             video_rst,
 
     input  board_desc_t board,
+    input             cfg_sprite_over_nbg0,   // DM: Pocket configuration video option
+    input             hs_req, hs_we,          // HS: score-block engine (u1_hiscore), work-RAM second-port client
+    input      [15:0] hs_addr, hs_wdata,
+    output     [15:0] hs_q,
+    output            hs_ack,
 
     // clock enables (from fractional CE generators in emu top)
     input             ce_cpu,       // 16.108 / 20 MHz physical V60/V70 bus
@@ -435,7 +440,9 @@ wire [15:0] pr_addr;
 wire [15:0] pr_wdata;
 wire [1:0]  pr_be;
 wire [15:0] pr_q;
-reg         pr_ack;
+wire        pr_ack;      // SN: a pulse per completed access (u1_wram_pr)
+wire        wram_pr_busy, wram_cpu_rdy;
+wire [15:0] wram_cpu_addr, wram_cpu_wdata; wire [1:0] wram_cpu_be; wire wram_cpu_we, wram_cpu_rd;
 wire        br_pram_we;
 wire [7:0]  br_pram_addr;
 wire [7:0]  br_pram_wdata;
@@ -453,21 +460,31 @@ wire [1:0] work_pr_be = br_pram_we
                       ? (br_pram_addr[0] ? 2'b10 : 2'b01)
                       : pr_be;
 
-// P1-POCKET-TOP VARIANT: no on-chip work RAM. The CPU port goes to the external SRAM port (wram_ext_*). Port B
-// (protection) is unused on GA2 (PROT_NONE): it reads open bus; a write to it is reported in simulation.
-assign wram_ext_addr  = 16'(wram_a);
-assign wram_ext_wdata = m_wdata;
-assign wram_ext_be    = m_be;
-assign wram_ext_we    = m_req && m_we && sel_wram;
-assign wram_ext_rd    = m_req && !m_we && sel_wram;
+// P1-POCKET-TOP VARIANT: no on-chip work RAM. The CPU port goes to the external SRAM port (wram_ext_*).
+// SN: port B (protection, pr_*) shares that port through u1_wram_pr; Burning Rival's byte port (br_pram_we) is not provided.
+assign wram_cpu_addr  = 16'(wram_a);
+assign wram_cpu_wdata = m_wdata;
+assign wram_cpu_be    = m_be;
+assign wram_cpu_we    = m_req && m_we && sel_wram;
+assign wram_cpu_rd    = m_req && !m_we && sel_wram;
 assign wram_q         = wram_ext_q;
-assign pr_q           = 16'hffff;
+wire        mx_req, mx_we, mx_ack; wire [15:0] mx_addr, mx_wdata; wire [1:0] mx_be;   // HS
+u1_pr_mux pr_mux (.clk(clk_sys), .rst(rst),
+    .a_req(pr_req), .a_we(pr_we), .a_addr(16'(pr_wram_a)), .a_wdata(pr_wdata), .a_be(pr_be), .a_ack(pr_ack),
+    .b_req(hs_req), .b_we(hs_we), .b_addr(hs_addr), .b_wdata(hs_wdata), .b_ack(hs_ack),
+    .m_req(mx_req), .m_we(mx_we), .m_addr(mx_addr), .m_wdata(mx_wdata), .m_be(mx_be), .m_ack(mx_ack));
+assign hs_q = pr_q;
+u1_wram_pr wram_pr (
+    .clk(clk_sys), .rst(rst),
+    .cpu_addr(wram_cpu_addr), .cpu_wdata(wram_cpu_wdata), .cpu_be(wram_cpu_be), .cpu_we(wram_cpu_we), .cpu_rd(wram_cpu_rd),
+    .cpu_rdy(wram_cpu_rdy),
+    .pr_req(mx_req), .pr_we(mx_we), .pr_addr(mx_addr), .pr_wdata(mx_wdata), .pr_be(mx_be), .pr_q(pr_q), .pr_ack(mx_ack),
+    .busy(wram_pr_busy),
+    .x_addr(wram_ext_addr), .x_wdata(wram_ext_wdata), .x_be(wram_ext_be), .x_we(wram_ext_we), .x_rd(wram_ext_rd),
+    .x_q(wram_ext_q), .x_rdy(wram_ext_rdy));
 `ifdef SIMULATION
-always @(posedge clk_sys) if (work_pr_we) $display("P1 VARIANT ERROR: write to work-RAM port B (protection), which this variant does not have");
+always @(posedge clk_sys) if (br_pram_we) $display("P1 VARIANT ERROR: write to work-RAM byte port (Burning Rival), which this variant does not have");
 `endif
-
-always @(posedge clk_sys)
-    pr_ack <= pr_req;
 
 
 // ---------------------------------------------------------------------------
@@ -862,7 +879,7 @@ wire [13:0] mix_px_text, mix_px_nbg0, mix_px_nbg1;
 wire [13:0] mix_px_nbg2, mix_px_nbg3, mix_px_bmp;
 // Sonic's opening vehicle and NBG0 terrain both use priority E; the vehicle
 // wins that tie, as do Alien 3's B1F enemies against its NBG0 walls.
-wire sprite_over_nbg0 = (cfg_prot_sel == PROT_SONIC) ||
+wire sprite_over_nbg0 = cfg_sprite_over_nbg0 || (cfg_prot_sel == PROT_SONIC) ||
                         (board.gun_aim && board.coin_swap);
 
 // Both current screen mixers consume the same tilemap-renderer stream.  Share
@@ -1680,7 +1697,8 @@ always @(posedge clk_sys) begin
             else if (rom_ready) begin rmux <= rom_word_r; ack_r <= 1'b1; end
         end
         else if (!m_we && !rd_wait) rd_wait <= 1'b1;
-        else if (!m_we && sel_wram && !wram_ext_rdy) begin end   // P1-POCKET-TOP VARIANT: wait for the external SRAM sample
+        else if (!m_we && sel_wram && !wram_cpu_rdy) begin end   // P1-POCKET-TOP VARIANT: wait for the external SRAM sample
+        else if (m_we && sel_wram && wram_pr_busy) begin end     // SN: a protection access owns the SRAM port; the write starts after it
         else begin
             rd_wait <= 1'b0;
             ack_r <= 1'b1;   // BRAM/regs

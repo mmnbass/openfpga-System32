@@ -195,6 +195,340 @@ X = [
      "always @(posedge clk_sys) begin size4_sm <= size4_74; size4_sys <= size4_sm; end\n", 1),
 ]
 
+# DM (fit/s32-dmap, Michael 2026-11-22: one private fit; experiments/V60-SONIC-DMAP dm_derive.py, the simulated edits, unchanged):
+# u1_board_cfg's video-option bit (word 13 bit 0) through u1_cfg_reg (same single clk_sys stage, same edge) to the core input.
+DM = [
+    ("    input  wire       ok_c, v25_c, ppi_c, sprv_c,\n", "    input  wire       ok_c, v25_c, ppi_c, sprv_c, son_c,\n", 1),
+    ("    output reg        ok = 1'b0, v25 = 1'b0, ppi = 1'b0, sprv = 1'b0,\n", "    output reg        ok = 1'b0, v25 = 1'b0, ppi = 1'b0, sprv = 1'b0, son = 1'b0,\n", 1),
+    ("sprm <= sprm_c; prof <= prof_c; end", "sprm <= sprm_c; prof <= prof_c; son <= son_c; end", 1),
+    (".sprite_bank_mask(u1c_spr_mask), .profile(u1c_profile),\n", ".sprite_bank_mask(u1c_spr_mask), .profile(u1c_profile), .spr_over_nbg0(u1c_son),\n", 1),
+    ("u1_cfg_reg cfgq (.clk(clk_sys), .ok_c(u1c_ok),", "u1_cfg_reg cfgq (.clk(clk_sys), .son_c(u1c_son), .son(u1_son), .ok_c(u1c_ok),", 1),
+    ("u1_board_cfg cfg (\n", "wire u1c_son, u1_son;   // DM\nu1_board_cfg cfg (\n", 1),
+    ("    .board(run_board),   // U1\n", "    .board(run_board),   // U1\n    .cfg_sprite_over_nbg0(u1_son),   // DM\n", 1),
+]
+
+# SN (SegaSonic, Michael 2026-11-23): the descriptor's trackball profile and SegaSonic protection selector, through u1_cfg_reg (same
+# single clk_sys stage and edge as every other consumed output) into the run-time descriptor; the trackball's digital directions from
+# the pads' d-pads (upstream's MiSTer top: {down, up, left, right} into s32_trackball_adapter's dir inputs), players 1 and 2. While
+# the trackball profile is selected the d-pad bits of the player ports read released (the board has no joystick there).
+SN = [
+    ("    input  wire       ok_c, v25_c, ppi_c, sprv_c, son_c,\n", "    input  wire       ok_c, v25_c, ppi_c, sprv_c, son_c, trk_c, prot_c,\n", 1),
+    ("    output reg        ok = 1'b0, v25 = 1'b0, ppi = 1'b0, sprv = 1'b0, son = 1'b0,\n",
+     "    output reg        ok = 1'b0, v25 = 1'b0, ppi = 1'b0, sprv = 1'b0, son = 1'b0, trk = 1'b0, prot = 1'b0,\n", 1),
+    ("sprm <= sprm_c; prof <= prof_c; son <= son_c; end", "sprm <= sprm_c; prof <= prof_c; son <= son_c; trk <= trk_c; prot <= prot_c; end", 1),
+    (".profile(u1c_profile), .spr_over_nbg0(u1c_son),\n", ".profile(u1c_profile), .spr_over_nbg0(u1c_son), .trackball(u1c_trk), .prot_sonic(u1c_prot),\n", 1),
+    ("u1_cfg_reg cfgq (.clk(clk_sys), .son_c(u1c_son), .son(u1_son),", "u1_cfg_reg cfgq (.clk(clk_sys), .son_c(u1c_son), .son(u1_son), .trk_c(u1c_trk), .trk(u1_trk), .prot_c(u1c_prot), .prot(u1_prot),", 1),
+    ("wire u1c_son, u1_son;   // DM\n", "wire u1c_son, u1_son;   // DM\nwire u1c_trk, u1_trk, u1c_prot, u1_prot;   // SN\n", 1),
+    ("    run_board.sprite_bank_valid = u1_spr_valid;\n    run_board.sprite_bank_mask  = u1_spr_mask;\nend\n",
+     "    run_board.sprite_bank_valid = u1_spr_valid;\n    run_board.sprite_bank_mask  = u1_spr_mask;\n"
+     "    run_board.analog_profile    = u1_trk ? ANALOG_TRACKBALL : 2'd0;   // SN\n"
+     "    run_board.prot_sel          = u1_prot ? PROT_SONIC : PROT_NONE;   // SN\nend\n", 1),
+    ("    input  wire        hold,         // pause: keys held during a pause stay masked after it until released\n",
+     "    input  wire        hold,         // pause: keys held during a pause stay masked after it until released\n"
+     "    input  wire        trackball,    // SN: the d-pads drive the trackball directions; player-port d-pad bits read released\n"
+     "    output wire  [3:0] trk1, trk2,   // SN: {down, up, left, right} of pads 1 / 2, active high, 0 unless trackball\n", 1),
+    ("assign p1a    = pdig(q1);\nassign p2a    = pdig(q2);\n",
+     "    wire [15:0] dmask = trackball ? 16'hfff0 : 16'hffff;   // SN\n"
+     "assign p1a    = pdig(q1 & dmask);\nassign p2a    = pdig(q2 & dmask);\n"
+     "assign trk1   = trackball ? {q1[1], q1[0], q1[2], q1[3]} : 4'd0;\n"
+     "assign trk2   = trackball ? {q2[1], q2[0], q2[2], q2[3]} : 4'd0;\n", 1),
+    ("    .profile(u1_profile), .hold(pause_r),\n", "    .profile(u1_profile), .hold(pause_r), .trackball(u1_trk), .trk1(g_trk1), .trk2(g_trk2),   // SN\n", 1),
+    ("    wire  [7:0] g_p1a, g_p2a, g_ppa, g_ppb, g_svc12, g_ppi_pc;", "    wire  [3:0] g_trk1, g_trk2;   // SN\n    wire  [7:0] g_p1a, g_p2a, g_ppa, g_ppb, g_svc12, g_ppi_pc;", 1),
+    ("    .track_p1_dir(4'd0), .track_p2_dir(4'd0), .track_p3_dir(4'd0),\n", "    .track_p1_dir(g_trk1), .track_p2_dir(g_trk2), .track_p3_dir(4'd0),   // SN\n", 1),
+    # SN2: the video bridge follows the board's CRT mode (rtl/u1_video.sv): 416-wide frames are written whole on scaler slot 1
+    ("ga2_video vbridge (\n    .clk_sys(clk_sys), .ce_pix(ce_pix),", "u1_video vbridge (   // SN2\n    .wide(mode_416_active),\n    .clk_sys(clk_sys), .ce_pix(ce_pix),", 1),
+]
+
+# HS (persistent score block, Michael 2026-11-23; rtl/u1_hiscore.sv, rtl/u1_save_rd.sv): the Save slot grows from the 128-byte 93C46
+# image to 1,164 bytes (128 + an 8-byte header + up to 1,024 block bytes + the end mark word and a pad word; one size for every game, so nothing depends on when APF
+# samples the size). An EEPROM-only 128-byte save loads as before; the score part is then absent and ignored. Games whose
+# configuration does not enable the engine read back zeros there.
+HS = [
+    ("    wire    [31:0]  datatable_data = 32'd128;    // SM1.2: 64 x 16-bit 93C46 words\n",
+     "    wire    [31:0]  datatable_data = 32'd1164;   // SM1.2: 64 x 16-bit 93C46 words; HS: + 8-byte header + 1,024-byte score block + end mark\n", 1),
+    ("    wire  [7:0] ed_addr, es_addr;\n    wire  [5:0] eu_addr;\n",
+     "    wire  [7:0] ed_addr; wire [11:0] es_addr;   // HS: the Save slot is 1,164 bytes\n    wire  [5:0] eu_addr;\n"
+     "    wire [10:0] sv_addr; wire sv_act; wire [15:0] hs_rb_data;   // HS: Save read-back word index, score part\n"
+     "    assign      eu_addr = sv_addr[5:0];\n", 1),
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h5), .ADDRESS_SIZE(8), .OUTPUT_WORD_SIZE(2)) eepsave_loader (\n",
+     "data_loader #(.ADDRESS_MASK_UPPER_4(4'h5), .ADDRESS_SIZE(12), .OUTPUT_WORD_SIZE(2)) eepsave_loader (   // HS: 12 address bits\n", 1),
+    ("sm_eep_bridge_rd #(.ADDRESS_MASK_UPPER_4(4'h5), .RD_LAT(3)) eepsave_rd (   // not data_unloader: see the module header\n"
+     "    .clk_74a(clk_74a), .clk_sys(clk_sys), .bridge_rd(bridge_rd), .bridge_addr(bridge_addr),\n"
+     "    .bridge_rd_data(eep_bridge_rd_data), .eep_rd_addr(eu_addr), .eep_rd_data(eep_rd_data));\n",
+     "u1_save_rd #(.ADDRESS_MASK_UPPER_4(4'h5), .PW(10), .RD_LAT(4)) eepsave_rd (   // HS: sm_eep_bridge_rd with a wider address; words 0-63 = EEPROM, 64.. = score part\n"
+     "    .clk_74a(clk_74a), .clk_sys(clk_sys), .bridge_rd(bridge_rd), .bridge_addr(bridge_addr),\n"
+     "    .bridge_rd_data(eep_bridge_rd_data), .eep_rd_addr(sv_addr), .act(sv_act),\n"
+     "    .eep_rd_data(sv_addr[10:6] == 5'd0 ? eep_rd_data : hs_rb_data));\n"
+     "    wire        es_eep = es_en && es_addr[11:7] == 5'd0;   // HS: the EEPROM image is the first 128 bytes of the Save slot\n"
+     "    wire        es_hs  = es_en && es_addr[11:7] != 5'd0;\n"
+     "    wire [10:0] es_hs_idx = es_addr[11:1] - 11'd64;\n", 1),
+    ("    wire        eep_ld_wr   = es_en | (ed_en & ~save_seen);\n    wire  [5:0] eep_ld_addr = es_en ? es_addr[6:1] : ed_addr[6:1];\n"
+     "    wire [15:0] eep_ld_data = es_en ? es_data : ed_data;\n",
+     "    wire        eep_ld_wr   = es_eep | (ed_en & ~save_seen);\n    wire  [5:0] eep_ld_addr = es_eep ? es_addr[6:1] : ed_addr[6:1];\n"
+     "    wire [15:0] eep_ld_data = es_eep ? es_data : ed_data;\n", 1),
+    ("wire u1c_trk, u1_trk, u1c_prot, u1_prot;   // SN\n",
+     "wire u1c_trk, u1_trk, u1c_prot, u1_prot;   // SN\n"
+     "// HS: the score-block fields, registered once in clk_sys (static after the configuration load)\n"
+     "wire u1c_hs_en; wire [14:0] u1c_hs_base; wire [8:0] u1c_hs_lenm1; wire [7:0] u1c_hs_m0, u1c_hs_m1; wire [9:0] u1c_hs_m1_off; wire [15:0] u1c_hs_tag;\n"
+     "reg  u1_hs_en = 1'b0; reg [14:0] u1_hs_base = 15'd0; reg [8:0] u1_hs_lenm1 = 9'd0; reg [7:0] u1_hs_m0 = 8'd0, u1_hs_m1 = 8'd0;\n"
+     "reg  [9:0] u1_hs_m1_off = 10'd0; reg [15:0] u1_hs_tag = 16'd0;\n"
+     "always @(posedge clk_sys) begin u1_hs_en <= u1c_hs_en; u1_hs_base <= u1c_hs_base; u1_hs_lenm1 <= u1c_hs_lenm1; u1_hs_m0 <= u1c_hs_m0;\n"
+     "    u1_hs_m1 <= u1c_hs_m1; u1_hs_m1_off <= u1c_hs_m1_off; u1_hs_tag <= u1c_hs_tag; end\n"
+     "wire hs_req, hs_we, hs_ack; wire [15:0] hs_addr, hs_wdata, hs_q;\n", 1),
+    (".spr_over_nbg0(u1c_son), .trackball(u1c_trk), .prot_sonic(u1c_prot),\n",
+     ".spr_over_nbg0(u1c_son), .trackball(u1c_trk), .prot_sonic(u1c_prot),\n"
+     "    .hs_en(u1c_hs_en), .hs_base(u1c_hs_base), .hs_lenm1(u1c_hs_lenm1), .hs_m0(u1c_hs_m0), .hs_m1(u1c_hs_m1), .hs_m1_off(u1c_hs_m1_off), .hs_tag(u1c_hs_tag),   // HS\n", 1),
+    ("    wire         ce_pix, hs, vs, hb, vb, mode_416_active;\n",
+     "    wire         ce_pix, hs, vs, hb, vb, mode_416_active;\n"
+     "// HS: the score-block engine. It watches the SRAM port (wx_*), restores / captures through the core's second work-RAM port and\n"
+     "// serves the score part of the Save slot (load: es_hs; read-back: sv_addr >= 64).\n"
+     "    reg          hs_vb_q = 1'b0; always @(posedge clk_sys) hs_vb_q <= vb;\n"
+     "    wire  [2:0]  hs_state_unused; wire hs_have_unused;\n"
+     "u1_hiscore hiscore (.clk(clk_sys), .rst(rst_r), .vbl(vb && !hs_vb_q),\n"
+     "    .en(u1_hs_en), .base(u1_hs_base), .lenm1(u1_hs_lenm1), .tag(u1_hs_tag), .m0(u1_hs_m0), .m1(u1_hs_m1), .m1_off(u1_hs_m1_off),\n"
+     "    .x_we(wx_we), .x_addr(wx_addr), .x_wdata(wx_wdata), .x_be(wx_be),\n"
+     "    .hs_req(hs_req), .hs_we(hs_we), .hs_addr(hs_addr), .hs_wdata(hs_wdata), .hs_q(hs_q), .hs_ack(hs_ack),\n"
+     "    .ld_start(es_en && es_addr[11:1] == 11'd0), .ld_en(es_hs), .ld_idx(es_hs_idx[9:0]), .ld_data(es_data),\n"
+     "    .rb_act(sv_act && sv_addr[10:6] != 5'd0), .rb_idx(10'(sv_addr - 11'd64)), .rb_data(hs_rb_data),\n"
+     "    .dbg_state(hs_state_unused), .dbg_have(hs_have_unused));\n", 1),
+    ("    .wram_ext_q(wx_q), .wram_ext_rdy(wx_rdy),\n",
+     "    .wram_ext_q(wx_q), .wram_ext_rdy(wx_rdy),\n"
+     "    .hs_req(hs_req), .hs_we(hs_we), .hs_addr(hs_addr), .hs_wdata(hs_wdata), .hs_q(hs_q), .hs_ack(hs_ack),   // HS\n", 1),
+]
+
+# LD1 (2026-11-24, area: fit rel-hs-1 failed the ALM gate at 18,277): one data_loader for bridge nibbles 1-6 (see the text it emits).
+LD = [
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h1), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot1_loader (\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),\n    .write_en(l1_en), .write_addr(l1_addr), .write_data(l1_data));\n",
+     "// LD1 (area, 2026-11-24): ONE data_loader for the bridge nibbles 1-6 (slots 1-3, default EEPROM, Save slot, configuration). The six\n// loaders it replaces were the same machine with the same parameters, told apart only by the nibble they match (their\n// ADDRESS_SIZE only truncates the output address); each costs a 4 x 44-bit register FIFO. The nibble is carried in the address\n// bits 27:25, which every one of those loaders discarded (no slot is larger than 32 MiB; the largest, slot 3, is 16 MiB, so\n// the +2 of a bridge word's second half never carries into them). Per slot, the strobe / address / data sequence is the one\n// its own loader produced; APF sends one bridge write at a time, as each single loader already required. The sound ROM's\n// loader (nibble 7) is unchanged.\n    wire  [3:0] ldm_nib  = bridge_addr[31:28];\n    wire        ldm_sel  = ldm_nib >= 4'h1 && ldm_nib <= 4'h6;\n    wire [31:0] ldm_badr = {ldm_sel ? 4'h1 : 4'h0, ldm_nib[2:0], bridge_addr[24:0]};\n    wire        ldm_en; wire [27:0] ldm_addr; wire [15:0] ldm_data;\ndata_loader #(.ADDRESS_MASK_UPPER_4(4'h1), .ADDRESS_SIZE(28), .OUTPUT_WORD_SIZE(2)) slots_loader (\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(ldm_badr), .bridge_wr_data(bridge_wr_data),\n    .write_en(ldm_en), .write_addr(ldm_addr), .write_data(ldm_data));\n    assign l1_en = ldm_en && ldm_addr[27:25] == 3'd1; assign l1_addr = ldm_addr[24:0]; assign l1_data = ldm_data;   // LD1: bridge nibble 1\n", 1),
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h2), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot2_loader (\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),\n    .write_en(l2_en), .write_addr(l2_addr), .write_data(l2_data));\n",
+     "    assign l2_en = ldm_en && ldm_addr[27:25] == 3'd2; assign l2_addr = ldm_addr[24:0]; assign l2_data = ldm_data;   // LD1: bridge nibble 2\n", 1),
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h3), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot3_loader (\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),\n    .write_en(l3_en), .write_addr(l3_addr), .write_data(l3_data));\n",
+     "    assign l3_en = ldm_en && ldm_addr[27:25] == 3'd3; assign l3_addr = ldm_addr[24:0]; assign l3_data = ldm_data;   // LD1: bridge nibble 3\n", 1),
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h6), .ADDRESS_SIZE(8), .OUTPUT_WORD_SIZE(2)) cfg_loader (\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),\n    .write_en(cf_en), .write_addr(cf_addr), .write_data(cf_data));\n",
+     "    assign cf_en = ldm_en && ldm_addr[27:25] == 3'd6; assign cf_addr = ldm_addr[7:0]; assign cf_data = ldm_data;   // LD1: bridge nibble 6\n", 1),
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h4), .ADDRESS_SIZE(8), .OUTPUT_WORD_SIZE(2)) eepdef_loader (\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),\n    .write_en(ed_en), .write_addr(ed_addr), .write_data(ed_data));\n",
+     "    assign ed_en = ldm_en && ldm_addr[27:25] == 3'd4; assign ed_addr = ldm_addr[7:0]; assign ed_data = ldm_data;   // LD1: bridge nibble 4\n", 1),
+    ("data_loader #(.ADDRESS_MASK_UPPER_4(4'h5), .ADDRESS_SIZE(12), .OUTPUT_WORD_SIZE(2)) eepsave_loader (   // HS: 12 address bits\n    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),\n    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),\n    .write_en(es_en), .write_addr(es_addr), .write_data(es_data));\n",
+     "    assign es_en = ldm_en && ldm_addr[27:25] == 3'd5; assign es_addr = ldm_addr[11:0]; assign es_data = ldm_data;   // LD1: bridge nibble 5\n", 1),
+]
+
+# WC (2026-11-24, hardware finding): the SegaSonic prototype reads work RAM it never wrote and depends on it being zero, as it is
+# in MAME and in simulation (SRAM model zero-filled); on the Pocket the external SRAM holds what the previous core left, and the
+# prototype stopped after its warning screen (reproduced in simulation with --sram-seed 1 and 7). The board's work RAM is now
+# cleared to zero after PLL lock, before the CPU reset is released, as the wave RAM already is. Retail games initialise their
+# own RAM, so for them the clear changes nothing they read. The clear runs once per configuration (like the wave-RAM clear) and
+# takes 64K writes x 8 clk_sys (about 11 ms), far inside the ROM load (about 2.6 s), so the reset-release time does not move.
+U1_WRAM_CLEAR = (
+    "\n// u1_wram_clear (rel_derive.py WC): zero the external work RAM once after PLL lock, through d2_sram_port's own write cycle, then\n"
+    "// pass the core's port signals through unchanged. The score engine and the work-RAM second port tap the core side, so they never\n"
+    "// see the clear. While clearing: one write every 8 clk_sys (d2_sram_port takes 5), read request held low.\n"
+    "module u1_wram_clear (\n"
+    "    input  wire        clk,\n"
+    "    input  wire        start,          // PLL locked (clk domain)\n"
+    "    input  wire [15:0] c_addr, c_wdata,\n"
+    "    input  wire  [1:0] c_be,\n"
+    "    input  wire        c_we, c_rd,\n"
+    "    output wire [15:0] p_addr, p_wdata,\n"
+    "    output wire  [1:0] p_be,\n"
+    "    output wire        p_we, p_rd,\n"
+    "    output reg         done = 1'b0\n"
+    ");\n"
+    "    reg [15:0] a = 16'd0;\n"
+    "    reg  [2:0] ph = 3'd0;\n"
+    "    reg        last = 1'b0;\n"
+    "// Reset by !start (the PLL is unlocked at power-up), NOT by initial values alone: Quartus treats power-up values as don't care, and\n"
+    "// with only initial values it found done's data input constant 1 and removed the whole engine (fit rel-wc-1, 2026-11-24).\n"
+    "always @(posedge clk)\n"
+    "    if (!start) begin done <= 1'b0; a <= 16'd0; ph <= 3'd0; last <= 1'b0; end\n"
+    "    else if (!done) begin\n"
+    "        ph <= ph + 3'd1;\n"
+    "        if (ph == 3'd7) begin\n"
+    "            if (last) done <= 1'b1;\n"
+    "            else begin a <= a + 16'd1; last <= (a == 16'hFFFE); end\n"
+    "        end\n"
+    "    end\n"
+    "    wire cw = start && !done && ph == 3'd0;   // addresses 0..FFFF, each written once\n"
+    "assign p_addr  = done ? c_addr  : a;\n"
+    "assign p_wdata = done ? c_wdata : 16'h0000;\n"
+    "assign p_be    = done ? c_be    : 2'b11;\n"
+    "assign p_we    = done ? c_we    : cw;\n"
+    "assign p_rd    = done ? c_rd    : 1'b0;\n"
+    "endmodule\n")
+WC = [
+    ("    wire [15:0] sram_dq_o; wire sram_dq_oe, sram_sample_now;\n",
+     "    wire [15:0] sram_dq_o; wire sram_dq_oe, sram_sample_now;\n"
+     "    wire [15:0] wp_addr, wp_wdata; wire [1:0] wp_be; wire wp_we, wp_rd, wram_clr_done;   // WC: port side of the work-RAM clear\n"
+     "u1_wram_clear wram_clr (.clk(clk_sys), .start(locked_s), .c_addr(wx_addr), .c_wdata(wx_wdata), .c_be(wx_be), .c_we(wx_we), .c_rd(wx_rd),\n"
+     "    .p_addr(wp_addr), .p_wdata(wp_wdata), .p_be(wp_be), .p_we(wp_we), .p_rd(wp_rd), .done(wram_clr_done));\n", 1),
+    ("    .clk(clk_sys), .rd_edges(3'(RD_EDGES)), .rst(rst_r), .addr(wx_addr), .wdata(wx_wdata), .be(wx_be), .we(wx_we),\n"
+     "    .rd(wx_rd), .q(wx_q), .rdy(wx_rdy),\n",
+     "    .clk(clk_sys), .rd_edges(3'(RD_EDGES)), .rst(rst_r && wram_clr_done), .addr(wp_addr), .wdata(wp_wdata), .be(wp_be), .we(wp_we),   // WC\n"
+     "    .rd(wp_rd), .q(wx_q), .rdy(wx_rdy),\n", 1),
+    ("|| !rp_vf_done || !u1_ok) begin rst_r <= 1'b1;", "|| !rp_vf_done || !u1_ok || !wram_clr_done) begin rst_r <= 1'b1;", 1),
+]
+
+# MP (2026-11-24, Michael: full native multiplayer is a v0.2.0 requirement):
+#  * SegaSonic player 3 (MAME `sonic` inputs): controller 3's d-pad drives the third trackball (s32_trackball_adapter p3_dir, the same
+#    digital approach as players 1 / 2); its A button is player 3's button, which the board reads on P1_A bit 2 (so in the trackball
+#    profile player 1's X / Y no longer drive that bit); its Select / Start are COIN3 / START3 (SERVICE12 bits 6 / 7).
+#  * Operator buttons: interact.json "Operator buttons" (bridge 0x90000000, writeonly, not persisted; cleared while the host holds
+#    reset): while on, controller 1's L = SERVICE (SERVICE12 bit 0) and R = TEST (bit 1). Off: both read released, as before.
+#  * Coin wiring by `cshared` (1 = one shared chute, the World / Japan layout; 0 = one chute per player, the US layout); step 1 = the
+#    regional default (profile), replaced by the game's own setting in step 2.
+MP = [
+    ("    output wire  [3:0] trk1, trk2,   // SN: {down, up, left, right} of pads 1 / 2, active high, 0 unless trackball\n",
+     "    output wire  [3:0] trk1, trk2,   // SN: {down, up, left, right} of pads 1 / 2, active high, 0 unless trackball\n"
+     "    output wire  [3:0] trk3,         // MP: pad 3 (SegaSonic player 3), same layout\n"
+     "    input  wire        op_en,        // MP: operator buttons on: controller 1's L = SERVICE, R = TEST\n"
+     "    input  wire        cshared,      // MP: coin wiring: 1 = shared chute (World / Japan layout), 0 = one chute per player (US)\n", 1),
+    ("assign p1a    = pdig(q1 & dmask);\n",
+     "    wire [15:0] xmask = trackball ? 16'hff3f : 16'hffff;   // MP: SegaSonic: P1_A bit 2 is player 3's button, not P1's X / Y\n"
+     "assign p1a    = pdig(q1 & dmask & xmask) & ~(trackball ? {5'b00000, q3[4], 2'b00} : 8'h00);\n", 1),
+    ("assign trk2   = trackball ? {q2[1], q2[0], q2[2], q2[3]} : 4'd0;\n",
+     "assign trk2   = trackball ? {q2[1], q2[0], q2[2], q2[3]} : 4'd0;\n"
+     "assign trk3   = trackball ? {q3[1], q3[0], q3[2], q3[3]} : 4'd0;   // MP\n", 1),
+    ("assign svc12  = world ? ~{2'b00, q2[15], q1[15], q2[14] | q4[14], q1[14] | q3[14], 2'b00}\n"
+     "                      : ~{2'b00, q2[15], q1[15], q3[14], q4[14], 2'b00};\n"
+     "assign ppi_pc = world ? {4'h0, 2'b11, ~q4[15], ~q3[15]}\n"
+     "                      : {4'h0, ~q1[14], ~q2[14], ~q4[15], ~q3[15]};\n",
+     "    wire        op_svc = op_en & q1[8], op_test = op_en & q1[9];   // MP: L / R of controller 1 while the operator buttons are on\n"
+     "    wire        p3_tb  = trackball;                                // MP: SegaSonic: SERVICE12 b6 COIN3, b7 START3 (MAME sonic)\n"
+     "// MP3 (2026-11-25), MP4 (2026-11-26, hardware + isolated runs): with INDIVIDUAL chutes the game credits b2 (MAME's COIN1) to\n"
+     "// PLAYER 3 and b6 (MAME's COIN3) to PLAYER 1; b3 is player 2's. So player 1's coin drives b6 and player 3's b2. COMMON (shared\n"
+     "// chutes; the game ignores b6 then): players 1 and 3 both on b2. Starts follow MAME (b4 START1, b5 START2, b7 START3).\n"
+     "assign svc12  = p3_tb   ? ~{q3[15], q1[14] & ~cshared, q2[15], q1[15], q2[14], q3[14] | (q1[14] & cshared), op_test, op_svc}\n"
+     "              : cshared ? ~{2'b00, q2[15], q1[15], q2[14] | q4[14], q1[14] | q3[14], op_test, op_svc}\n"
+     "                        : ~{2'b00, q2[15], q1[15], q3[14], q4[14], op_test, op_svc};\n"
+     "assign ppi_pc = p3_tb   ? 8'h0F                                   // SegaSonic: no 8255 player lines (idle)\n"
+     "              : cshared ? {4'h0, 2'b11, ~q4[15], ~q3[15]}\n"
+     "                        : {4'h0, ~q1[14], ~q2[14], ~q4[15], ~q3[15]};\n", 1),
+    ("    .profile(u1_profile), .hold(pause_r), .trackball(u1_trk), .trk1(g_trk1), .trk2(g_trk2),   // SN\n",
+     "    .profile(u1_profile), .hold(pause_r), .trackball(u1_trk), .trk1(g_trk1), .trk2(g_trk2),   // SN\n"
+     "    .trk3(g_trk3), .op_en(op_en_s), .cshared(u1_cshared),   // MP\n", 1),
+    ("    wire  [3:0] g_trk1, g_trk2;   // SN\n",
+     "    wire  [3:0] g_trk1, g_trk2, g_trk3;   // SN; MP: g_trk3\n"
+     "// MP: operator buttons (interact.json \"Operator buttons\": bridge 0x90000000, writeonly, not persisted). Cleared while the host holds\n"
+     "// reset (every launch starts with them off); the host writes the check box's value every frame.\n"
+     "    reg         op_74 = 1'b0;\n"
+     "always @(posedge clk_74a) if (!reset_n) op_74 <= 1'b0; else if (bridge_wr && bridge_addr == 32'h90000000) op_74 <= |bridge_wr_data;\n"
+     "    reg   [1:0] op_s = 2'b00;\n"
+     "always @(posedge clk_sys) op_s <= {op_s[0], op_74};\n"
+     "    wire        op_en_s = op_s[1];\n"
+     "    wire        u1_cshared = u1_profile[0];   // MP step 1: the regional default (World / Japan shared, US individual)\n", 1),
+    (".track_p3_dir(4'd0),   // SN\n", ".track_p3_dir(g_trk3),   // SN; MP: player 3\n", 1),
+]
+
+# MP2 (coin chute from the game's own setting): u1_chute reads one bit of the 93C46 EEPROM (the word / bit / value the game file names
+# in configuration word 3) through the EEPROM's read port whenever the Save read-back does not own it, and selects the coin wiring:
+# individual (one chute per player, US layout) or shared (World / Japan layout). The operator menu writes the EEPROM, so the wiring
+# follows the operator's COIN CHUTE TYPE setting; games whose file does not enable it keep the regional default.
+U1_CHUTE = (
+    "\n// u1_chute (rel_derive.py MP2): coin wiring from the game's own coin-chute setting (one bit of its 93C46 EEPROM).\n"
+    "// rd_busy = the Save read-back owns the read port (it sets its address on the edge that raises rd_busy); otherwise this module\n"
+    "// drives the configured word and samples it after 8 stable clocks. No state depends on initial values for correctness.\n"
+    "module u1_chute (\n"
+    "    input  wire        clk,\n"
+    "    input  wire        en, pol,\n"
+    "    input  wire  [3:0] bitn,\n"
+    "    input  wire  [5:0] word,\n"
+    "    input  wire        dflt_shared,    // the regional default (profile)\n"
+    "    input  wire        rd_busy,\n"
+    "    input  wire [15:0] eep_q,\n"
+    "    output wire  [5:0] rd_addr,\n"
+    "    output wire        shared\n"
+    ");\n"
+    "    reg  [2:0] cnt = 3'd0;\n"
+    "    reg        ind = 1'b0, en_q = 1'b0;\n"
+    "always @(posedge clk) begin\n"
+    "    en_q <= en;\n"
+    "    if (rd_busy) cnt <= 3'd0; else if (cnt != 3'd7) cnt <= cnt + 3'd1;\n"
+    "    if (!rd_busy && cnt == 3'd7) ind <= (eep_q[bitn] == pol);\n"
+    "end\n"
+    "assign rd_addr = word;\n"
+    "assign shared  = en_q ? !ind : dflt_shared;\n"
+    "endmodule\n")
+MP2 = [
+    ("u1_board_cfg cfg (\n", "wire        u1c_ch_en, u1c_ch_pol; wire [3:0] u1c_ch_bit; wire [5:0] u1c_ch_word, ch_addr; wire u1_ch_shared;   // MP2\nu1_board_cfg cfg (\n", 1),
+    (".spr_over_nbg0(u1c_son), .trackball(u1c_trk), .prot_sonic(u1c_prot),\n    .hs_en(u1c_hs_en),",
+     ".spr_over_nbg0(u1c_son), .trackball(u1c_trk), .prot_sonic(u1c_prot),\n"
+     "    .chute_en(u1c_ch_en), .chute_pol(u1c_ch_pol), .chute_bit(u1c_ch_bit), .chute_word(u1c_ch_word),   // MP2\n    .hs_en(u1c_hs_en),", 1),
+    ("    assign      eu_addr = sv_addr[5:0];\n",
+     "    assign      eu_addr = sv_act ? sv_addr[5:0] : ch_addr;   // MP2: the coin-chute reader owns the port while no read-back runs\n", 1),
+    ("    wire        u1_cshared = u1_profile[0];   // MP step 1: the regional default (World / Japan shared, US individual)\n",
+     "    wire        u1_cshared = u1_ch_shared;    // MP2: the game's own coin-chute setting (regional default unless its file enables it)\n"
+     "u1_chute chute (.clk(clk_sys), .en(u1c_ch_en), .pol(u1c_ch_pol), .bitn(u1c_ch_bit), .word(u1c_ch_word), .dflt_shared(u1_profile[0]),\n"
+     "    .rd_busy(sv_act), .eep_q(eep_rd_data), .rd_addr(ch_addr), .shared(u1_ch_shared));\n", 1),
+]
+
+# CB (2026-11-26, sn7 hardware: Golden Axe World, CABINET TYPE 2P + COIN CHUTE INDIVIDUAL, no coin credited): Golden Axe and
+# Spider-Man choose the coin switches they count from their CABINET TYPE setting, not only from COIN CHUTE TYPE. Measured on the
+# sn7 build with game-made saves, each line alone against a matched control (docs/fit-s32-sonic.md "CB"):
+#   2P cabinet: player 1 = SERVICE12 b3, player 2 = SERVICE12 b2; the 8255 port C coin lines (b3 / b2) are not counted;
+#   4P cabinet: player 1 = 8255 PC b3, player 2 = PC b2, player 3 = SERVICE12 b3, player 4 = SERVICE12 b2 (the previous wiring);
+#   3P cabinet: player 1 = PC b2, player 2 = SERVICE12 b3, player 3 = SERVICE12 b2; PC b3 not counted (CB3 below).
+# The game file names where the setting lives (configuration word 12, u1_cfg.py "cabinet"); u1_chute reads that 2-bit field from the
+# EEPROM beside the chute bit, so the routing follows the operator's setting after a menu exit and after a reload. Without the
+# field, cab = 2 (4P), exactly the previous wiring. COMMON and the SegaSonic (trackball) branch do not use cab.
+CB = [
+    ("    input  wire        cshared,      // MP: coin wiring: 1 = shared chute (World / Japan layout), 0 = one chute per player (US)\n",
+     "    input  wire        cshared,      // MP: coin wiring: 1 = shared chute (World / Japan layout), 0 = one chute per player (US)\n"
+     "    input  wire  [1:0] cab,          // CB: the game's CABINET TYPE (0 = 2P, 1 = 3P, 2 = 4P; 3 read as 4P); INDIVIDUAL only\n", 1),
+    ("              : cshared ? ~{2'b00, q2[15], q1[15], q2[14] | q4[14], q1[14] | q3[14], op_test, op_svc}\n"
+     "                        : ~{2'b00, q2[15], q1[15], q3[14], q4[14], op_test, op_svc};\n",
+     "              : cshared ? ~{2'b00, q2[15], q1[15], q2[14] | (q4[14] & act4), q1[14] | (q3[14] & act3), op_test, op_svc}\n"
+     "                        : ~{2'b00, q2[15], q1[15], ci_s3, ci_s2, op_test, op_svc};\n", 1),
+    ("                        : {4'h0, ~q1[14], ~q2[14], ~q4[15], ~q3[15]};\n",
+     "                        : {4'h0, ~ci_p3, ~ci_p2, ~q4[15], ~q3[15]};\n", 1),
+    ("    wire        p3_tb  = trackball;                                // MP: SegaSonic: SERVICE12 b6 COIN3, b7 START3 (MAME sonic)\n",
+     "    wire        p3_tb  = trackball;                                // MP: SegaSonic: SERVICE12 b6 COIN3, b7 START3 (MAME sonic)\n"
+     "// CB: INDIVIDUAL coin lines by cabinet type (ci_p3 / ci_p2 = 8255 PC b3 / b2, ci_s3 / ci_s2 = SERVICE12 b3 / b2, active high)\n"
+     "    wire        cab2   = cab == 2'd0, cab3 = cab == 2'd1;\n"
+     "    wire        act3   = !cab2, act4 = !cab2 && !cab3;   // CB: players a cabinet does not have drive no coin line (COMMON too)\n"
+     "    wire        ci_p3  = cab2 ? 1'b0     : CB3_P3;\n"
+     "    wire        ci_p2  = cab2 ? 1'b0     : CB3_P2;\n"
+     "    wire        ci_s3  = cab2 ? q1[14]   : CB3_S3;\n"
+     "    wire        ci_s2  = cab2 ? q2[14]   : CB3_S2;\n", 1),
+    ("    .trk3(g_trk3), .op_en(op_en_s), .cshared(u1_cshared),   // MP\n",
+     "    .trk3(g_trk3), .op_en(op_en_s), .cshared(u1_cshared), .cab(u1_cab),   // MP; CB\n", 1),
+    ("wire        u1c_ch_en, u1c_ch_pol; wire [3:0] u1c_ch_bit; wire [5:0] u1c_ch_word, ch_addr; wire u1_ch_shared;   // MP2\n",
+     "wire        u1c_ch_en, u1c_ch_pol; wire [3:0] u1c_ch_bit; wire [5:0] u1c_ch_word, ch_addr; wire u1_ch_shared;   // MP2\n"
+     "wire        u1c_cb_en; wire [3:0] u1c_cb_bit; wire [5:0] u1c_cb_word; wire [1:0] u1_cab;   // CB\n", 1),
+    ("    .chute_en(u1c_ch_en), .chute_pol(u1c_ch_pol), .chute_bit(u1c_ch_bit), .chute_word(u1c_ch_word),   // MP2\n",
+     "    .chute_en(u1c_ch_en), .chute_pol(u1c_ch_pol), .chute_bit(u1c_ch_bit), .chute_word(u1c_ch_word),   // MP2\n"
+     "    .cab_en(u1c_cb_en), .cab_bit(u1c_cb_bit), .cab_word(u1c_cb_word),   // CB\n", 1),
+    ("    .rd_busy(sv_act), .eep_q(eep_rd_data), .rd_addr(ch_addr), .shared(u1_ch_shared));\n",
+     "    .cab_en(u1c_cb_en), .cab_bit(u1c_cb_bit), .cab_word(u1c_cb_word), .cab(u1_cab),   // CB\n"
+     "    .rd_busy(sv_act), .eep_q(eep_rd_data), .rd_addr(ch_addr), .shared(u1_ch_shared));\n", 1),
+]
+# CB3: the 3P cabinet's INDIVIDUAL lines, measured (World, MW3I save, each pad alone vs control): PC b3 counts for nobody,
+# PC b2 = player 1, SERVICE12 b3 = player 2, SERVICE12 b2 = player 3. The rule for every cabinet: the game's coin lines in the order
+# PC b3, PC b2, SERVICE12 b3, SERVICE12 b2; an N-player cabinet counts the LAST N of them for players 1..N.
+CB3 = {"CB3_P3": "1'b0", "CB3_P2": "q1[14]", "CB3_S3": "q2[14]", "CB3_S2": "q3[14]"}
+CB = [(a, b.replace("CB3_P3", "(cab3 ? " + CB3["CB3_P3"] + " : q1[14])").replace("CB3_P2", "(cab3 ? " + CB3["CB3_P2"] + " : q2[14])")
+            .replace("CB3_S3", "(cab3 ? " + CB3["CB3_S3"] + " : q3[14])").replace("CB3_S2", "(cab3 ? " + CB3["CB3_S2"] + " : q4[14])"), n)
+      for a, b, n in CB]
+# u1_chute with the cabinet field: the read port alternates between the chute word and the cabinet word (each sampled after 8
+# stable clocks); without the cabinet field it behaves exactly as before (always the chute word) and cab = 2 (4P).
+CB_CHUTE = [
+    ("    input  wire  [5:0] word,\n",
+     "    input  wire  [5:0] word,\n    input  wire        cab_en,         // CB: cabinet type field (2 bits at cab_bit of cab_word)\n"
+     "    input  wire  [3:0] cab_bit,\n    input  wire  [5:0] cab_word,\n    output wire  [1:0] cab,\n", 1),
+    ("    reg        ind = 1'b0, en_q = 1'b0;\n",
+     "    reg        ind = 1'b0, en_q = 1'b0;\n    reg        ph = 1'b0, cab_en_q = 1'b0;   // CB: ph = 1 while the cabinet word is addressed\n"
+     "    reg  [1:0] cab_r = 2'd2;\n    wire [15:0] cab_sh = eep_q >> cab_bit;\n", 1),
+    ("    en_q <= en;\n    if (rd_busy) cnt <= 3'd0; else if (cnt != 3'd7) cnt <= cnt + 3'd1;\n"
+     "    if (!rd_busy && cnt == 3'd7) ind <= (eep_q[bitn] == pol);\n",
+     "    en_q <= en; cab_en_q <= cab_en;\n"
+     "    if (rd_busy) cnt <= 3'd0; else if (cnt != 3'd7) cnt <= cnt + 3'd1; else if (cab_en) cnt <= 3'd0;   // CB: re-address\n"
+     "    if (!rd_busy && cnt == 3'd7) begin\n"
+     "        if (!ph) ind <= (eep_q[bitn] == pol); else cab_r <= cab_sh[1:0];\n"
+     "        ph <= cab_en ? !ph : 1'b0;\n"
+     "    end\n", 1),
+    ("assign rd_addr = word;\n", "assign rd_addr = ph ? cab_word : word;\n", 1),
+    ("assign shared  = en_q ? !ind : dflt_shared;\n",
+     "assign shared  = en_q ? !ind : dflt_shared;\nassign cab     = (en_q && cab_en_q) ? cab_r : 2'd2;   // CB: no field = 4P (the previous wiring)\n", 1),
+]
+
 MUT = {
     "noguard": [("    .profile(u1_profile), .hold(pause_r),\n", "    .profile(u1_profile), .hold(1'b0),   // MUTANT noguard\n")],
     "nopause": [("always @(posedge clk_sys) begin menu_m <= osnotify_inmenu; menu_s <= menu_m; pause_r <= menu_s; end\n",
@@ -203,9 +537,14 @@ MUT = {
                   "    .prof_c(u1c_profile), .ok(u1_ok), .v25(u1_has_v25), .ppi(u1_has_ppi), .sprv(u1_spr_valid), .sprm(u1_spr_mask), .prof(u1_profile));\n",
                   "assign {u1_ok, u1_has_v25, u1_has_ppi, u1_spr_valid, u1_spr_mask, u1_profile} =   // MUTANT cfg_comb\n"
                   "    {u1c_ok, u1c_has_v25, u1c_has_ppi, u1c_spr_valid, u1c_spr_mask, u1c_profile};\n")],
+    "cab_tied": [(".trk3(g_trk3), .op_en(op_en_s), .cshared(u1_cshared), .cab(u1_cab),   // MP; CB\n",
+                  ".trk3(g_trk3), .op_en(op_en_s), .cshared(u1_cshared), .cab(2'd2),   // MUTANT cab_tied\n")],
+    "eep_addr0": [("    .eep_rd_data(eep_rd_data), .eep_rd_addr(eu_addr),\n", "    .eep_rd_data(eep_rd_data), .eep_rd_addr(6'd0),   // MUTANT eep_addr0\n")],
     "size_ram": [("    .vf_start(ld_s[1]), .vf_bytes(size4_sys), .vf_done(rp_vf_done), .vf_sum(v_sum3), .vf_fl(v_fl3),   // rel: clk_sys copy (X)\n",
                   "    .vf_start(ld_s[1]), .vf_bytes(size4_r), .vf_done(rp_vf_done), .vf_sum(v_sum3), .vf_fl(v_fl3),   // MUTANT size_ram\n")],
 }
+
+FULL_MUT = ("cab_tied", "eep_addr0")   # Codex CB r1: the EEPROM read-address connection
 
 HDR = ("// *** RELEASE (release/s32-v1) UNIVERSAL DERIVED COPY. Generated by experiments/U1-universal/rel_derive.py from GA2 RC1's\n"
        "// experiments/D2-pocket-top/rtl/derived/d2_core_top_au3.sv with univ_derive.py's universal replacements, the sound ROM on slot\n"
@@ -220,13 +559,20 @@ def apply(t, reps):
     return t
 
 
-def gen(skip_c=False):
+def gen(skip_c=False, dm=True, sn=True):   # dm=False: the negative-control mutants keep the pre-DM text they edit
     t = SRC.read_text()
     i, j = t.index(RC1_CTL_START), t.index(RC1_CTL_END)
     assert t.count(RC1_CTL_START) == 1 and t.count(RC1_CTL_END) == 1 and i < j
     t = t[:i] + U1_CONTROLS + U1_CFG_REG + t[j + len(RC1_CTL_END):]
     t = apply(t, U + V + ([] if skip_c else C) + S + K_INST + X)
     t = apply(t, R_INST)                                  # after U: it re-targets univ_derive's configuration-instance text
+    if dm:
+        t = apply(t, DM)
+    if dm and sn:
+        t = apply(t, SN)
+        t = apply(t, HS)
+        t = apply(t, LD)
+        t = apply(apply(apply(apply(t, WC), MP), MP2), CB) + U1_WRAM_CLEAR + apply(U1_CHUTE, CB_CHUTE)
     assert "module d2_controls" not in t and "\nd2_controls " not in t, "a d2_controls module / instance survived"
     return HDR + t
 
@@ -235,7 +581,7 @@ if __name__ == "__main__":
     if "--mutant" in sys.argv:
         mk = sys.argv[sys.argv.index("--mutant") + 1]; assert mk in ("slot4", *MUT), mk
         o = Path(sys.argv[sys.argv.index("--out") + 1]); assert o.resolve() != OUT.resolve(), "a mutant never replaces the real file"
-        g = gen(skip_c=(mk == "slot4"))
+        g = gen(skip_c=(mk == "slot4"), dm=False) if mk not in FULL_MUT else gen()   # CB: mutants of the CB text need the full pipeline
         if mk != "slot4":
             g = apply(g, [(a, b, 1) for a, b in MUT[mk]])
         o.write_text(g); print(f"wrote NEGATIVE-CONTROL mutant {mk}", o); sys.exit(0)

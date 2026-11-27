@@ -396,7 +396,7 @@ def run_checks(proj, tpl, seed=None, pin=None, config="fit"):
                  "D2-pocket-top/rtl/derived/d2_slot_verify4.sv", "D2-pocket-top/rtl/derived/d2_diag_band_au.sv", "D2-pocket-top/rtl/d2_diag_band.sv",
                  "t80s_ghdl.v", "D2-pocket-top/rtl/derived/s32_soundsys_d2.sv", "D2-pocket-top/rtl/derived/s32_sprite_d2.sv")
         if rel:
-            want1 = want1 + ("U1-universal/rtl/u1_board_cfg.sv", "SM1-spidman/rtl/sm_eep_bridge_rd.sv", "references/s32/rtl/io/s32_io.sv")
+            want1 = want1 + ("U1-universal/rtl/u1_board_cfg.sv", "U1-universal/rtl/u1_wram_pr.sv", "U1-universal/rtl/u1_hiscore.sv", "U1-universal/rtl/u1_video.sv", "U1-universal/rtl/u1_save_rd.sv", "SM1-spidman/rtl/sm_eep_bridge_rd.sv", "references/s32/rtl/io/s32_io.sv")   # SN: + u1_wram_pr
             want0 = want0 + ("D2-pocket-top/rtl/derived/d2_core_top_au3.sv", "D2-pocket-top/rtl/derived/s32_core_d2_sp.sv",
                              "U1-universal/rtl/derived/d2_core_top_univ.sv", "SM1-spidman/rtl/derived/d2_core_top_spid.sv",
                              "WC-sim/rtl/sim_variants/s32_io_eep_mame.sv")
@@ -427,7 +427,9 @@ def run_checks(proj, tpl, seed=None, pin=None, config="fit"):
             "sp_sdram instance == the sp top's (p3 tied off)": sdr(at) is not None and sdr(at) == sdr(spt) and ".p3_req(1'b0), .p3_addr(24'd0), .p3_dout(), .p3_ack()," in sdr(at),
             "no ack stub on p3 / p4 / wave": not re.search(r"d2_ack_stub[^;]*\bst_(p3|p4|wv)\b", at),
             "cram1 driven by rmps (no tie-off)": "assign cram1_ce0_n=1;" not in at and ".cram_ce0_n(cram1_ce0_n)" in at,
-            "rst_r waits for rp_vf_done": ("|| !rp_vf_done || !u1_ok) begin rst_r <= 1'b1;" if rel else "|| !rp_vf_done) begin rst_r <= 1'b1;") in at,   # rel: + the valid configuration
+            "rst_r waits for rp_vf_done": ("|| !rp_vf_done || !u1_ok || !wram_clr_done) begin rst_r <= 1'b1;" if rel else "|| !rp_vf_done) begin rst_r <= 1'b1;") in at,   # rel: + the valid configuration; WC: + the work-RAM clear
+            **({"WC: work-RAM clear in front of the SRAM port, port reset released for it": re.search(r"\bu1_wram_clear\s+wram_clr\s*\(", at) is not None
+                    and ".rst(rst_r && wram_clr_done), .addr(wp_addr), .wdata(wp_wdata), .be(wp_be), .we(wp_we)," in at and ".rd(wp_rd), .q(wx_q), .rdy(wx_rdy)," in at} if rel else {}),
         }
         if rel:
             au3_struct["rel: u1_board_cfg cfg, u1_controls ctl with the guard"] = (re.search(r"\bu1_board_cfg\s+cfg\s*\(", at) is not None

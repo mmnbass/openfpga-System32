@@ -54,7 +54,7 @@
           "sav"
         ],
         "address": "0x50000000",
-        "size_maximum": "0x80"
+        "size_maximum": "0x48C"
       },
       {
         "name": "EEPROM default",

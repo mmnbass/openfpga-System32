@@ -177,6 +177,19 @@ always @(posedge clk) if (iolog && !rst) begin
         $display("V25R %06x %04x i=%0d", `CORE.A, `CORE.v25_stub_q, `V2.obs.retired);
 end
 
+// ---- +ioxlog (regional sets, TB only): every main-CPU access to the extended I/O area (0xC00040-0xC0007F: 8255 at 0x60-0x67),
+// one line per bus request: IOX R|W <addr> be=<be> wd=<wdata> ctrl=<8255 control> pc_in=<port C pins> i=<retired>. Capped.
+reg ioxlog; integer n_iox = 0;
+initial ioxlog = $test$plusargs("ioxlog");
+reg iox_q = 1'b0;
+always @(posedge clk) if (ioxlog && !rst) begin
+    iox_q <= `CORE.m_req && `CORE.sel_ioex;
+    if (`CORE.m_req && `CORE.sel_ioex && !iox_q && n_iox < 60000) begin
+        n_iox <= n_iox + 1;
+        $display("IOX %s %06x be=%b wd=%04x ctrl=%02x pc_in=%02x i=%0d", `CORE.m_we ? "W" : "R", `CORE.A, `CORE.m_be, `CORE.m_wdata, `CORE.ppi.ctrl, `CORE.ppi_pc, `V2.obs.retired);
+    end
+end
+
 // ---- +wramdump=<file> (build-1 gameplay gate, TB only): a byte shadow of main work RAM 0x200000-0x20FFFF built from the CPU's own
 // writes (m_req & m_we & sel_wram; byte lane 0 = even address, as in the sprite shadow above), written as 65536 raw bytes at every
 // vblank start (frame k = k-th vbl_start), the same layout as the MAME dump (ram.bin) used to compare. Also +wramlog: one line

@@ -1,0 +1,20 @@
+{
+  "set": "sonicp",
+  "title": "SegaSonic The Hedgehog (Japan, prototype)",
+  "mra": "references/s32/releases/SegaSonic The Hedgehog.mra",
+  "mra_descriptor_differs": "upstream has no MRA for the prototype. Against the retail set's descriptor: byte 2 = 00 (no protection responder: MAME's init_sonicp is the common init only) and byte 3 = 81 (8 MB of sprite ROM, as Spider-Man)",
+  "descriptor": "00300081000000000000000000000000",
+  "input_profile": 1,
+  "input_profile_note": "1 = World wiring: Coin 1 on SERVICE12 bit 2, 1P Start on SERVICE12 bit 4. With the trackball profile the d-pads of pads 1 / 2 drive the trackball directions (u1_controls)",
+  "video_options": 1,
+  "video_options_note": "1: sprites win equal-priority ties against NBG0, as in the retail set, where the rule follows from prot_sel = 7; here the explicit bit carries it",
+  "expected_sums": {
+    "sum0": "d8c1c090",
+    "fl0": "e2f4bec8",
+    "sum1": "048f78f3",
+    "fl1": "d8111d78",
+    "sum2": "c7d11cd3",
+    "fl2": "74867438"
+  },
+  "expected_sums_source": "checksums of the slot files built privately from this ROM set (not ROM data); band off, not consumed"
+}

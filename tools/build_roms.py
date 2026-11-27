@@ -4,16 +4,22 @@
 
     python3 build_roms.py --out <SD card>/Assets/segas32/common  <MAME set> [<MAME set> ...]
 
-<MAME set> is a .zip file or a folder: ga2u (Golden Axe: The Revenge of Death Adder, US) and/or spidman (Spider-Man: The Video Game,
-World). Merged, split and non-merged sets all work: every ROM part is found by its CRC32, whatever the file is called, so give the
-tool every zip you have for a game (a SPLIT ga2u set needs its parent ga2.zip as well).
+<MAME set> is a .zip file or a folder. Supported sets (MAME names):
+
+  ga2, ga2u, ga2j              Golden Axe: The Revenge of Death Adder (World Rev B, US Rev A, Japan)
+  spidman, spidmanu, spidmanj  Spider-Man: The Videogame (World, US Rev A, Japan)
+  sonic, sonicp                SegaSonic The Hedgehog (Japan rev. C, Japan prototype)
+
+Merged, split and non-merged sets all work: every ROM part is found by its CRC32, whatever the file is called, so give the tool every
+zip you have for a game (a SPLIT regional set needs its parent zip as well: ga2.zip, spidman.zip).
 
 For each game whose parts are all present the tool writes four images (main, tiles, sprites, sound) named as the core's Game files
-expect (ga2u_main.bin ... spidman_sound.bin). Before writing it checks the length and the CRC32 of every part's actual contents, and
-afterwards the SHA-256 of every finished image against the image that was tested on hardware. Nothing is written for a game unless all
+expect (<set>_main.bin, <set>_tiles.bin, <set>_sprites.bin, <set>_sound.bin). Before writing it checks the length and the CRC32 of
+every part's actual contents, and afterwards the SHA-256 of every finished image that has been tested on hardware (a set not yet
+tested on hardware is built from the MAME set definition alone, and the tool says so). Nothing is written for a game unless all
 four images match. Missing or wrong parts are listed by name, size and CRC32.
 
-  --game ga2u|spidman   build only this game (default: every game whose parts are all present; an error if none is)
+  --game <set>          build only this set   (default: every game whose parts are all present; an error if none is)
   --force               replace existing image files in --out (default: refuse)
 
 Layouts: the upstream core's MRA files (references/s32 releases/: Golden Axe ... (US, Rev A).mra and Spider-Man The Videogame.mra),
@@ -36,7 +42,7 @@ def _rep(step, n):
 
 GAMES = {
     "ga2u": {
-        "title": "Golden Axe: The Revenge of Death Adder (US)",
+        "title": "Golden Axe: The Revenge of Death Adder (US, Rev A)",
         "sets": "ga2u (a split set also needs its parent ga2)",
         "parts": {  # crc: (MAME name, size)
             0x87182FEA: ("epr-14960a.ic17", 0x20000), 0xAB787CF4: ("epr-14957a.ic8", 0x20000),
@@ -63,7 +69,7 @@ GAMES = {
         },
     },
     "spidman": {
-        "title": "Spider-Man: The Video Game (World)",
+        "title": "Spider-Man: The Videogame (World)",
         "sets": "spidman",
         "parts": {
             0xD900219C: ("epr-14307.ic13", 0x20000), 0x64379DC6: ("epr-14306.ic7", 0x20000),
@@ -91,7 +97,90 @@ GAMES = {
         },
     },
 }
+GAMES["sonic"] = {
+    "title": "SegaSonic The Hedgehog (Japan, rev. C)",
+    "sets": "sonic",
+    "parts": {
+        0x25E3C27E: ("epr-15787c.ic17", 0x20000), 0xEFE9524C: ("epr-15786c.ic8", 0x20000),
+        0x65B06C25: ("epr-15781c.ic18", 0x40000), 0x2DB66FD2: ("epr-15780c.ic9", 0x40000),
+        0x0FE7422E: ("epr-15785.ic36", 0x40000), 0x42F06714: ("mpr-15784.ic35", 0x100000),
+        0xE4220EEA: ("mpr-15783.ic34", 0x100000), 0xCF56B5A0: ("mpr-15782.ic33", 0x100000),
+        0x4378F12B: ("mpr-15789.ic14", 0x100000), 0xA6ED5D7A: ("mpr-15788.ic5", 0x100000),
+        0xC69D51B1: ("mpr-15790.ic32", 0x200000), 0x1006BB67: ("mpr-15792.ic30", 0x200000),
+        0x8672B480: ("mpr-15794.ic28", 0x200000), 0x95B8011C: ("mpr-15796.ic26", 0x200000),
+        0x42217066: ("mpr-15791.ic31", 0x100000), 0x75BAFE55: ("mpr-15793.ic29", 0x100000),
+        0x7F3DAD30: ("mpr-15795.ic27", 0x100000), 0x013C6CAB: ("mpr-15797.ic25", 0x100000),
+    },
+    "images": {
+        "main": (_rep(("part", 0x25E3C27E), 4) + _rep(("part", 0xEFE9524C), 4)
+                 + _rep(("inter", 16, [(0x65B06C25, "01"), (0x2DB66FD2, "10")]), 2),
+                 0x200000, "80de6ab3f66e400f207d2cf120b364ae9b9469eead3c774e674b71861498ff60"),
+        "tiles": ([("inter", 16, [(0x4378F12B, "01"), (0xA6ED5D7A, "10")]), ("fill", 0x200000, 0xFF)],
+                  0x400000, "2c743d749f47298014b66ad755f2a07acd07c2789f8cb1b61b65655ed1fab9ef"),
+        "sprites": ([("inter", 64, [(0xC69D51B1, "00000021"), (0x1006BB67, "00002100"), (0x8672B480, "00210000"), (0x95B8011C, "21000000")]),
+                     ("inter", 64, [(0x42217066, "00000021"), (0x75BAFE55, "00002100"), (0x7F3DAD30, "00210000"), (0x013C6CAB, "21000000")]),
+                     ("fill", 0x400000, 0xFF)],
+                    0x1000000, "c98f4d6afb292919f7fcbac1682829a19a6c40ebd4219e620c6db713348cda4d"),
+        "sound": (_rep(("part", 0x0FE7422E), 4) + [("part", 0x42F06714), ("part", 0xE4220EEA), ("part", 0xCF56B5A0)],
+                  0x400000, "1c38973d757e0c1a1cc1efeef5a3fb366bd5b52f5e87c27b204cafbd4586d982"),
+    },
+}
+# The prototype: every ROM but one differs; tile and sprite ROMs are byte-wide (MAME: ROM_LOAD32_BYTE at offsets 0, 2, 1, 3 and
+# ROM_LOAD64_BYTE at 0-7), 2 MB of tiles (the image's upper half is filled FF, as in the retail set) and 8 MB of sprites.
+# Its SHA-256 values are the images tested on hardware with core 0.2.0.
+GAMES["sonicp"] = {
+    "title": "SegaSonic The Hedgehog (Japan, prototype)",
+    "sets": "sonicp",
+    "parts": {
+        0xDA05DCBB: ("sonpg0.bin", 0x20000), 0xC57DC5C5: ("sonpg1.bin", 0x20000),
+        0xA7DA7546: ("sonpd0.bin", 0x40000), 0xC30E4C70: ("sonpd1.bin", 0x40000),
+        0x569C8D4B: ("sonsnd0.bin", 0x40000), 0xF4FA5A21: ("sonsnd1.bin", 0x100000),
+        0xE1BD45A5: ("sonsnd2.bin", 0x100000), 0xCF56B5A0: ("sonsnd3.bin", 0x100000),
+        0x445E31B9: ("sonscl0.bin", 0x80000), 0x3D234181: ("sonscl1.bin", 0x80000),
+        0xA5DE28B2: ("sonscl2.bin", 0x80000), 0x7CE7554B: ("sonscl3.bin", 0x80000),
+        0xCEEA18E3: ("sonobj0.bin", 0x100000), 0x6BBC226B: ("sonobj1.bin", 0x100000),
+        0xFCD5EF0E: ("sonobj2.bin", 0x100000), 0xB99B42AB: ("sonobj3.bin", 0x100000),
+        0xC7EC1456: ("sonobj4.bin", 0x100000), 0xBD5DA27F: ("sonobj5.bin", 0x100000),
+        0x313C92D1: ("sonobj6.bin", 0x100000), 0x3784C507: ("sonobj7.bin", 0x100000),
+    },
+    "images": {
+        "main": (_rep(("part", 0xDA05DCBB), 4) + _rep(("part", 0xC57DC5C5), 4)
+                 + _rep(("inter", 16, [(0xA7DA7546, "01"), (0xC30E4C70, "10")]), 2), 0x200000, "e8f35ebe3c8934185d303ffca86a35bf5b90ba324365ba8837c7172b8ce262e3"),
+        "tiles": ([("inter", 32, [(0x445E31B9, "0001"), (0xA5DE28B2, "0010"), (0x3D234181, "0100"), (0x7CE7554B, "1000")]),
+                   ("fill", 0x200000, 0xFF)], 0x400000, "04aa47d8f4cbb5868220cd8039d2a6ee6fbc437d2b3d1822f6fd8ff1bd9ab1ec"),
+        "sprites": ([("inter", 64, [(0xCEEA18E3, "00000001"), (0x6BBC226B, "00000010"), (0xFCD5EF0E, "00000100"), (0xB99B42AB, "00001000"),
+                                    (0xC7EC1456, "00010000"), (0xBD5DA27F, "00100000"), (0x313C92D1, "01000000"), (0x3784C507, "10000000")])],
+                    0x800000, "4dd0d687ae4d70cb1ca361d28760b26296bc1fa125438d3f40cc2e25a67f5de9"),
+        "sound": (_rep(("part", 0x569C8D4B), 4) + [("part", 0xF4FA5A21), ("part", 0xE1BD45A5), ("part", 0xCF56B5A0)], 0x400000, "e2b3f6ec21ab9a6c1ae16e5a7c6a0f89b4992ba1235bc3e146ebe5892907fc41"),
+    },
+}
 ORDER = ("main", "tiles", "sprites", "sound")
+
+
+def _clone(parent, name, title, swap, main_sha):
+    """A regional set: the parent's layout with its program ROM parts replaced (swap = {parent crc: (crc, MAME name)}). Its tile, sprite
+    and sound images are the parent's (same parts, same tested SHA-256); main_sha = the SHA-256 of its main image as tested on
+    hardware (Pocket, sn3 build, 2026-11-24)."""
+    p = GAMES[parent]
+    def sub(x):
+        if isinstance(x, tuple): return tuple(sub(y) for y in x)
+        if isinstance(x, list): return [sub(y) for y in x]
+        return swap[x][0] if isinstance(x, int) and x in swap else x
+    parts = {(swap[c][0] if c in swap else c): ((swap[c][1], sz) if c in swap else (n, sz)) for c, (n, sz) in p["parts"].items()}
+    images = dict(p["images"]); steps, size, _ = p["images"]["main"]; images["main"] = (sub(steps), size, main_sha)
+    GAMES[name] = {"title": title, "sets": f"{name} (a split set also needs its parent)", "parts": parts, "images": images}
+
+
+_clone("ga2u", "ga2", "Golden Axe: The Revenge of Death Adder (World, Rev B)",
+       {0x87182FEA: (0xD9CD8885, "epr-14961b.ic17"), 0xAB787CF4: (0x0BE324A3, "epr-14958b.ic8"),
+        0x7293D5C3: (0xC477A9FD, "epr-15148b.ic18"), 0x0DA61782: (0x1BB676EA, "epr-15147b.ic9")}, "871d43dff2276de15b920452c37fd87312dbe285e3d6db7c15a340593e39c2e9")
+_clone("ga2u", "ga2j", "Golden Axe: The Revenge of Death Adder (Japan)",
+       {0x87182FEA: (0xF1929177, "epr-14959.ic17"), 0xAB787CF4: (0xEACAFE94, "epr-14946.ic8"),
+        0x7293D5C3: (0x0FFB8203, "epr-14941.ic18"), 0x0DA61782: (0x3B5B3084, "epr-14940.ic9")}, "48dc1f01b28b3c79fad8c3c2c011777217804a19292cf59650484076ea6438c2")
+_clone("spidman", "spidmanu", "Spider-Man: The Videogame (US, Rev A)",
+       {0xD900219C: (0x7F1BD28F, "epr-14303a.ic13"), 0x64379DC6: (0xD954C40A, "epr-14302a.ic7")}, "eff4e531e2b8ac02a9299710ddcc9efd81c1984ae5abae319316f842b7c7d874")
+_clone("spidman", "spidmanj", "Spider-Man: The Videogame (Japan)",
+       {0xD900219C: (0x403CCDC9, "epr-14287.ic13"), 0x64379DC6: (0x5C2B4E2C, "epr-14286.ic7")}, "1e891489743ce5613ee3d9347656a369d32082f538b25e314b774d599f216385")
 
 
 def scan(sources):
@@ -158,8 +247,9 @@ def build(game, found):
         steps, size, sha = g["images"][kind]
         b = bytearray()
         for st in steps:
-            b += found[st[1]][0] if st[0] == "part" else interleave(st[1], [(found[c][0], m) for c, m in st[2]])
-        if len(b) != size or hashlib.sha256(b).hexdigest() != sha:
+            b += (found[st[1]][0] if st[0] == "part" else bytes([st[2]]) * st[1] if st[0] == "fill"
+                  else interleave(st[1], [(found[c][0], m) for c, m in st[2]]))
+        if len(b) != size or (sha is not None and hashlib.sha256(b).hexdigest() != sha):
             wrong.append(f"  {game}_{kind}.bin: the finished image does not match the tested image (sha256 {hashlib.sha256(b).hexdigest()})")
         imgs[kind] = bytes(b)
     return (None if wrong else imgs), missing, wrong
@@ -167,7 +257,7 @@ def build(game, found):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Make the Sega System 32 (mmnbass.System32) ROM images from your own MAME ROM sets.")
-    ap.add_argument("sources", nargs="+", help="MAME set .zip files or folders (ga2u [+ ga2], spidman)")
+    ap.add_argument("sources", nargs="+", help="MAME set .zip files or folders (any of: " + ", ".join(sorted(GAMES)) + ")")
     ap.add_argument("--out", required=True, help="output folder, normally <SD card>/Assets/segas32/common")
     ap.add_argument("--game", choices=sorted(GAMES), help="build only this game")
     ap.add_argument("--force", action="store_true", help="replace existing image files")
@@ -181,8 +271,9 @@ def main(argv=None):
         imgs, missing, wrong = build(game, found)
         have = sum(c in found for c in g["parts"])
         if imgs is None:
-            if not a.game and have == 0:
-                continue                                       # this game's set was not given: skip it quietly
+            own = [c for c in g["parts"] if not any(c in o["parts"] for n, o in GAMES.items() if n != game)]
+            if not a.game and not any(c in found for c in own):
+                continue                                       # none of this set's own parts was given (at most parts it shares): skip it quietly
             rc = 1
             print(f"{g['title']}: NOT built ({have} of {len(g['parts'])} parts found; MAME set {g['sets']})")
             if missing:
@@ -201,12 +292,15 @@ def main(argv=None):
             tmp = t.with_name(t.name + ".tmp")
             tmp.write_bytes(imgs[k])
             os.replace(tmp, t)
-            if hashlib.sha256(t.read_bytes()).hexdigest() != g["images"][k][2]:
+            if t.read_bytes() != imgs[k]:
                 sys.exit(f"error: {t} did not read back correctly")
         done.append(game)
+        if g.get("untested"):
+            print(f"  note: {game} is built from the MAME set definition; its main image has no hardware-tested SHA-256 yet "
+                  f"(sha256 {hashlib.sha256(imgs['main']).hexdigest()})")
         print(f"{g['title']}: written and verified: " + ", ".join(f"{t.name} ({len(imgs[k]):,} bytes)" for k, t in zip(ORDER, targets)))
     if not done and rc == 0:
-        print("No game built: none of the given files contains a ga2u or spidman ROM part.")
+        print("No game built: none of the given files contains a ROM part of a supported set (" + ", ".join(sorted(GAMES)) + ").")
         rc = 1
     return rc
 

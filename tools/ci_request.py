@@ -40,7 +40,7 @@ import subprocess
 import sys
 
 BRANCH = "research/v60-datapath-floor"
-JOB_BRANCH = {"spid": "sm/spidman", "univ": "univ/u1b", "rel": "release/s32-v0.1"}   # release/s32-v0.1 (Michael 2026-11-21): rel only on the clean v0.1.0 public release-candidate branch   # jobs with their own branch; every other job is accepted only on BRANCH
+JOB_BRANCH = {"spid": "sm/spidman", "univ": "univ/u1b", "rel": "fit/s32-dmap"}   # fit/s32-dmap (Michael 2026-11-22): rel only on the PRIVATE fit branch of the demand-mapped sprite-RAM window + video-option bit (one seed-1 fit; never a release)   # jobs with their own branch; every other job is accepted only on BRANCH
 BRANCHES = (BRANCH,) + tuple(sorted(set(JOB_BRANCH.values())))
 DIR = "experiments/build-requests/"
 SEEDS = {"hwt": {1}, "f2": {1, 2, 3}, "d1": {1}, "pll": {1}, "d2": {1}, "d2rbf": {1}, "d2sp": {1, 2, 3}, "d2au": {1, 2, 3}, "d2au3": {1, 2, 3},

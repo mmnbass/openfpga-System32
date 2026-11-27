@@ -6,7 +6,7 @@
 #   experiments/U1-universal/pkg_rel/package_rel.sh <ga2_d2.rbf> <outdir>
 # <outdir> must not exist (nothing is ever overwritten or removed). Result:
 #   <outdir>/stage/                        the SD-card tree (Cores/, Platforms/, Assets/)
-#   <outdir>/mmnbass.System32_<core.json version>.zip     the same tree, zipped
+#   <outdir>/mmnbass.System32_0.9.0-rc1.zip     the same tree, zipped
 #   <outdir>/MANIFEST.sha256               sha256 of every file in stage/, the zip, and the input rbf
 # As SpidPlay1 / GA2Play8 package_d2.sh: the .rbf is bit-reversed into bitstream.rbf_r, icon.bin and the platform image are drawn.
 # Added for U1: the per-game instance files (committed, checked by u1_pkg.py check) and the per-game 64-byte configuration files
@@ -17,12 +17,12 @@ RBF="${1:-}"; OUT="${2:-}"
 [ -n "$RBF" ] && [ -n "$OUT" ] || { echo "usage: package_rel.sh <ga2_d2.rbf> <outdir>" >&2; exit 2; }
 [ -f "$RBF" ] && [ -s "$RBF" ] || { echo "refusing: no bitstream: '$RBF' is not a non-empty file" >&2; exit 2; }
 [ ! -e "$OUT" ] || { echo "refusing: outdir '$OUT' already exists (use a fresh directory)" >&2; exit 2; }
-CORE=mmnbass.System32; PLAT=segas32
-VER=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["core"]["metadata"]["version"])' "$HERE/Cores/$CORE/core.json")   # release/s32-v0.1: the zip is named from core.json's version (one source of truth)
+CORE=${PKG_CORE:-mmnbass.System32}; PLAT=${PKG_PLATFORM:-segas32}; TPL=${PKG_TEMPLATES:-$HERE}   # SN: package_sn.sh sets these (as release/s32-v1-diag / -ro did)
+VER=${PKG_VERSION:-$(python3 -I -c 'import json,sys; print(json.load(open(sys.argv[1]))["core"]["metadata"]["version"])' "$TPL/Cores/$CORE/core.json")}   # default: the version in core.json (as release/s32-v0.1)
 python3 -B "$HERE/u1_pkg.py" check
 mkdir -p "$OUT/stage"
-cp -R "$HERE/Cores" "$HERE/Platforms" "$HERE/Assets" "$OUT/stage/"
-cp "$HERE/../../../LICENSE" "$OUT/stage/Cores/$CORE/LICENSE.txt"   # the GPL-3.0 text travels with the bitstream (release/s32-v0.1, R7)
+cp -R "$TPL/Cores" "$TPL/Platforms" "$TPL/Assets" "$OUT/stage/"
+[ "$CORE" = mmnbass.System32 ] && cp "$HERE/../../../LICENSE" "$OUT/stage/Cores/$CORE/LICENSE.txt"   # the GPL-3.0 text travels with the bitstream (release/s32-v0.1, R7)
 python3 -B "$HERE/u1_pkg.py" cfg "$OUT/stage/Assets/$PLAT/common"
 python3 -B "$HERE/../u1_cfg.py" check-files "$HERE/../games/cfg_files.sha256" "$OUT/stage/Assets/$PLAT/common/"*_u1cfg.bin
 mkdir -p "$OUT/stage/Platforms/_images"

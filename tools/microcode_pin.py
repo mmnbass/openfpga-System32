@@ -49,8 +49,14 @@ IMAGES = ("m1_cstore.hex", "m1_dispatch.hex", "m1_mode.hex")
 PIN_KEYS = {"schema", "what", "source", "builder", "builder_sha256", "command", "images_sha256", "v25_microcode_bin_sha256", "word_counts"}
 PIN_KEYS_OPTIONAL = {"args"}
 DEFAULT_ARGS = ["--reset-native"]
+# fit/s32-dmap SN (SegaSonic integration, 2026-11-23): the fourth list selects every ported switch of research/v60-sonic-cpu1 (S1 to S3-C, indexed
+# JSR, MOVCFU) with the pack search budget those images were built with; `make --mc-pack tail,zero --gen <GEN_SONIC> --pack-budget 20000`.
+# BS (2026-11-24): + bs = MOVBSU / MOVBSD (research/v60-bs); the list without it is no longer accepted.
+# CC (2026-11-24): + cc = CMPC.B / CMPC.H (research/v60-cc); ceiling 2,000 words (Michael).
+GEN_SONIC = "var,dbcc,cv,mul,div,addc,bit,sh,am,rv,sf,xc,pp,gp,js,up,ld,st,jx,mf,bs,cc"
 ALLOWED_ARGS = (["--reset-native"], ["--reset-native", "--mc-pack=tail,zero"],
-                ["--reset-native", "--mc-pack=tail,zero", "--arith=mul,div"])   # closed: anything else is refused (fail closed)
+                ["--reset-native", "--mc-pack=tail,zero", "--arith=mul,div"],
+                ["--reset-native", "--mc-pack=tail,zero", f"--gen={GEN_SONIC}", "--pack-budget=20000"])   # closed: anything else is refused (fail closed)
 # release/s32-v1-ro2: the third list selects the S1 multiply / divide routine (research/v60-s1md); the builder honours no environment switch for it.
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
@@ -127,8 +133,8 @@ def command_for(args):
 def builder_env():
     """The environment of the builder run: the caller's without GA2_MC_PACK (packing comes ONLY from the pin's arguments).
     release/s32-v1-ro2: an ambient C1_GEN (the research arithmetic switch) is refused, never passed or silently dropped."""
-    if "C1_GEN" in os.environ:
-        raise SystemExit("refusing: C1_GEN is set in the environment; microcode selection comes only from the pin's builder arguments")
+    if "C1_GEN" in os.environ or "MC_PACK_BUDGET" in os.environ:
+        raise SystemExit("refusing: C1_GEN / MC_PACK_BUDGET is set in the environment; microcode selection comes only from the pin's builder arguments")
     return {k: v for k, v in os.environ.items() if k != "GA2_MC_PACK"}
 
 
@@ -180,6 +186,10 @@ def make(a):
     args = ["--reset-native", f"--mc-pack={a.mc_pack}"] if a.mc_pack else list(DEFAULT_ARGS)
     if a.arith:
         args.append(f"--arith={a.arith}")
+    if a.gen:
+        args.append(f"--gen={a.gen}")
+    if a.pack_budget:
+        args.append(f"--pack-budget={a.pack_budget}")
     if args not in ALLOWED_ARGS:
         raise SystemExit(f"refusing: builder arguments {args} are not one of {ALLOWED_ARGS}")
     out, got, builder = generate_images(repo, commit, scratch, args)
@@ -192,7 +202,7 @@ def make(a):
         "images_sha256": got, "v25_microcode_bin_sha256": v25,
         "word_counts": {n: words(out / n) for n in IMAGES},
     }
-    if a.mc_pack or a.arith:
+    if a.mc_pack or a.arith or a.gen or a.pack_budget:
         pin["args"] = args                     # absent for the default (reset-native) so that pins made before this field stay as they were
     out_p.parent.mkdir(parents=True, exist_ok=True)
     out_p.write_text(json.dumps(pin, indent=1, sort_keys=True) + "\n")
@@ -243,6 +253,8 @@ def main(argv=None):
     m.add_argument("--repo", default=str(ROOT))
     m.add_argument("--scratch")
     m.add_argument("--mc-pack", help="MC-compact packing mode passed to the builder (allowed: tail,zero); recorded in the pin's `args`")
+    m.add_argument("--gen", help="switch list passed to the builder as --gen=<v> (allowed: GEN_SONIC; with --mc-pack tail,zero --pack-budget 20000)")
+    m.add_argument("--pack-budget", help="pack search budget passed to the builder as --pack-budget=<n> (allowed: 20000, with --gen)")
     m.add_argument("--arith", help="arithmetic routine selector passed to the builder as --arith=<v> (allowed: mul,div; with --mc-pack tail,zero)")
     c = sub.add_parser("check")
     c.add_argument("--pin", required=True)

@@ -14,7 +14,7 @@ the slot loads. Those are hardware observations (U1c).
 
 Rules (each one a check below):
   R1  file set exactly: the core's JSON files, info.txt, icon.bin, bitstream.rbf_r; the platform JSON and image; the common README; one
-      configuration file <set>_u1cfg.bin per game in Assets/s32univ/common; one instance file <set>.json per game in the core folder
+      configuration file <set>_u1cfg.bin per game in Assets/s32univ/common; one instance file per game in the core folder, named by the game's full title
       Assets/s32univ/mmnbass.S32Univ (and nothing else: no ROM-like file can hide).
   R2  core.json: platform segas32, author.shortname = the folder, version VERSION, names both supported games and no other, the framework block, ONE
       bitstream (cores = [default, id 0, bitstream.rbf_r]).
@@ -28,30 +28,22 @@ Rules (each one a check below):
       * ROM (incl. the sound ROM, id 7 at the RTL's 0x7000_0000 / 4 MiB) / EEPROM-default / configuration slots: bridge address and size from the RTL, no default filename (only the instance names
         files, so no file can be shared by both games through a default), not core-specific (common folder), not reloadable;
       * Save: nonvolatile, filename cloned from slot 0 (bit 2) so each instance file gives its own save, bit 5 clear, 0x84 (as SpidPlay1
-        and the released core), ["sav"], 128 bytes = the RTL datatable value, optional;
+        and the released core), ["sav"], 1,164 bytes = the RTL datatable value (HS: the 128-byte 93C46 image + the score part), optional;
       * EEPROM default: optional, read-only, not nonvolatile; configuration: required, 64 bytes, inside the loader's window, and
         size_exact 0x40 (U1b review finding 1: APF writes whole 32-bit words, so a 61-63-byte file would reach the core as 64 bridge
         bytes and pass the RTL's "every word written" completeness check; with size_exact APF loads only a 64-byte file [D]). No
         other slot sets size_exact.
-  R4  each game (experiments/U1-universal/games/<set>.json) has <set>.json: magic, data_path "", core_select id 0 / select false;
+  R4  each game (experiments/U1-universal/games/<set>.json) has its instance file (<full title>.json): magic, data_path "", core_select id 0 / select false;
       data_slots name ids 1, 2, 3, 6, 7 (and 4 only if the game has a default-EEPROM file), each once, never 0 or 10, ids that data.json
       declares; flat ASCII names; no file name is used by two games; the id-6 file is in the package, equals u1_cfg.make(<set>) byte
       for byte and its sha256 is the games/cfg_files.sha256 entry (configuration identity), decodes with reason 0 (u1_cfg's reference
       model of u1_board_cfg) and carries the game's own descriptor; the ROM names appear in the common README.
   R5  instance file names differ case-insensitively (APF names each save after slot 0's file: one save per game).
   R6  video / input / platform / images / bitstream as the GA2Play8 and SpidPlay1 validators (input = GA2Play8's six mappings).
-  R7  licence notices for the synthesized bitstream (release/s32-v0.1, Michael 2026-11-21): Cores/<core>/LICENSE.txt is the complete
-      GNU GPL v3 text (sha256 of the canonical gpl-3.0.txt, = the repository LICENSE); Cores/<core>/THIRD_PARTY_NOTICES.txt names the
-      source address and contains, verbatim (comment markers removed), every T80 file's copyright notice, conditions and disclaimer
-      (the BSD-style T80 terms require them "in the documentation and/or other materials provided with the distribution" for the
-      synthesized form) and every agg23 MIT file's copyright and permission notice. The blocks are extracted from the compiled
-      source files themselves (the pinned upstream T80 files: <repo>/references/s32, or --upstream <dir>), so a missing or edited
-      notice fails.
-  R8  AI-use declaration (release/s32-v0.1, Michael 2026-11-21): Cores/<core>/updaters.json is exactly {"declare_ai": DECLARE_AI}
-      (the openFPGA Library's updaters.json schema: an object whose declare_ai is an array of strings; the Library and its AI check
-      read it from the release zip). Claude Code was the primary implementation tool; OpenAI Codex a read-only reviewer."""
+  R7 / R8 (release identity mmnbass.System32 only; ported from release/s32-v0.1 for v0.2.0): LICENSE.txt = the complete GPL-3.0
+      text, THIRD_PARTY_NOTICES.txt holds every compiled T80 / agg23 notice verbatim (extracted from the sources; --upstream or
+      S32_UPSTREAM for a worktree without references/s32), updaters.json = {"declare_ai": DECLARE_AI}; input labels game-neutral."""
 import hashlib, json, os, re, shutil, subprocess, sys
-DECLARE_AI = ["Claude Code", "OpenAI Codex"]          # R8
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -62,66 +54,28 @@ import u1_cfg  # noqa: E402
 
 RTL = U1 / "rtl" / "derived" / "d2_core_top_rel.sv"
 VIDEO_RTL = ROOT / "experiments" / "P1-pocket-top" / "rtl" / "ga2_video.sv"
-CORE_DIR, PLATFORM = "mmnbass.System32", "segas32"   # provisional public identifiers (Michael 2026-11-19)
-VERSION = "0.1.0"   # release/s32-v0.1: the first public release (Michael 2026-11-21)
-GAME_TITLES = ("Golden Axe: The Revenge of Death Adder", "Spider-Man: The Video Game")   # public spelling (Michael 2026-11-21)
+CORE_DIR, PLATFORM = os.environ.get("PKG_CORE", "mmnbass.System32"), os.environ.get("PKG_PLATFORM", "segas32")   # SN: overridable (package_sn.sh)
+VERSION = os.environ.get("PKG_VERSION", "0.2.0")   # v0.2.0 (Michael 2026-11-24; v0.1.0 = the first public release); SN: overridable
+GAME_TITLES = ("Golden Axe: The Revenge of Death Adder", "Spider-Man: The Videogame", "SegaSonic The Hedgehog")
 INST = f"Assets/{PLATFORM}/{CORE_DIR}"
 COMMON = f"Assets/{PLATFORM}/common"
 ORDER = [0, 1, 2, 3, 10, 4, 6, 7]
-EEPROM_DEFAULT_GAMES = {"spidman"}             # games whose instance names a default-EEPROM file (SpidPlay1's optional image); GA2 has none
+EEPROM_DEFAULT_GAMES = {"spidman", "spidmanu", "spidmanj"}             # games whose instance names a default-EEPROM file (SpidPlay1's optional image); GA2 has none
 ICON_BYTES, PLAT_BYTES = 36 * 36 * 2, 521 * 165 * 2
 ROMLIKE_EXT = {".bin", ".rom", ".zip", ".7z", ".mra", ".j64", ".jag", ".abs", ".cof", ".sav", ".mpr", ".epr", ".hex"}
 ROMLIKE_SIZES = {1 << 20, 2 << 20, 4 << 20, 8 << 20, 16 << 20, 512 << 10, 256 << 10, 128 << 10}
-WANT_MAP = [(0, "pad_btn_a"), (1, "pad_btn_b"), (2, "pad_btn_x"), (3, "pad_btn_y"), (20, "pad_btn_start"), (21, "pad_btn_select")]
-WANT_NAMES = ["Button 1", "Button 2", "Button 3", "Button 3 (alt)", "Start", "Coin"]   # release/s32-v0.1: game-neutral labels (universal core)
+DECLARE_AI = ["Claude Code", "OpenAI Codex"]          # R8 (release identity only)
+WANT_NAMES = ["Button 1", "Button 2", "Button 3", "Button 3 (alt)", "Service (operator buttons on)", "Test (operator buttons on)", "Start", "Coin"]   # release: game-neutral labels (v0.1), + operator L / R
 GPL3_SHA256 = "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"   # the canonical GNU GPL v3 text (gpl-3.0.txt)
 SOURCE_URL = "https://github.com/mmnbass/openfpga-System32"
 MIT_FILES = ("experiments/P1-pocket-top/rtl/third_party/data_loader.sv", "experiments/D2-pocket-top/rtl/third_party/sound_i2s.sv",
              "experiments/D2-pocket-top/rtl/third_party/sync_fifo.sv")
 T80_FILES = ("T80.vhd", "T80_ALU.vhd", "T80_MCode.vhd", "T80_Reg.vhd", "T80pa.vhd", "T80s.vhd")   # the T80 files the release compiles
 UPSTREAM = [ROOT / "references" / "s32"]                     # --upstream overrides (a worktree without the submodule checked out)
+RELEASE = CORE_DIR == "mmnbass.System32"   # R7 / R8 / labels apply to the public identity (the SN test identity is unchanged)
+WANT_MAP = [(0, "pad_btn_a"), (1, "pad_btn_b"), (2, "pad_btn_x"), (3, "pad_btn_y"), (4, "pad_trig_l"), (5, "pad_trig_r"), (20, "pad_btn_start"), (21, "pad_btn_select")]   # MP: L / R = Service / Test (operator buttons)
 FRAMEWORK = {"target_product": "Analogue Pocket", "version_required": "1.1", "sleep_supported": False,
              "dock": {"supported": True, "analog_output": False}, "hardware": {"link_port": False, "cartridge_adapter": -1}}
-
-
-def games():
-    return {p.stem: json.loads(p.read_text()) for p in u1_cfg.games()}
-
-
-def cfg_manifest():
-    return dict(reversed(ln.split()) for ln in (U1 / "games" / "cfg_files.sha256").read_text().splitlines() if ln.strip())
-
-
-def rtl_constants():
-    t = RTL.read_text()
-    nib = lambda name: int(re.search(rf"ADDRESS_MASK_UPPER_4\(4'h([0-9a-fA-F])\)[^;]*?\)\s*{name}\s*\(", t).group(1), 16) << 28
-    c = {"ids": sorted(set(int(x) for x in re.findall(r"dataslot_requestwrite_id\s*==\s*16'd(\d+)", t)))}
-    c["addr"] = {i: nib(f"slot{i}_loader") for i in (1, 2, 3)}
-    c["snd"] = nib("slot4_loader")                      # rel: the sound-ROM loader keeps GA2Audio3's name slot4_loader (rel_derive.py C)
-    c["hdr"] = {int(m.group(1)): (int(m.group(2).replace("_", ""), 16), int(m.group(3)) << 20)
-                for m in re.finditer(r"id (\d) [^,(]*\((?:bridge )?(0x[0-9A-Fa-f_]+), (\d+) MB\)", t)}
-    c["cfg"] = nib("cfg_loader")
-    c["cfg_window"] = 1 << int(re.search(r"ADDRESS_SIZE\((\d+)\)[^;]*?\)\s*cfg_loader\s*\(", t).group(1))
-    c["eep_def"], c["eep_save"] = nib("eepdef_loader"), nib("eepsave_loader")
-    c["eep_rd"] = int(re.search(r"sm_eep_bridge_rd #\(\.ADDRESS_MASK_UPPER_4\(4'h([0-9a-fA-F])\)", t).group(1), 16) << 28
-    c["eep_mux"] = int(re.search(r"32'h([0-9a-fA-F])xxxxxxx: bridge_rd_data <= eep_bridge_rd_data", t).group(1), 16) << 28
-    c["dt_addr"] = int(re.search(r"datatable_addr = 10'd(\d+)", t).group(1))
-    c["dt_size"] = int(re.search(r"datatable_data = 32'd(\d+)", t).group(1))
-    c["cfg_gate"] = re.search(r"\|\|\s*!u1_ok\)\s*begin\s*rst_r\s*<=\s*1'b1", t) is not None      # the CPU reset waits for a valid file
-    v = VIDEO_RTL.read_text()
-    c["w"] = int(re.search(r"H_PIXELS\s*=\s*(\d+)", v).group(1)); c["h"] = int(re.search(r"V_LINES\s*=\s*(\d+)", v).group(1))
-    return c
-
-
-def reverse_bits(b):
-    return b.translate(bytes(int(f"{i:08b}"[::-1], 2) for i in range(256)))
-
-
-def P(s):
-    try:
-        return int(str(s.get("parameters")), 16)
-    except Exception:
-        return None
 
 
 def _uncomment(lines, mark):
@@ -157,6 +111,66 @@ def notice_blocks():
     return req
 
 
+def iname(s):   # a set's instance file name: its full title (u1_cfg.instance_stem); the Pocket lists it and names the save after it
+    return u1_cfg.instance_stem(games()[s]) + ".json"
+
+
+def games():
+    return {p.stem: json.loads(p.read_text()) for p in u1_cfg.games()}
+
+
+def cfg_manifest():
+    return dict(reversed(ln.split()) for ln in (U1 / "games" / "cfg_files.sha256").read_text().splitlines() if ln.strip())
+
+
+def rtl_constants():
+    t = RTL.read_text()
+    # LD1: bridge nibbles 1-6 share one data_loader (slots_loader); a slot's nibble is then the one its strobe selects from the
+    # address bits 27:25, and only counts if the shared loader and its nibble remap are present as generated.
+    LD1 = {"slot1_loader": "l1", "slot2_loader": "l2", "slot3_loader": "l3", "cfg_loader": "cf", "eepdef_loader": "ed", "eepsave_loader": "es"}
+    ld1 = ("wire [31:0] ldm_badr = {ldm_sel ? 4'h1 : 4'h0, ldm_nib[2:0], bridge_addr[24:0]};" in t
+           and "wire        ldm_sel  = ldm_nib >= 4'h1 && ldm_nib <= 4'h6;" in t
+           and re.search(r"data_loader #\(\.ADDRESS_MASK_UPPER_4\(4'h1\), \.ADDRESS_SIZE\(28\), \.OUTPUT_WORD_SIZE\(2\)\) slots_loader \(\s*"
+                         r"\.clk_74a\(clk_74a\), \.clk_memory\(clk_sys\), \.bridge_wr\(bridge_wr\), \.bridge_endian_little\(bridge_endian_little\),\s*"
+                         r"\.bridge_addr\(ldm_badr\), \.bridge_wr_data\(bridge_wr_data\),\s*"
+                         r"\.write_en\(ldm_en\), \.write_addr\(ldm_addr\), \.write_data\(ldm_data\)\);", t) is not None)
+    def ld1_sig(name):
+        m = re.findall(rf"assign {LD1[name]}_en = ldm_en && ldm_addr\[27:25\] == 3'd([1-6]); assign {LD1[name]}_addr = ldm_addr\[(\d+):0\]; assign {LD1[name]}_data = ldm_data;", t)
+        assert ld1 and len(m) == 1, f"no loader for {name}"
+        return int(m[0][0]), int(m[0][1]) + 1
+    def nib(name):
+        m = re.search(rf"ADDRESS_MASK_UPPER_4\(4'h([0-9a-fA-F])\)[^;]*?\)\s*{name}\s*\(", t)
+        return (int(m.group(1), 16) if m else ld1_sig(name)[0]) << 28
+    c = {"ids": sorted(set(int(x) for x in re.findall(r"dataslot_requestwrite_id\s*==\s*16'd(\d+)", t)))}
+    c["addr"] = {i: nib(f"slot{i}_loader") for i in (1, 2, 3)}
+    c["snd"] = nib("slot4_loader")                      # rel: the sound-ROM loader keeps GA2Audio3's name slot4_loader (rel_derive.py C)
+    c["hdr"] = {int(m.group(1)): (int(m.group(2).replace("_", ""), 16), int(m.group(3)) << 20)
+                for m in re.finditer(r"id (\d) [^,(]*\((?:bridge )?(0x[0-9A-Fa-f_]+), (\d+) MB\)", t)}
+    c["cfg"] = nib("cfg_loader")
+    m = re.search(r"ADDRESS_SIZE\((\d+)\)[^;]*?\)\s*cfg_loader\s*\(", t)
+    c["cfg_window"] = 1 << (int(m.group(1)) if m else ld1_sig("cfg_loader")[1])
+    c["eep_def"], c["eep_save"] = nib("eepdef_loader"), nib("eepsave_loader")
+    c["eep_rd"] = int(re.search(r"u1_save_rd #\(\.ADDRESS_MASK_UPPER_4\(4'h([0-9a-fA-F])\)", t).group(1), 16) << 28
+    c["eep_mux"] = int(re.search(r"32'h([0-9a-fA-F])xxxxxxx: bridge_rd_data <= eep_bridge_rd_data", t).group(1), 16) << 28
+    c["dt_addr"] = int(re.search(r"datatable_addr = 10'd(\d+)", t).group(1))
+    c["dt_size"] = int(re.search(r"datatable_data = 32'd(\d+)", t).group(1))
+    c["cfg_gate"] = re.search(r"\|\|\s*!u1_ok\b(?:\s*\|\|\s*![A-Za-z_][A-Za-z0-9_]*)*\)\s*begin\s*rst_r\s*<=\s*1'b1", t) is not None   # the CPU reset waits for a valid file (WC: further OR terms may follow)
+    v = VIDEO_RTL.read_text()
+    c["w"] = int(re.search(r"H_PIXELS\s*=\s*(\d+)", v).group(1)); c["h"] = int(re.search(r"V_LINES\s*=\s*(\d+)", v).group(1))
+    return c
+
+
+def reverse_bits(b):
+    return b.translate(bytes(int(f"{i:08b}"[::-1], 2) for i in range(256)))
+
+
+def P(s):
+    try:
+        return int(str(s.get("parameters")), 16)
+    except Exception:
+        return None
+
+
 def validate(pkg, rbf=None):
     pkg = Path(pkg); errs = []; E = errs.append
     try:
@@ -173,15 +187,14 @@ def validate(pkg, rbf=None):
         E(f"RTL windows cfg/default/save/read-back/mux {K['cfg']:#x}/{K['eep_def']:#x}/{K['eep_save']:#x}/{K['eep_rd']:#x}/{K['eep_mux']:#x}")
     if K["cfg_window"] < 64: E(f"RTL configuration loader window {K['cfg_window']} bytes < 64")
     if not K["cfg_gate"]: E("RTL: the CPU reset does not wait for a valid configuration (u1_ok)")
-    if (K["dt_addr"] - 1) % 2 or K["dt_size"] != 128: E(f"RTL datatable entry {K['dt_addr']} / size {K['dt_size']} (expected an odd size entry, 128)")
+    if (K["dt_addr"] - 1) % 2 or K["dt_size"] != 1164: E(f"RTL datatable entry {K['dt_addr']} / size {K['dt_size']} (expected an odd size entry, 1164)")
     save_index = (K["dt_addr"] - 1) // 2
     # ---- R1 file set
     files = {str(p.relative_to(pkg)).replace(os.sep, "/") for p in pkg.rglob("*") if p.is_file()}
     expected = {f"Cores/{CORE_DIR}/{n}" for n in ("core.json", "data.json", "video.json", "input.json", "audio.json", "interact.json",
-                                                   "variants.json", "info.txt", "icon.bin", "bitstream.rbf_r",
-                                                   "LICENSE.txt", "THIRD_PARTY_NOTICES.txt", "updaters.json")} | {
+                                                   "variants.json", "info.txt", "icon.bin", "bitstream.rbf_r") + (("LICENSE.txt", "THIRD_PARTY_NOTICES.txt", "updaters.json") if RELEASE else ())} | {
         f"Platforms/{PLATFORM}.json", f"Platforms/_images/{PLATFORM}.bin", f"{COMMON}/README.txt"} | {
-        f"{COMMON}/{s}_u1cfg.bin" for s in G} | {f"{INST}/{s}.json" for s in G}
+        f"{COMMON}/{s}_u1cfg.bin" for s in G} | {f"{INST}/{iname(s)}" for s in G}
     for f in sorted(expected - files): E(f"R1 missing file: {f}")
     for f in sorted(files - expected): E(f"R1 unexpected file: {f}")
     for f in sorted(files):
@@ -211,7 +224,7 @@ def validate(pkg, rbf=None):
         if m.get("platform_ids") != [PLATFORM]: E(f"R2 core.json platform_ids {m.get('platform_ids')} != ['{PLATFORM}']")
         if f"{m.get('author')}.{m.get('shortname')}" != CORE_DIR: E("R2 core.json author.shortname != core directory name")
         if m.get("version") != VERSION: E(f"R2 core.json version {m.get('version')} != {VERSION}")
-        if not all(t in m.get("description", "") for t in GAME_TITLES): E("R2 core.json description does not name both supported games")
+        if not all(t in m.get("description", "") for t in GAME_TITLES): E("R2 core.json description does not name every supported game")
         for k in ("shortname", "author", "version"):
             if len(str(m.get(k, ""))) > 31: E(f"R2 core.json metadata.{k} longer than 31 characters")
         if not re.fullmatch(r"[a-z0-9][a-z0-9_]{0,14}", PLATFORM): E(f"R2 platform id {PLATFORM!r}: Analogue allows a-z 0-9 _, at most 15, not starting with _")
@@ -244,7 +257,7 @@ def validate(pkg, rbf=None):
     if 10 in ids and ids.index(10) != save_index:
         E(f"R3 Save slot at index {ids.index(10)}: its datatable entry {2 * ids.index(10) + 1} != RTL datatable_addr {K['dt_addr']} (index {save_index})")
     for i, base, size in ((1, K["addr"].get(1), K["hdr"].get(1, (0, 0))[1]), (2, K["addr"].get(2), K["hdr"].get(2, (0, 0))[1]),
-                          (3, K["addr"].get(3), K["hdr"].get(3, (0, 0))[1]), (4, K["eep_def"], K["dt_size"]), (10, K["eep_save"], K["dt_size"]),
+                          (3, K["addr"].get(3), K["hdr"].get(3, (0, 0))[1]), (4, K["eep_def"], 128), (10, K["eep_save"], K["dt_size"]),
                           (6, K["cfg"], 64), (7, K["snd"], K["hdr"].get(7, (0, 0))[1])):
         s = byid.get(i)
         if s is None: E(f"R3 slot id {i} missing"); continue
@@ -276,7 +289,7 @@ def validate(pkg, rbf=None):
     man = cfg_manifest(); used = {}
     declared = set(ids) - {0}
     for s, g in sorted(G.items()):
-        rel = f"{INST}/{s}.json"; d = J(rel) if (pkg / rel).is_file() else None
+        rel = f"{INST}/{iname(s)}"; d = J(rel) if (pkg / rel).is_file() else None
         if d is None: E(f"R4 {s}: no instance file {rel}"); continue
         it = d.get("instance", {})
         if it.get("magic") != "APF_VER_1": E(f"R4 {s}: instance magic {it.get('magic')!r}")
@@ -315,16 +328,32 @@ def validate(pkg, rbf=None):
     # ---- R6 video / input / platform / images / bitstream
     d = J(f"Cores/{CORE_DIR}/video.json")
     sm = d.get("video", {}).get("scaler_modes", []) if d else []
-    if len(sm) != 1 or (sm[0].get("width"), sm[0].get("height"), sm[0].get("aspect_w"), sm[0].get("aspect_h"), sm[0].get("rotation"), sm[0].get("mirror")) != (K["w"], K["h"], 4, 3, 0, 0):
-        E(f"R6 video.json scaler modes {sm} != one {K['w']}x{K['h']} 4:3 mode")
+    # SN2: slot 0 = the 320 mode, slot 1 = the board's 416 mode (u1_video.sv selects it by the end-of-line word), both 4:3
+    got_sm = [(m.get("width"), m.get("height"), m.get("aspect_w"), m.get("aspect_h"), m.get("rotation"), m.get("mirror")) for m in sm]
+    if got_sm != [(K["w"], K["h"], 4, 3, 0, 0), (416, K["h"], 4, 3, 0, 0)]:
+        E(f"R6 video.json scaler modes {sm} != [{K['w']}x{K['h']} 4:3, 416x{K['h']} 4:3]")
     d = J(f"Cores/{CORE_DIR}/input.json")
     try:
         cs = d["input"]["controllers"]; got = [(m["id"], m["key"]) for m in cs[0]["mappings"]] if len(cs) == 1 and cs[0].get("type") == "default" else None
     except Exception:
         got = None
     if got != WANT_MAP: E(f"R6 input.json mappings {got} != {WANT_MAP}")
-    names = [m.get("name") for m in cs[0]["mappings"]] if got is not None else None
-    if names != WANT_NAMES: E(f"R6 input.json labels {names} != {WANT_NAMES} (game-neutral)")
+    if RELEASE:
+        try:
+            names = [m["name"] for m in d["input"]["controllers"][0]["mappings"]]
+        except Exception:
+            names = None
+        if names != WANT_NAMES: E(f"R6 input.json labels {names} != {WANT_NAMES} (game-neutral)")
+    # R9 (MP): the core menu has exactly the "Operator buttons" check box, written (never read back, not persisted) to the address the RTL decodes
+    ij = pkg / "Cores" / CORE_DIR / "interact.json"
+    try:
+        iv = json.loads(ij.read_text())["interact"]["variables"]
+    except (OSError, ValueError, KeyError):
+        iv = None
+    rtl_op = re.search(r"bridge_wr && bridge_addr == 32'h([0-9A-Fa-f]{8})\) op_74 <=", RTL.read_text())
+    want_iv = [{"name": "Operator buttons", "id": 1, "type": "check", "enabled": True, "persist": False, "writeonly": True,
+                "address": f"0x{rtl_op.group(1).upper() if rtl_op else 'MISSING'}", "defaultval": 0, "value": 1, "value_off": 0}]
+    if iv != want_iv: E(f"R9 interact.json variables {iv} != {want_iv} (operator buttons, RTL address)")
     pj = pkg / "Platforms" / f"{PLATFORM}.json"
     if pj.is_file():
         try:
@@ -339,29 +368,6 @@ def validate(pkg, rbf=None):
             if len(b) != n: E(f"R6 {f}: {len(b)} bytes, expected {n}")
             elif any(b[1::2]): E(f"R6 {f}: nonzero high bytes")
             elif len(set(b[0::2])) < 2: E(f"R6 {f}: blank image")
-    # ---- R7 licence notices (the bitstream is a synthesized form of GPL, BSD-style (T80) and MIT (agg23) sources)
-    lp, np_ = cdir / "LICENSE.txt", cdir / "THIRD_PARTY_NOTICES.txt"
-    if lp.is_file() and hashlib.sha256(lp.read_bytes()).hexdigest() != GPL3_SHA256: E("R7 LICENSE.txt is not the complete GNU GPL v3 text")
-    if lp.is_file() and (ROOT / "LICENSE").is_file() and lp.read_bytes() != (ROOT / "LICENSE").read_bytes(): E("R7 LICENSE.txt differs from the repository LICENSE")
-    if np_.is_file():
-        nt = np_.read_text()
-        if SOURCE_URL not in nt: E(f"R7 THIRD_PARTY_NOTICES.txt does not name the source address {SOURCE_URL}")
-        if "LICENSE.txt" not in nt: E("R7 THIRD_PARTY_NOTICES.txt does not refer to LICENSE.txt")
-        try:
-            req = notice_blocks()
-        except (OSError, ValueError, StopIteration) as ex:
-            E(f"R7 cannot read the notice sources (references/s32 checked out? --upstream): {ex}"); req = []
-        for what, blk in req:
-            if blk not in nt: E(f"R7 THIRD_PARTY_NOTICES.txt lacks the verbatim {what}")
-    # ---- R8 AI-use declaration (openFPGA Library updaters.json)
-    up = cdir / "updaters.json"
-    if up.is_file():
-        try:
-            u = json.loads(up.read_text())
-        except ValueError as ex:
-            E(f"R8 updaters.json is not valid JSON: {ex}"); u = None
-        if u is not None and u != {"declare_ai": DECLARE_AI}:
-            E(f"R8 updaters.json is not exactly {{\"declare_ai\": {DECLARE_AI}}}: {u}")
     rp = cdir / "bitstream.rbf_r"
     if rp.is_file():
         r = rp.read_bytes()
@@ -370,6 +376,38 @@ def validate(pkg, rbf=None):
             src = Path(rbf).read_bytes()
             if reverse_bits(src) != r: E("R6 bitstream.rbf_r is NOT the bit-reversal of the given rbf")
             if r == src: E("R6 bitstream.rbf_r equals the un-reversed rbf")
+    if RELEASE:
+        # ---- R7 licence notices (the bitstream is a synthesized form of GPL, BSD-style (T80) and MIT (agg23) sources)
+        lp, np_ = cdir / "LICENSE.txt", cdir / "THIRD_PARTY_NOTICES.txt"
+        if lp.is_file() and hashlib.sha256(lp.read_bytes()).hexdigest() != GPL3_SHA256: E("R7 LICENSE.txt is not the complete GNU GPL v3 text")
+        if lp.is_file() and (ROOT / "LICENSE").is_file() and lp.read_bytes() != (ROOT / "LICENSE").read_bytes(): E("R7 LICENSE.txt differs from the repository LICENSE")
+        if np_.is_file():
+            nt = np_.read_text()
+            if SOURCE_URL not in nt: E(f"R7 THIRD_PARTY_NOTICES.txt does not name the source address {SOURCE_URL}")
+            if "LICENSE.txt" not in nt: E("R7 THIRD_PARTY_NOTICES.txt does not refer to LICENSE.txt")
+            try:
+                req = notice_blocks()
+            except (OSError, ValueError, StopIteration) as ex:
+                E(f"R7 cannot read the notice sources (references/s32 checked out? --upstream): {ex}"); req = []
+            for what, blk in req:
+                if blk not in nt: E(f"R7 THIRD_PARTY_NOTICES.txt lacks the verbatim {what}")
+        # ---- R8 AI-use declaration (openFPGA Library updaters.json)
+        up = cdir / "updaters.json"
+        if up.is_file():
+            try:
+                u = json.loads(up.read_text())
+            except ValueError as ex:
+                E(f"R8 updaters.json is not valid JSON: {ex}"); u = None
+            if u is not None and u != {"declare_ai": DECLARE_AI}:
+                E(f"R8 updaters.json is not exactly {{\"declare_ai\": {DECLARE_AI}}}: {u}")
+        rp = cdir / "bitstream.rbf_r"
+        if rp.is_file():
+            r = rp.read_bytes()
+            if not r: E("R6 bitstream.rbf_r is empty")
+            if rbf is not None:
+                src = Path(rbf).read_bytes()
+                if reverse_bits(src) != r: E("R6 bitstream.rbf_r is NOT the bit-reversal of the given rbf")
+                if r == src: E("R6 bitstream.rbf_r equals the un-reversed rbf")
     return errs
 
 
@@ -381,7 +419,7 @@ def selftest(work):
     work.mkdir(parents=True)
     fake = work / "FAKE_PLACEHOLDER_NOT_A_BITSTREAM.rbf"
     fake.write_bytes(b"FAKE PLACEHOLDER - NOT A BITSTREAM - for package validation only\n" + bytes(range(256)) * 16)
-    r = subprocess.run([str(HERE / "package_rel.sh"), str(fake), str(work / "pkg")], capture_output=True, text=True)
+    r = subprocess.run([str(HERE / os.environ.get("PKG_SCRIPT", "package_rel.sh")), str(fake), str(work / "pkg")], capture_output=True, text=True)
     print(r.stdout[-1200:], r.stderr[-400:])
     if r.returncode:
         sys.exit("package_rel.sh failed")
@@ -399,7 +437,7 @@ def selftest(work):
 
     def inst(s, fn):
         def f(d):
-            p = d / INST / f"{s}.json"; j = json.loads(p.read_text()); fn(j["instance"], {x["id"]: x for x in j["instance"]["data_slots"]})
+            p = d / INST / iname(s); j = json.loads(p.read_text()); fn(j["instance"], {x["id"]: x for x in j["instance"]["data_slots"]})
             p.write_text(json.dumps(j, indent=2))
         return f
 
@@ -459,8 +497,8 @@ def selftest(work):
         ("sound_slot_before_save", data(lambda b, a: a.insert(4, a.pop(7))), "datatable entry"),
         ("ga2_without_sound", inst("ga2u", lambda i, b: i["data_slots"].remove(b[7])), "instance data slot ids"),
         ("spidman_uses_ga2_sound", inst("spidman", lambda i, b: b[7].update(filename="ga2u_sound.bin")), "also named by ga2u"),
-        ("version_changed", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace('"0.1.0"', '"0.1.1"')), "version"),
-        ("description_drops_a_game", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace("Spider-Man: The Video Game", "Spider-Man")), "both supported games"),
+        ("version_changed", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace(f'"{VERSION}"', '"9.9.9"')), "version"),
+        ("description_drops_a_game", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace("Spider-Man: The Videogame", "Spider-Man")), "every supported game"),
         ("spidman_uses_ga2_cfg", inst("spidman", lambda i, b: b[6].update(filename="ga2u_u1cfg.bin")), "also named by ga2u"),
         ("spidman_cfg_bytes_are_ga2s", cfgfile("spidman", lambda b: ga2cfg), "configuration identity"),
         ("ga2_uses_spidman_tiles", inst("ga2u", lambda i, b: b[2].update(filename="spidman_tiles.bin")), "spidman_tiles.bin is also named by ga2u"),
@@ -474,37 +512,44 @@ def selftest(work):
         ("instance_core_select", inst("ga2u", lambda i, b: i.update(core_select={"id": 1, "select": True})), "core_select"),
         ("instance_memory_writes", inst("ga2u", lambda i, b: i.update(memory_writes=[{"address": "0x60000000", "data": "0x0"}])), "memory_writes"),
         ("instance_subfolder_name", inst("ga2u", lambda i, b: b[1].update(filename="ga2u/ga2u_main.bin")), "flat ASCII"),
-        ("instance_missing", lambda d: (d / INST / "spidman.json").unlink(), "no instance file"),
-        ("instance_in_common", move(f"{INST}/ga2u.json", f"{COMMON}/ga2u.json"), "unexpected file"),
-        ("instance_extra", put(f"{INST}/ga2.json", (stage / INST / "ga2u.json").read_bytes()), "unexpected file"),
+        ("instance_missing", lambda d: (d / INST / iname("spidman")).unlink(), "no instance file"),
+        ("instance_in_common", move(INST + "/" + iname("ga2u"), COMMON + "/" + iname("ga2u")), "unexpected file"),
+        ("instance_extra", put(f"{INST}/ga2u.json", (stage / INST / iname("ga2u")).read_bytes()), "unexpected file"),   # an obsolete short-name instance file
         ("rom_included", put(f"{COMMON}/ga2u_main.bin", bytes(2 << 20)), "ROM-like"),
         ("readme_missing_rom_name", lambda d: (d / COMMON / "README.txt").write_text("no names\n"), "not described"),
         ("two_bitstreams", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace(
             '"filename": "bitstream.rbf_r"\n      }\n    ]', '"filename": "bitstream.rbf_r"\n      },\n      {"name": "b", "id": 1, "filename": "b.rbf_r"}\n    ]')), "ONE bitstream"),
-        ("platform_mismatch", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace('"segas32"', '"ga2rc1"', 1)), "platform_ids"),
+        ("platform_mismatch", lambda d: (d / cd / "core.json").write_text((d / cd / "core.json").read_text().replace(f'"{PLATFORM}"', '"ga2rc1"', 1)), "platform_ids"),
+        ("operator_persisted", lambda d: (d / cd / "interact.json").write_text((d / cd / "interact.json").read_text().replace('"persist": false', '"persist": true')), "R9"),
+        ("operator_address", lambda d: (d / cd / "interact.json").write_text((d / cd / "interact.json").read_text().replace("0x90000000", "0x80000000")), "R9"),
+        ("operator_default_on", lambda d: (d / cd / "interact.json").write_text((d / cd / "interact.json").read_text().replace('"defaultval": 0', '"defaultval": 1')), "R9"),
+        ("operator_missing", lambda d: (d / cd / "interact.json").write_text('{"interact": {"magic": "APF_VER_1", "variables": [], "messages": []}}'), "R9"),
         ("input_mapping_changed", lambda d: (d / cd / "input.json").write_text((d / cd / "input.json").read_text().replace("pad_btn_x", "pad_btn_l")), "mappings"),
-        ("input_label_game_specific", lambda d: (d / cd / "input.json").write_text((d / cd / "input.json").read_text().replace('"Button 3"', '"Button 3 (Magic)"')), "game-neutral"),
         ("rbf_r_flipped_bit", flip, "NOT the bit-reversal"),
         ("missing_icon", lambda d: (d / cd / "icon.bin").unlink(), "missing file"),
-        ("license_missing", lambda d: (d / cd / "LICENSE.txt").unlink(), "missing file: Cores/mmnbass.System32/LICENSE.txt"),
-        ("license_truncated", lambda d: (d / cd / "LICENSE.txt").write_bytes((d / cd / "LICENSE.txt").read_bytes()[:-200]), "complete GNU GPL v3"),
-        ("notices_missing", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").unlink(), "missing file: Cores/mmnbass.System32/THIRD_PARTY_NOTICES.txt"),
-        ("notices_t80_condition_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
-            "Redistributions in synthesized form must reproduce the above copyright\nnotice", "Redistributions in synthesized form may reproduce the above copyright\nnotice")), "verbatim T80"),
-        ("notices_t80_disclaimer_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
-            "POSSIBILITY OF SUCH DAMAGE.", "")), "verbatim T80"),
-        ("notices_sorgelig_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
-            "Copyright (c) 2018 Sorgelig", "")), "copyright line"),
-        ("notices_t80_reg_year", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
-            "Copyright (c) 2002 Daniel Wallner", "Copyright (c) 2001-2002 Daniel Wallner")), "T80 T80_Reg.vhd"),
-        ("notices_mit_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
-            "Copyright (c) 2022 Adam Gastineau", "")), "verbatim MIT"),
-        ("notices_no_source_url", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
-            SOURCE_URL, "the project page")), "source address"),
-        ("updaters_missing", lambda d: (d / cd / "updaters.json").unlink(), "missing file: Cores/mmnbass.System32/updaters.json"),
-        ("updaters_codex_dropped", lambda d: (d / cd / "updaters.json").write_text('{"declare_ai": ["Claude Code"]}\n'), "R8 updaters.json is not exactly"),
-        ("updaters_invalid_json", lambda d: (d / cd / "updaters.json").write_text('{"declare_ai": ["Claude Code", "OpenAI Codex"]\n'), "R8 updaters.json is not valid JSON"),
     ]
+    if RELEASE:
+        cases += [
+            ("license_missing", lambda d: (d / cd / "LICENSE.txt").unlink(), "missing file: Cores/mmnbass.System32/LICENSE.txt"),
+            ("license_truncated", lambda d: (d / cd / "LICENSE.txt").write_bytes((d / cd / "LICENSE.txt").read_bytes()[:-200]), "complete GNU GPL v3"),
+            ("notices_missing", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").unlink(), "missing file: Cores/mmnbass.System32/THIRD_PARTY_NOTICES.txt"),
+            ("notices_t80_condition_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
+                "Redistributions in synthesized form must reproduce the above copyright\nnotice", "Redistributions in synthesized form may reproduce the above copyright\nnotice")), "verbatim T80"),
+            ("notices_t80_disclaimer_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
+                "POSSIBILITY OF SUCH DAMAGE.", "")), "verbatim T80"),
+            ("notices_sorgelig_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
+                "Copyright (c) 2018 Sorgelig", "")), "copyright line"),
+            ("notices_t80_reg_year", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
+                "Copyright (c) 2002 Daniel Wallner", "Copyright (c) 2001-2002 Daniel Wallner")), "T80 T80_Reg.vhd"),
+            ("notices_mit_dropped", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
+                "Copyright (c) 2022 Adam Gastineau", "")), "verbatim MIT"),
+            ("notices_no_source_url", lambda d: (d / cd / "THIRD_PARTY_NOTICES.txt").write_text((d / cd / "THIRD_PARTY_NOTICES.txt").read_text().replace(
+                SOURCE_URL, "the project page")), "source address"),
+            ("updaters_missing", lambda d: (d / cd / "updaters.json").unlink(), "missing file: Cores/mmnbass.System32/updaters.json"),
+            ("updaters_codex_dropped", lambda d: (d / cd / "updaters.json").write_text('{"declare_ai": ["Claude Code"]}\n'), "R8 updaters.json is not exactly"),
+            ("updaters_invalid_json", lambda d: (d / cd / "updaters.json").write_text('{"declare_ai": ["Claude Code", "OpenAI Codex"]\n'), "R8 updaters.json is not valid JSON"),
+            ("label_game_specific", lambda d: (d / cd / "input.json").write_text((d / cd / "input.json").read_text().replace('"Button 1"', '"Button 1 (Attack)"')), "game-neutral"),
+        ]
     for name, edit, want in cases:
         dst = work / f"neg_{name}"; shutil.copytree(stage, dst)
         try:
@@ -530,7 +575,6 @@ if __name__ == "__main__":
     if not a or a[0].startswith("--"):
         sys.exit(__doc__)
     rbf = a[a.index("--rbf") + 1] if "--rbf" in a else None
-    if "--upstream" in a: UPSTREAM[0] = Path(a[a.index("--upstream") + 1]).expanduser().resolve()
     errs = validate(a[0], rbf)
     for x in errs:
         print("FAIL:", x)

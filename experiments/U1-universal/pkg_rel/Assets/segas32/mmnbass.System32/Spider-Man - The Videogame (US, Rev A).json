@@ -1,0 +1,36 @@
+{
+  "instance": {
+    "magic": "APF_VER_1",
+    "data_path": "",
+    "core_select": {
+      "id": 0,
+      "select": false
+    },
+    "data_slots": [
+      {
+        "id": 1,
+        "filename": "spidmanu_main.bin"
+      },
+      {
+        "id": 2,
+        "filename": "spidmanu_tiles.bin"
+      },
+      {
+        "id": 3,
+        "filename": "spidmanu_sprites.bin"
+      },
+      {
+        "id": 7,
+        "filename": "spidmanu_sound.bin"
+      },
+      {
+        "id": 4,
+        "filename": "spidmanu_eeprom.bin"
+      },
+      {
+        "id": 6,
+        "filename": "spidmanu_u1cfg.bin"
+      }
+    ]
+  }
+}

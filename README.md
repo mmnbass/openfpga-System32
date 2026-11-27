@@ -1,23 +1,31 @@
 # Sega System 32 for Analogue Pocket
 
-An openFPGA core for the Analogue Pocket that runs two Sega System 32 arcade games from one core:
+An openFPGA core for the Analogue Pocket that runs Sega System 32 arcade games from one core:
 
-- **Golden Axe: The Revenge of Death Adder** (US, MAME set `ga2u`)
-- **Spider-Man: The Video Game** (World, MAME set `spidman`)
+| Game | Versions (MAME set) |
+| --- | --- |
+| **Golden Axe: The Revenge of Death Adder** | World, Rev B (`ga2`); US, Rev A (`ga2u`); Japan (`ga2j`) |
+| **Spider-Man: The Videogame** | World (`spidman`); US, Rev A (`spidmanu`); Japan (`spidmanj`) |
+| **SegaSonic the Hedgehog** | Japan, Rev C (`sonic`); Japan, prototype (`sonicp`) |
 
-You choose the game at launch with its Game file: `ga2u.json` or `spidman.json`.
+You choose the game at launch with its Game file, named by its full title and version, for example
+`Golden Axe - The Revenge of Death Adder (US, Rev A).json`.
 
-**Current release: v0.1.0, the initial public release.**
+**Current release: v0.2.0.**
 
 ## Status
 
-- **Both games, two players:** complete two-player playthroughs on hardware (Analogue Pocket with the Dock), with no observed errors.
-- **Three or four players:** the core accepts controllers 3 and 4, but three- and four-player play has not yet been validated on hardware.
-- **Other System 32 games:** not currently supported. This initial release supports two games, with plans to investigate and add support for more over time.
+- **Every set, one and two players:** played on hardware (Analogue Pocket with the Dock).
+- **Three or four players:** validated in simulation, not yet on hardware. Community testing is welcome.
+- **Operator settings:** each game's own operator (test) menu is reachable from the core menu, so cabinet size and coin chutes
+  (common or individual) can be set as on the original board; the core follows them. Every set starts with its own factory settings.
+- **High scores:** kept between sessions in Spider-Man and SegaSonic the Hedgehog (Rev C). Golden Axe and the SegaSonic prototype
+  keep no high-score table of their own.
+- **Other System 32 games:** not currently supported.
 
 ## Installing
 
-1. **Copy the core.** Unzip `mmnbass.System32_0.1.0.zip`, then copy the folders inside it (`Cores`, `Platforms`, `Assets`)
+1. **Copy the core.** Unzip `mmnbass.System32_0.2.0.zip`, then copy the folders inside it (`Cores`, `Platforms`, `Assets`)
    onto the root of the SD card, **merging** them with the folders already there. Never replace the existing `Cores`,
    `Platforms` or `Assets` folders: that deletes your other cores and their files. On macOS, hold Option while you drag the
    folders onto the card and choose **Merge** (never **Replace**). On Windows and Linux, the file manager merges folders when
@@ -25,19 +33,19 @@ You choose the game at launch with its Game file: `ga2u.json` or `spidman.json`.
 
    - `Cores/mmnbass.System32/`
    - `Platforms/segas32.json` and `Platforms/_images/segas32.bin`
-   - `Assets/segas32/common/`: the README and both games' configuration files
-   - `Assets/segas32/mmnbass.System32/`: the Game files `ga2u.json` and `spidman.json`
+   - `Assets/segas32/common/`: the README and every set's configuration file (`<set>_u1cfg.bin`)
+   - `Assets/segas32/mmnbass.System32/`: one Game file per set
 
-2. **Make the ROM images** from your own MAME ROM sets. They are not included and never will be. You supply `ga2u.zip`
-   and/or `spidman.zip`; the core zip from step 1 already provides the configuration files; the plugin below (or
-   `build_roms.py`) makes the eight ROM images from your zips.
+2. **Make the ROM images** from your own MAME ROM sets. They are not included and never will be. You supply the set zips you
+   have (`ga2.zip`, `ga2u.zip`, `ga2j.zip`, `spidman.zip`, `spidmanu.zip`, `spidmanj.zip`, `sonic.zip`, `sonicp.zip`); the core
+   zip from step 1 already provides the configuration files; the plugin below (or `build_roms.py`) makes four ROM images per set.
 
    **Recommended: the [Sega System 32 ROMs plugin](https://github.com/mmnbass/pocket-plugin-System32)** for pupdate and
    Pocket Sync. It builds the images directly on the SD card, with the same checks as `build_roms.py` and byte for byte the
    same result, and needs no Python or terminal.
 
-   1. Copy your `ga2u.zip` and/or `spidman.zip` into `Assets/segas32/common/` on the SD card. A split `ga2u` set also needs
-      its parent `ga2.zip`.
+   1. Copy your set zips into `Assets/segas32/common/` on the SD card. A split regional set also needs its parent's zip
+      (`ga2.zip` for Golden Axe, `spidman.zip` for Spider-Man).
    2. Install the plugin:
       - **pupdate:** open **Plugins**, choose **Install from GitHub...** and enter `mmnbass/pocket-plugin-System32`.
       - **Pocket Sync:** open **Plugins**, choose **Add Plugin** and enter `https://github.com/mmnbass/pocket-plugin-System32`.
@@ -49,28 +57,27 @@ You choose the game at launch with its Game file: `ga2u.json` or `spidman.json`.
 
    1. Install Python 3.8 or newer from [python.org/downloads](https://www.python.org/downloads/) if you don't have it
       (on Windows, keep the option that installs the `py` launcher).
-   2. Download `build_roms.py` from the release page. Put it in one folder together with your `ga2u.zip` and/or
-      `spidman.zip`. A split `ga2u` set also needs its parent `ga2.zip`.
+   2. Download `build_roms.py` from the release page. Put it in one folder together with your set zips (and, for a split
+      regional set, its parent's zip).
    3. Open a terminal in that folder. On macOS, open Terminal, type `cd ` (with a space), drag the folder onto the window
       and press Return. On Windows, click the File Explorer address bar, type `cmd` and press Enter. On Linux, open a
-      terminal in the folder. Then run:
+      terminal in the folder. Then run, listing the zips you have:
 
       macOS / Linux:
 
       ```
-      python3 build_roms.py --out roms ga2u.zip spidman.zip
+      python3 build_roms.py --out roms ga2u.zip spidman.zip sonic.zip
       ```
 
       Windows:
 
       ```
-      py build_roms.py --out roms ga2u.zip spidman.zip
+      py build_roms.py --out roms ga2u.zip spidman.zip sonic.zip
       ```
 
-      List only the zips you have: for Spider-Man alone, `spidman.zip`; for a split Golden Axe set, `ga2u.zip ga2.zip`.
-   4. On the SD card, open **Assets**, then **segas32**, then **common**. Copy the eight game ROM `.bin` files from your
-      `roms` folder (four if you built only one game) into that **common** folder, alongside `README.txt` and the two
-      `_u1cfg.bin` files. Not into `segas32` itself: the core only looks in `common`.
+   4. On the SD card, open **Assets**, then **segas32**, then **common**. Copy the `.bin` files from your `roms` folder (four
+      per set) into that **common** folder, alongside `README.txt` and the `_u1cfg.bin` files. Not into `segas32` itself: the
+      core only looks in `common`.
 
    - Merged, split and non-merged sets all work: every ROM part is found by its CRC32.
    - The tool checks every part and compares each finished image with the image tested on hardware.
@@ -78,9 +85,18 @@ You choose the game at launch with its Game file: `ga2u.json` or `spidman.json`.
    - Missing or wrong parts are listed by name, size and CRC32.
    - It needs only Python's standard library: no other installs, and no copy of this repository.
 
-3. **Play.** On the Pocket, open **Sega System 32** and pick a Game file. To change game, load the other Game file from the core menu.
+3. **Play.** On the Pocket, open **Sega System 32** and pick a Game file. To change game, load another Game file from the core menu.
 
-To upgrade from an earlier version, merge the new zip's folders onto the card the same way (replacing individual files is fine). Your ROM images and saves stay where they are.
+### Upgrading from v0.1.0
+
+Merge the new zip's folders onto the card the same way (replacing individual files is fine). Then:
+
+- **Remove the old Game files** `ga2u.json` and `spidman.json` from `Assets/segas32/mmnbass.System32/` if they are still there;
+  otherwise those games are listed twice.
+- **Keep your ROM images and saves.** The ROM image names are unchanged, so your images keep working. Saves are now named after
+  the new Game files: to keep your v0.1.0 operator settings, rename them in `Saves/segas32/mmnbass.System32/`: `ga2u.sav` to
+  `Golden Axe - The Revenge of Death Adder (US, Rev A).sav` and `spidman.sav` to `Spider-Man - The Videogame (World).sav`.
+  (v0.1.0 saved settings only, no high scores.)
 
 ## Controls
 
@@ -88,14 +104,19 @@ To upgrade from an earlier version, merge the new zip's folders onto the card th
 | --- | --- |
 | Select | Insert coin |
 | Start | Start / join |
-| A | Attack |
-| B | Jump |
-| X or Y | Magic (Golden Axe) |
-| D-pad | Move |
+| A | Button 1 (Golden Axe: attack; SegaSonic: the button) |
+| B | Button 2 (Golden Axe: jump) |
+| X or Y | Button 3 (Golden Axe: magic) |
+| D-pad | Move (SegaSonic: rolls the trackball) |
+| L / R | Service / Test, while **Operator buttons** is on in the core menu |
 
 - With the Dock, controllers 1-4 are players 1-4. Handheld play is player 1 only.
 - The game pauses while the Pocket menu is open.
-- Saves: each game's arcade settings are kept between sessions, one save per game. High scores are not saved.
+- **Operator menu:** core menu > Operator buttons on, then R (Test) on controller 1 opens the game's own test menu, where cabinet
+  type and coin chutes are set. Turn Operator buttons off again for normal play.
+- **Saves:** one per Game file: the game's operator settings and, for Spider-Man and SegaSonic (Rev C), its high-score table.
+- Spider-Man may reassign existing credits when the cabinet size is changed with individual coin chutes, as the original arcade
+  software does.
 
 ## Building from source
 
@@ -124,7 +145,7 @@ python3 tools/verify_release_inputs.py      # prints RELEASE INPUTS IDENTICAL
 `tools/verify_release_inputs.py` compares the prepared project with the released build's own configuration reference
 (`experiments/D2-pocket-top/reference/d2_rel_seed1_config_reference.json`):
 
-- **Identical:** all 181 source files, the 22 project files and the three microcode images.
+- **Identical:** all 185 source files, the 22 project files and the three microcode images.
 - **Accepted differences:** only the documented ones, each checked by the script:
   - the public pin's name and hash (two checks);
   - one research log under `experiments/M1-functional/results/` with a local path removed;
@@ -158,7 +179,7 @@ its packaging use are included.
 This is an independent, community-developed project. It is not affiliated with, endorsed by or sponsored by Sega, Marvel, Analogue or
 their respective rights holders.
 
-- **Trademarks:** Sega, System 32 and Golden Axe are trademarks of Sega Corporation. Spider-Man is a trademark of Marvel. Analogue and
+- **Trademarks:** Sega, System 32, Golden Axe and SegaSonic are trademarks of Sega Corporation. Spider-Man is a trademark of Marvel. Analogue and
   Analogue Pocket are trademarks of Analogue Enterprises Limited. All trademarks belong to their respective owners and are used here
   only to identify the hardware and games.
 - **No ROMs:** This repository and its releases do not include copyrighted game ROMs, BIOS files or game data. Users are responsible for obtaining and using ROM images in accordance with applicable law.

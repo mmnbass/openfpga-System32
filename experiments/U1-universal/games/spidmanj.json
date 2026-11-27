@@ -1,0 +1,30 @@
+{
+  "set": "spidmanj",
+  "title": "Spider-Man: The Videogame (Japan)",
+  "mra": "references/s32/releases/Spider-Man The Videogame.mra",
+  "descriptor": "20000081000000000000000000000000",
+  "input_profile": 1,
+  "input_profile_note": "1 = World wiring (MAME's ga2 / spidman input definition): Coin 1 on SERVICE12 bit 2, Coin 2 on bit 3, Start 1 / 2 on bits 4 / 5",
+  "expected_sums": {
+    "sum0": "963ad310",
+    "fl0": "b353e62c",
+    "sum1": "277545f8",
+    "fl1": "773ac616",
+    "sum2": "60dcfbd3",
+    "fl2": "0e90eeeb"
+  },
+  "expected_sums_source": "checksums of the slot files built privately from this ROM set (not ROM data); band off, not consumed",
+  "hiscore": {
+    "wram_offset": "8c00",
+    "bytes": 128,
+    "first_byte": "a0",
+    "marker_byte": "57",
+    "marker_offset": "7e",
+    "tag": "0003"
+  },
+  "hiscore_note": "the same block as the World set: MAME's public hiscore.dat lists one entry for spidman, spidmanj and spidmanu. Own tag, so a save of another set is never restored into this one. If the block were wrong the markers would never be seen and the engine would stay idle",
+  "coin_chute": {"eeprom_word": 8, "bit": 8, "individual_value": 1},
+  "coin_chute_note": "COIN ASSIGNMENTS > COIN CHUTE TYPE is EEPROM word 8 bits 15:8 (0x00 = COMMON, 0xFF = INDIVIDUAL; bit 8 read); CABINET TYPE is word 8 bits 7:0 (0 = 2P, 1 = 3P, 2 = 4P). Measured 2026-11-25 by changing the setting in the game's own test menu and diffing the saved EEPROM; the three regional sets run the same program (their saves are byte-identical). The core routes the coin inputs from this bit",
+  "cabinet": {"eeprom_word": 8, "low_bit": 0},
+  "cabinet_note": "GAME ASSIGNMENTS > CABINET TYPE is EEPROM word 8 bits 1:0 of its low byte (0 = 2P, 1 = 3P, 2 = 4P; menu-written saves). With INDIVIDUAL chutes the game counts its coin lines (8255 PC b3, PC b2, SERVICE12 b3, SERVICE12 b2) by cabinet type exactly as Golden Axe: an N-player cabinet counts the last N for players 1..N (measured 2026-11-26, rel_derive.py CB); the core reads this field to route the coins"
+}

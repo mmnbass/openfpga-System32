@@ -134,7 +134,9 @@ def main():
         [HERE / "rtl/d2_freeze_readout.sv"] if sp_like else []) + au_extra + [
         HERE / "rtl/mf_pll_ga2.v", topf]
     if u1_like:   # U1: Spider-Man's Save-slot read-back and the configuration register file, before the top
-        synth[synth.index(topf):synth.index(topf)] = [ROOT / "experiments/SM1-spidman/rtl/sm_eep_bridge_rd.sv", U1 / "rtl/u1_board_cfg.sv"]
+        synth[synth.index(topf):synth.index(topf)] = [ROOT / "experiments/SM1-spidman/rtl/sm_eep_bridge_rd.sv", U1 / "rtl/u1_board_cfg.sv",
+                                                      U1 / "rtl/u1_wram_pr.sv", U1 / "rtl/u1_hiscore.sv"] + (
+                                                      [U1 / "rtl/u1_video.sv", U1 / "rtl/u1_save_rd.sv"] if a.config == "rel" else [])   # SN: the work RAM's protection port; SN2: rel's video bridge
     # au: sync_fifo.sv names every dcfifo port; tb/sim_models/dcfifo_au_sim.sv = the P1 model + those ports (logic unchanged)
     dcf_sim = HERE / "tb/sim_models/dcfifo_au_sim.sv" if au_like else P1 / "rtl/sim/dcfifo_sim.sv"
     sim = [f for f in synth if f != HERE / "rtl/mf_pll_ga2.v"] + [

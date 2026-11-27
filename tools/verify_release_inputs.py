@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 """verify_release_inputs.py: show that a Quartus project prepared from this public repository has exactly the build inputs of the
-released v0.1.0 bitstream (CI run 44862122336, seed 1), using the release's own configuration reference.
+released v0.2.0 bitstream (CI run 45907881404, seed 1), using the release's own configuration reference.
 
     python3 tools/verify_release_inputs.py [--project build/D2REL/seed1] [--ci-root /home/runner/work/ga2-pocket-research/ga2-pocket-research]
 
 Run it after the build steps in README.md (gen_d2.py, then prepare_quartus_d2.py with experiments/D2-pocket-top/reference/
 microcode_pin_rel_public.json). It runs tools/d2rbf_identity.py config against
 experiments/D2-pocket-top/reference/d2_rel_seed1_config_reference.json (the fitted build's reference, unchanged) and requires:
-  - C2 / C3 / C4 identical: the 5 recorded source hashes, the .qsf / .sdc, all 181 source files and 22 project files
+  - C2 / C3 / C4 identical: the 5 recorded source hashes, the .qsf / .sdc, all 185 source files and 22 project files
     (path-embedding files compared after rebasing this checkout's root onto the CI root), including the three V2 microcode images;
   - every other difference to be one of the four documented public-repository differences, each checked here:
       1. C1 microcode.pin_sha256 / microcode.verified_against: the public pin microcode_pin_rel_public.json is used instead of the
          fitted pin. Checked: both pins are equal in every field except `source` (same builder sha256, arguments, command and the
          three image hashes).
-      2. C5 experiments/M1-functional tree: the public tree differs from the fitted one (33fc798e) only in research files that the
+      2. C5 experiments/M1-functional tree: the public tree differs from the fitted one (34b33084) only in research files that the
          build does not read. Checked: against fitted_m1_functional_tree.txt, only the listed sanitized files differ; the builder
          m1_m11_microcode.py and mc_pack.py are byte-identical.
       3. references/s32 is the history-free snapshot of upstream accd644 (commit 2b9c265d, branch upstream/s32-accd644), not accd644
@@ -78,7 +78,7 @@ def main():
                         "--root", str(ROOT), "--project", a.project, "--rebase-root", str(ROOT), a.ci_root, "--source-sha", str(sha_txt),
                         "--out", str(ROOT / "build/verify_cfg.json"), "--text", str(ROOT / "build/verify_cfg.txt")], capture_output=True, text=True, cwd=ROOT)
     text = (ROOT / "build/verify_cfg.txt").read_text() if (ROOT / "build/verify_cfg.txt").exists() else r.stdout + r.stderr
-    for need in ("C2 source_sha256.txt: 5 lines identical", "C4 181 source files and 22 project files re-hashed from disk: identical"):
+    for need in ("C2 source_sha256.txt: 5 lines identical", "C4 185 source files and 22 project files re-hashed from disk: identical"):
         if need not in text: bad.append(f"missing: {need}")
     fails = [l.strip() for l in text.splitlines() if l.strip().startswith("FAIL")]
     snap = snapshot_problems()

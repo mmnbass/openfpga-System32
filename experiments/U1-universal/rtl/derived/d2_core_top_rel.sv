@@ -103,6 +103,12 @@ module u1_controls (
     input  wire [31:0] key2, key3, key4,
     input  wire  [1:0] profile,      // 0: GA2 US (ga2u) wiring; 1: World wiring (spidman)
     input  wire        hold,         // pause: keys held during a pause stay masked after it until released
+    input  wire        trackball,    // SN: the d-pads drive the trackball directions; player-port d-pad bits read released
+    output wire  [3:0] trk1, trk2,   // SN: {down, up, left, right} of pads 1 / 2, active high, 0 unless trackball
+    output wire  [3:0] trk3,         // MP: pad 3 (SegaSonic player 3), same layout
+    input  wire        op_en,        // MP: operator buttons on: controller 1's L = SERVICE, R = TEST
+    input  wire        cshared,      // MP: coin wiring: 1 = shared chute (World / Japan layout), 0 = one chute per player (US)
+    input  wire  [1:0] cab,          // CB: the game's CABINET TYPE (0 = 2P, 1 = 3P, 2 = 4P; 3 read as 4P); INDIVIDUAL only
     output wire  [7:0] p1a, p2a, ppa, ppb, svc12, ppi_pc
 );
     reg  [15:0] key_m = 16'd0, key_s = 16'd0;
@@ -129,24 +135,43 @@ always @(posedge clk) begin
     g4 <= hold ? (g4 | r4) : (g4 & r4);
 end
     wire [15:0] q1 = r1 & ~g1 & {16{~hold}}, q2 = r2 & ~g2 & {16{~hold}}, q3 = r3 & ~g3 & {16{~hold}}, q4 = r4 & ~g4 & {16{~hold}};
-assign p1a    = pdig(q1);
-assign p2a    = pdig(q2);
+    wire [15:0] dmask = trackball ? 16'hfff0 : 16'hffff;   // SN
+    wire [15:0] xmask = trackball ? 16'hff3f : 16'hffff;   // MP: SegaSonic: P1_A bit 2 is player 3's button, not P1's X / Y
+assign p1a    = pdig(q1 & dmask & xmask) & ~(trackball ? {5'b00000, q3[4], 2'b00} : 8'h00);
+assign p2a    = pdig(q2 & dmask);
+assign trk1   = trackball ? {q1[1], q1[0], q1[2], q1[3]} : 4'd0;
+assign trk2   = trackball ? {q2[1], q2[0], q2[2], q2[3]} : 4'd0;
+assign trk3   = trackball ? {q3[1], q3[0], q3[2], q3[3]} : 4'd0;   // MP
 assign ppa    = pdig(q3);
 assign ppb    = pdig(q4);
-assign svc12  = world ? ~{2'b00, q2[15], q1[15], q2[14] | q4[14], q1[14] | q3[14], 2'b00}
-                      : ~{2'b00, q2[15], q1[15], q3[14], q4[14], 2'b00};
-assign ppi_pc = world ? {4'h0, 2'b11, ~q4[15], ~q3[15]}
-                      : {4'h0, ~q1[14], ~q2[14], ~q4[15], ~q3[15]};
+    wire        op_svc = op_en & q1[8], op_test = op_en & q1[9];   // MP: L / R of controller 1 while the operator buttons are on
+    wire        p3_tb  = trackball;                                // MP: SegaSonic: SERVICE12 b6 COIN3, b7 START3 (MAME sonic)
+// CB: INDIVIDUAL coin lines by cabinet type (ci_p3 / ci_p2 = 8255 PC b3 / b2, ci_s3 / ci_s2 = SERVICE12 b3 / b2, active high)
+    wire        cab2   = cab == 2'd0, cab3 = cab == 2'd1;
+    wire        act3   = !cab2, act4 = !cab2 && !cab3;   // CB: players a cabinet does not have drive no coin line (COMMON too)
+    wire        ci_p3  = cab2 ? 1'b0     : (cab3 ? 1'b0 : q1[14]);
+    wire        ci_p2  = cab2 ? 1'b0     : (cab3 ? q1[14] : q2[14]);
+    wire        ci_s3  = cab2 ? q1[14]   : (cab3 ? q2[14] : q3[14]);
+    wire        ci_s2  = cab2 ? q2[14]   : (cab3 ? q3[14] : q4[14]);
+// MP3 (2026-11-25), MP4 (2026-11-26, hardware + isolated runs): with INDIVIDUAL chutes the game credits b2 (MAME's COIN1) to
+// PLAYER 3 and b6 (MAME's COIN3) to PLAYER 1; b3 is player 2's. So player 1's coin drives b6 and player 3's b2. COMMON (shared
+// chutes; the game ignores b6 then): players 1 and 3 both on b2. Starts follow MAME (b4 START1, b5 START2, b7 START3).
+assign svc12  = p3_tb   ? ~{q3[15], q1[14] & ~cshared, q2[15], q1[15], q2[14], q3[14] | (q1[14] & cshared), op_test, op_svc}
+              : cshared ? ~{2'b00, q2[15], q1[15], q2[14] | (q4[14] & act4), q1[14] | (q3[14] & act3), op_test, op_svc}
+                        : ~{2'b00, q2[15], q1[15], ci_s3, ci_s2, op_test, op_svc};
+assign ppi_pc = p3_tb   ? 8'h0F                                   // SegaSonic: no 8255 player lines (idle)
+              : cshared ? {4'h0, 2'b11, ~q4[15], ~q3[15]}
+                        : {4'h0, ~ci_p3, ~ci_p2, ~q4[15], ~q3[15]};
 endmodule
 // u1_cfg_reg (release/s32-v1, rel_derive.py R): u1_board_cfg's consumed outputs, registered in clk_sys (one stage, one edge for all).
 module u1_cfg_reg (
     input  wire       clk,
-    input  wire       ok_c, v25_c, ppi_c, sprv_c,
+    input  wire       ok_c, v25_c, ppi_c, sprv_c, son_c, trk_c, prot_c,
     input  wire [1:0] sprm_c, prof_c,
-    output reg        ok = 1'b0, v25 = 1'b0, ppi = 1'b0, sprv = 1'b0,
+    output reg        ok = 1'b0, v25 = 1'b0, ppi = 1'b0, sprv = 1'b0, son = 1'b0, trk = 1'b0, prot = 1'b0,
     output reg  [1:0] sprm = 2'd0, prof = 2'd0
 );
-always @(posedge clk) begin ok <= ok_c; v25 <= v25_c; ppi <= ppi_c; sprv <= sprv_c; sprm <= sprm_c; prof <= prof_c; end
+always @(posedge clk) begin ok <= ok_c; v25 <= v25_c; ppi <= ppi_c; sprv <= sprv_c; sprm <= sprm_c; prof <= prof_c; son <= son_c; trk <= trk_c; prot <= prot_c; end
 endmodule
 
 
@@ -486,7 +511,7 @@ synch_3 s_rdy74 (sd_ready, sd_ready_74, clk_74a);
 
     wire    [9:0]   datatable_addr = 10'd9;      // SM1.2: data.json slot index 4 (Save, id 10): entry 2 * 4 + 1 = its size
     wire            datatable_wren = 1'b1;
-    wire    [31:0]  datatable_data = 32'd128;    // SM1.2: 64 x 16-bit 93C46 words
+    wire    [31:0]  datatable_data = 32'd1164;   // SM1.2: 64 x 16-bit 93C46 words; HS: + 8-byte header + 1,024-byte score block + end mark
     wire    [31:0]  datatable_q;
 
     wire    [31:0]  eep_bridge_rd_data;          // SM1.2: Save slot read-back (sm_eep_bridge_rd below)
@@ -592,19 +617,25 @@ end
     wire        l1_en, l2_en, l3_en;
     wire [24:0] l1_addr, l2_addr, l3_addr;
     wire [15:0] l1_data, l2_data, l3_data;
-data_loader #(.ADDRESS_MASK_UPPER_4(4'h1), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot1_loader (
+// LD1 (area, 2026-11-24): ONE data_loader for the bridge nibbles 1-6 (slots 1-3, default EEPROM, Save slot, configuration). The six
+// loaders it replaces were the same machine with the same parameters, told apart only by the nibble they match (their
+// ADDRESS_SIZE only truncates the output address); each costs a 4 x 44-bit register FIFO. The nibble is carried in the address
+// bits 27:25, which every one of those loaders discarded (no slot is larger than 32 MiB; the largest, slot 3, is 16 MiB, so
+// the +2 of a bridge word's second half never carries into them). Per slot, the strobe / address / data sequence is the one
+// its own loader produced; APF sends one bridge write at a time, as each single loader already required. The sound ROM's
+// loader (nibble 7) is unchanged.
+    wire  [3:0] ldm_nib  = bridge_addr[31:28];
+    wire        ldm_sel  = ldm_nib >= 4'h1 && ldm_nib <= 4'h6;
+    wire [31:0] ldm_badr = {ldm_sel ? 4'h1 : 4'h0, ldm_nib[2:0], bridge_addr[24:0]};
+    wire        ldm_en; wire [27:0] ldm_addr; wire [15:0] ldm_data;
+data_loader #(.ADDRESS_MASK_UPPER_4(4'h1), .ADDRESS_SIZE(28), .OUTPUT_WORD_SIZE(2)) slots_loader (
     .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
-    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
-    .write_en(l1_en), .write_addr(l1_addr), .write_data(l1_data));
-data_loader #(.ADDRESS_MASK_UPPER_4(4'h2), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot2_loader (
-    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
-    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
-    .write_en(l2_en), .write_addr(l2_addr), .write_data(l2_data));
+    .bridge_addr(ldm_badr), .bridge_wr_data(bridge_wr_data),
+    .write_en(ldm_en), .write_addr(ldm_addr), .write_data(ldm_data));
+    assign l1_en = ldm_en && ldm_addr[27:25] == 3'd1; assign l1_addr = ldm_addr[24:0]; assign l1_data = ldm_data;   // LD1: bridge nibble 1
+    assign l2_en = ldm_en && ldm_addr[27:25] == 3'd2; assign l2_addr = ldm_addr[24:0]; assign l2_data = ldm_data;   // LD1: bridge nibble 2
 // SP: slot 3 = sprites.bin (16 MiB, bridge 0x3000_0000) -> SDRAM SDR_SPRITES_BASE 0x100_0000 (the s32_core p2 region)
-data_loader #(.ADDRESS_MASK_UPPER_4(4'h3), .ADDRESS_SIZE(25), .OUTPUT_WORD_SIZE(2)) slot3_loader (
-    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
-    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
-    .write_en(l3_en), .write_addr(l3_addr), .write_data(l3_data));
+    assign l3_en = ldm_en && ldm_addr[27:25] == 3'd3; assign l3_addr = ldm_addr[24:0]; assign l3_data = ldm_data;   // LD1: bridge nibble 3
 // AU3: slot 4 = sound.bin (4 MiB, bridge 0x4000_0000) -> d2_rom_psram (PSRAM chip 1, word address = byte offset / 2). ADDRESS_SIZE 22:
 // rel (as SpidAudio1): the sound ROM is data slot id 7 at bridge 0x7000_0000 (nibble 7) for every game; nibble 4 / id 4
 // is the universal EEPROM default slot. The l4_* / size4_* names are GA2Audio3's and are kept.
@@ -620,21 +651,32 @@ data_loader #(.ADDRESS_MASK_UPPER_4(4'h7), .ADDRESS_SIZE(22), .OUTPUT_WORD_SIZE(
 // board at run time: descriptor (has_v25, has_ppi, sprite banks), input-wiring profile and the band's expected slot sums. The
 // CPU reset stays asserted unless the file is complete, valid, and asks only for hardware this bitstream has (u1_board_cfg).
     wire        cf_en; wire [7:0] cf_addr; wire [15:0] cf_data;
-data_loader #(.ADDRESS_MASK_UPPER_4(4'h6), .ADDRESS_SIZE(8), .OUTPUT_WORD_SIZE(2)) cfg_loader (
-    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
-    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
-    .write_en(cf_en), .write_addr(cf_addr), .write_data(cf_data));
+    assign cf_en = ldm_en && ldm_addr[27:25] == 3'd6; assign cf_addr = ldm_addr[7:0]; assign cf_data = ldm_data;   // LD1: bridge nibble 6
     wire        u1_seen, u1_ok, u1_has_v25, u1_has_ppi, u1_spr_valid; wire [3:0] u1_reason; wire [1:0] u1_spr_mask, u1_profile;
     wire        u1c_ok, u1c_has_v25, u1c_has_ppi, u1c_spr_valid; wire [1:0] u1c_spr_mask, u1c_profile;   // rel R: u1_board_cfg's raw outputs
     wire [31:0] u1_exp_sum0, u1_exp_fl0, u1_exp_sum1, u1_exp_fl1, u1_exp_sum2, u1_exp_fl2;
+wire u1c_son, u1_son;   // DM
+wire u1c_trk, u1_trk, u1c_prot, u1_prot;   // SN
+// HS: the score-block fields, registered once in clk_sys (static after the configuration load)
+wire u1c_hs_en; wire [14:0] u1c_hs_base; wire [8:0] u1c_hs_lenm1; wire [7:0] u1c_hs_m0, u1c_hs_m1; wire [9:0] u1c_hs_m1_off; wire [15:0] u1c_hs_tag;
+reg  u1_hs_en = 1'b0; reg [14:0] u1_hs_base = 15'd0; reg [8:0] u1_hs_lenm1 = 9'd0; reg [7:0] u1_hs_m0 = 8'd0, u1_hs_m1 = 8'd0;
+reg  [9:0] u1_hs_m1_off = 10'd0; reg [15:0] u1_hs_tag = 16'd0;
+always @(posedge clk_sys) begin u1_hs_en <= u1c_hs_en; u1_hs_base <= u1c_hs_base; u1_hs_lenm1 <= u1c_hs_lenm1; u1_hs_m0 <= u1c_hs_m0;
+    u1_hs_m1 <= u1c_hs_m1; u1_hs_m1_off <= u1c_hs_m1_off; u1_hs_tag <= u1c_hs_tag; end
+wire hs_req, hs_we, hs_ack; wire [15:0] hs_addr, hs_wdata, hs_q;
+wire        u1c_ch_en, u1c_ch_pol; wire [3:0] u1c_ch_bit; wire [5:0] u1c_ch_word, ch_addr; wire u1_ch_shared;   // MP2
+wire        u1c_cb_en; wire [3:0] u1c_cb_bit; wire [5:0] u1c_cb_word; wire [1:0] u1_cab;   // CB
 u1_board_cfg cfg (
     .clk(clk_sys), .ld_en(cf_en), .ld_addr(cf_addr), .ld_data(cf_data),
     .cfg_seen(u1_seen), .cfg_ok(u1c_ok), .reason(u1_reason),
-    .has_v25(u1c_has_v25), .has_ppi(u1c_has_ppi), .sprite_bank_valid(u1c_spr_valid), .sprite_bank_mask(u1c_spr_mask), .profile(u1c_profile),
+    .has_v25(u1c_has_v25), .has_ppi(u1c_has_ppi), .sprite_bank_valid(u1c_spr_valid), .sprite_bank_mask(u1c_spr_mask), .profile(u1c_profile), .spr_over_nbg0(u1c_son), .trackball(u1c_trk), .prot_sonic(u1c_prot),
+    .chute_en(u1c_ch_en), .chute_pol(u1c_ch_pol), .chute_bit(u1c_ch_bit), .chute_word(u1c_ch_word),   // MP2
+    .cab_en(u1c_cb_en), .cab_bit(u1c_cb_bit), .cab_word(u1c_cb_word),   // CB
+    .hs_en(u1c_hs_en), .hs_base(u1c_hs_base), .hs_lenm1(u1c_hs_lenm1), .hs_m0(u1c_hs_m0), .hs_m1(u1c_hs_m1), .hs_m1_off(u1c_hs_m1_off), .hs_tag(u1c_hs_tag),   // HS
     .exp_sum0(u1_exp_sum0), .exp_fl0(u1_exp_fl0), .exp_sum1(u1_exp_sum1), .exp_fl1(u1_exp_fl1),
     .exp_sum2(u1_exp_sum2), .exp_fl2(u1_exp_fl2));
 // rel R: the consumed outputs registered in clk_sys (u1_cfg_reg, top of this file); every consumer below uses the registered names
-u1_cfg_reg cfgq (.clk(clk_sys), .ok_c(u1c_ok), .v25_c(u1c_has_v25), .ppi_c(u1c_has_ppi), .sprv_c(u1c_spr_valid), .sprm_c(u1c_spr_mask),
+u1_cfg_reg cfgq (.clk(clk_sys), .son_c(u1c_son), .son(u1_son), .trk_c(u1c_trk), .trk(u1_trk), .prot_c(u1c_prot), .prot(u1_prot), .ok_c(u1c_ok), .v25_c(u1c_has_v25), .ppi_c(u1c_has_ppi), .sprv_c(u1c_spr_valid), .sprm_c(u1c_spr_mask),
     .prof_c(u1c_profile), .ok(u1_ok), .v25(u1_has_v25), .ppi(u1_has_ppi), .sprv(u1_spr_valid), .sprm(u1_spr_mask), .prof(u1_profile));
 
 // ============================================================================================ SM1.2 EEPROM persistence (clk_74a -> clk_sys)
@@ -648,25 +690,25 @@ u1_cfg_reg cfgq (.clk(clk_sys), .ok_c(u1c_ok), .v25_c(u1c_has_v25), .ppi_c(u1c_h
 // initialises it itself, slowly enough to lose its timer-0 race: the SM1.1 blocker). Every load ends before dataslot_allcomplete;
 // the CPU reset waits for allcomplete + 1024 quiet clk_ram with no loader write (EEPROM writes included) + the slot read-back.
     wire        ed_en, es_en;
-    wire  [7:0] ed_addr, es_addr;
+    wire  [7:0] ed_addr; wire [11:0] es_addr;   // HS: the Save slot is 1,164 bytes
     wire  [5:0] eu_addr;
+    wire [10:0] sv_addr; wire sv_act; wire [15:0] hs_rb_data;   // HS: Save read-back word index, score part
+    assign      eu_addr = sv_act ? sv_addr[5:0] : ch_addr;   // MP2: the coin-chute reader owns the port while no read-back runs
     wire [15:0] ed_data, es_data, eep_rd_data;
-data_loader #(.ADDRESS_MASK_UPPER_4(4'h4), .ADDRESS_SIZE(8), .OUTPUT_WORD_SIZE(2)) eepdef_loader (
-    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
-    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
-    .write_en(ed_en), .write_addr(ed_addr), .write_data(ed_data));
-data_loader #(.ADDRESS_MASK_UPPER_4(4'h5), .ADDRESS_SIZE(8), .OUTPUT_WORD_SIZE(2)) eepsave_loader (
-    .clk_74a(clk_74a), .clk_memory(clk_sys), .bridge_wr(bridge_wr), .bridge_endian_little(bridge_endian_little),
-    .bridge_addr(bridge_addr), .bridge_wr_data(bridge_wr_data),
-    .write_en(es_en), .write_addr(es_addr), .write_data(es_data));
-sm_eep_bridge_rd #(.ADDRESS_MASK_UPPER_4(4'h5), .RD_LAT(3)) eepsave_rd (   // not data_unloader: see the module header
+    assign ed_en = ldm_en && ldm_addr[27:25] == 3'd4; assign ed_addr = ldm_addr[7:0]; assign ed_data = ldm_data;   // LD1: bridge nibble 4
+    assign es_en = ldm_en && ldm_addr[27:25] == 3'd5; assign es_addr = ldm_addr[11:0]; assign es_data = ldm_data;   // LD1: bridge nibble 5
+u1_save_rd #(.ADDRESS_MASK_UPPER_4(4'h5), .PW(10), .RD_LAT(4)) eepsave_rd (   // HS: sm_eep_bridge_rd with a wider address; words 0-63 = EEPROM, 64.. = score part
     .clk_74a(clk_74a), .clk_sys(clk_sys), .bridge_rd(bridge_rd), .bridge_addr(bridge_addr),
-    .bridge_rd_data(eep_bridge_rd_data), .eep_rd_addr(eu_addr), .eep_rd_data(eep_rd_data));
+    .bridge_rd_data(eep_bridge_rd_data), .eep_rd_addr(sv_addr), .act(sv_act),
+    .eep_rd_data(sv_addr[10:6] == 5'd0 ? eep_rd_data : hs_rb_data));
+    wire        es_eep = es_en && es_addr[11:7] == 5'd0;   // HS: the EEPROM image is the first 128 bytes of the Save slot
+    wire        es_hs  = es_en && es_addr[11:7] != 5'd0;
+    wire [10:0] es_hs_idx = es_addr[11:1] - 11'd64;
     reg         save_seen = 1'b0;
 always @(posedge clk_sys) if (es_en) save_seen <= 1'b1;
-    wire        eep_ld_wr   = es_en | (ed_en & ~save_seen);
-    wire  [5:0] eep_ld_addr = es_en ? es_addr[6:1] : ed_addr[6:1];
-    wire [15:0] eep_ld_data = es_en ? es_data : ed_data;
+    wire        eep_ld_wr   = es_eep | (ed_en & ~save_seen);
+    wire  [5:0] eep_ld_addr = es_eep ? es_addr[6:1] : ed_addr[6:1];
+    wire [15:0] eep_ld_data = es_eep ? es_data : ed_data;
 
 // ============================================================================================ SDRAM controller (upstream)
     wire        wr_req, wr_ack; wire [24:1] wr_addr; wire [15:0] wr_din; wire [1:0] wr_be;
@@ -769,7 +811,7 @@ always @(posedge clk_sys)
     end
     reg  [31:0] vcnt_r = 32'd0;
 always @(posedge clk_sys) begin
-    if (!vd_s[1] || !reset_n_s || !locked_s || !(wv_clear_done || wclr_to) || !rp_vf_done || !u1_ok) begin rst_r <= 1'b1; vrst_r <= 1'b1; vcnt_r <= 32'd0; end   // AU: + wave-RAM clear (AU2: or timeout); AU3: + the PSRAM sound-ROM read-back; U1: + valid configuration
+    if (!vd_s[1] || !reset_n_s || !locked_s || !(wv_clear_done || wclr_to) || !rp_vf_done || !u1_ok || !wram_clr_done) begin rst_r <= 1'b1; vrst_r <= 1'b1; vcnt_r <= 32'd0; end   // AU: + wave-RAM clear (AU2: or timeout); AU3: + the PSRAM sound-ROM read-back; U1: + valid configuration
     else begin
         rst_r <= 1'b0;
         if (vcnt_r < VIDEO_AFTER_RST) vcnt_r <= vcnt_r + 32'd1; else vrst_r <= 1'b0;
@@ -811,10 +853,13 @@ s32_audio_ce audio_ce (
 // ============================================================================================ SRAM work-RAM port
     wire [15:0] wx_addr, wx_wdata, wx_q; wire [1:0] wx_be; wire wx_we, wx_rd, wx_rdy;
     wire [15:0] sram_dq_o; wire sram_dq_oe, sram_sample_now;
+    wire [15:0] wp_addr, wp_wdata; wire [1:0] wp_be; wire wp_we, wp_rd, wram_clr_done;   // WC: port side of the work-RAM clear
+u1_wram_clear wram_clr (.clk(clk_sys), .start(locked_s), .c_addr(wx_addr), .c_wdata(wx_wdata), .c_be(wx_be), .c_we(wx_we), .c_rd(wx_rd),
+    .p_addr(wp_addr), .p_wdata(wp_wdata), .p_be(wp_be), .p_we(wp_we), .p_rd(wp_rd), .done(wram_clr_done));
     wire [31:0] sram_reads, sram_writes, sram_overlap;
 d2_sram_port sram_port (
-    .clk(clk_sys), .rd_edges(3'(RD_EDGES)), .rst(rst_r), .addr(wx_addr), .wdata(wx_wdata), .be(wx_be), .we(wx_we),
-    .rd(wx_rd), .q(wx_q), .rdy(wx_rdy),
+    .clk(clk_sys), .rd_edges(3'(RD_EDGES)), .rst(rst_r && wram_clr_done), .addr(wp_addr), .wdata(wp_wdata), .be(wp_be), .we(wp_we),   // WC
+    .rd(wp_rd), .q(wx_q), .rdy(wx_rdy),
     .sram_a(sram_a), .sram_dq_o(sram_dq_o), .sram_dq_oe(sram_dq_oe), .sram_dq_i(sram_dq),
     .sram_oe_n(sram_oe_n), .sram_we_n(sram_we_n), .sram_ub_n(sram_ub_n), .sram_lb_n(sram_lb_n),
     .sample_now(sram_sample_now), .n_reads(sram_reads), .n_writes(sram_writes), .overlap(sram_overlap));
@@ -829,6 +874,8 @@ always_comb begin
     run_board.has_ppi           = u1_has_ppi;
     run_board.sprite_bank_valid = u1_spr_valid;
     run_board.sprite_bank_mask  = u1_spr_mask;
+    run_board.analog_profile    = u1_trk ? ANALOG_TRACKBALL : 2'd0;   // SN
+    run_board.prot_sel          = u1_prot ? PROT_SONIC : PROT_NONE;   // SN
 end
     wire [7:0] adc_ch [0:7];
 genvar gi;
@@ -846,6 +893,17 @@ end endgenerate
     wire [15:0]  fb_wr_pix_u;
     wire [23:0]  rgb_a, rgb_b_unused;
     wire         ce_pix, hs, vs, hb, vb, mode_416_active;
+// HS: the score-block engine. It watches the SRAM port (wx_*), restores / captures through the core's second work-RAM port and
+// serves the score part of the Save slot (load: es_hs; read-back: sv_addr >= 64).
+    reg          hs_vb_q = 1'b0; always @(posedge clk_sys) hs_vb_q <= vb;
+    wire  [2:0]  hs_state_unused; wire hs_have_unused;
+u1_hiscore hiscore (.clk(clk_sys), .rst(rst_r), .vbl(vb && !hs_vb_q),
+    .en(u1_hs_en), .base(u1_hs_base), .lenm1(u1_hs_lenm1), .tag(u1_hs_tag), .m0(u1_hs_m0), .m1(u1_hs_m1), .m1_off(u1_hs_m1_off),
+    .x_we(wx_we), .x_addr(wx_addr), .x_wdata(wx_wdata), .x_be(wx_be),
+    .hs_req(hs_req), .hs_we(hs_we), .hs_addr(hs_addr), .hs_wdata(hs_wdata), .hs_q(hs_q), .hs_ack(hs_ack),
+    .ld_start(es_en && es_addr[11:1] == 11'd0), .ld_en(es_hs), .ld_idx(es_hs_idx[9:0]), .ld_data(es_data),
+    .rb_act(sv_act && sv_addr[10:6] != 5'd0), .rb_idx(10'(sv_addr - 11'd64)), .rb_data(hs_rb_data),
+    .dbg_state(hs_state_unused), .dbg_have(hs_have_unused));
     wire         eep_modified_unused, wheel_unused;
     wire signed [15:0] core_audio_l, core_audio_r;   // AU: s32_audio_mix output
     wire         irq_ack_v2;
@@ -855,15 +913,29 @@ end endgenerate
 
 // ============================================================================================ controls (D2-play)
 // See module u1_controls (top of this file).
+    wire  [3:0] g_trk1, g_trk2, g_trk3;   // SN; MP: g_trk3
+// MP: operator buttons (interact.json "Operator buttons": bridge 0x90000000, writeonly, not persisted). Cleared while the host holds
+// reset (every launch starts with them off); the host writes the check box's value every frame.
+    reg         op_74 = 1'b0;
+always @(posedge clk_74a) if (!reset_n) op_74 <= 1'b0; else if (bridge_wr && bridge_addr == 32'h90000000) op_74 <= |bridge_wr_data;
+    reg   [1:0] op_s = 2'b00;
+always @(posedge clk_sys) op_s <= {op_s[0], op_74};
+    wire        op_en_s = op_s[1];
+    wire        u1_cshared = u1_ch_shared;    // MP2: the game's own coin-chute setting (regional default unless its file enables it)
+u1_chute chute (.clk(clk_sys), .en(u1c_ch_en), .pol(u1c_ch_pol), .bitn(u1c_ch_bit), .word(u1c_ch_word), .dflt_shared(u1_profile[0]),
+    .cab_en(u1c_cb_en), .cab_bit(u1c_cb_bit), .cab_word(u1c_cb_word), .cab(u1_cab),   // CB
+    .rd_busy(sv_act), .eep_q(eep_rd_data), .rd_addr(ch_addr), .shared(u1_ch_shared));
     wire  [7:0] g_p1a, g_p2a, g_ppa, g_ppb, g_svc12, g_ppi_pc;   // 2P: + g_p2a; 4P: + g_ppa / g_ppb
 u1_controls ctl (.clk(clk_sys), .key(cont1_key[15:0]), .key2(cont2_key), .key3(cont3_key), .key4(cont4_key),   // rel: profile + guard
-    .profile(u1_profile), .hold(pause_r),
+    .profile(u1_profile), .hold(pause_r), .trackball(u1_trk), .trk1(g_trk1), .trk2(g_trk2),   // SN
+    .trk3(g_trk3), .op_en(op_en_s), .cshared(u1_cshared), .cab(u1_cab),   // MP; CB
     .p1a(g_p1a), .p2a(g_p2a), .ppa(g_ppa), .ppb(g_ppb), .svc12(g_svc12), .ppi_pc(g_ppi_pc));
 
 s32_core core (
     .clk_sys(clk_sys), .clk_ram(clk_ram), .clk_v25(clk_v25),
     .rst(rst_r), .video_rst(vrst_r),
     .board(run_board),   // U1
+    .cfg_sprite_over_nbg0(u1_son),   // DM
     .ce_cpu(ce_cpu), .ce_z80(ce_z80), .ce_fm(ce_fm), .ce_pcm(ce_pcm),   // AU: upstream s32_audio_ce
     .pause(pause_r),   // RC1: upstream's pause input (V60 exec cadence, V25 domain)
     .fast_v60(1'b1),
@@ -883,6 +955,7 @@ s32_core core (
     .fb_rd_x(fb_rd_x_u), .fb_rd_pix(sp_fb_rd_pix),   // SP
     .wram_ext_addr(wx_addr), .wram_ext_wdata(wx_wdata), .wram_ext_be(wx_be), .wram_ext_we(wx_we), .wram_ext_rd(wx_rd),
     .wram_ext_q(wx_q), .wram_ext_rdy(wx_rdy),
+    .hs_req(hs_req), .hs_we(hs_we), .hs_addr(hs_addr), .hs_wdata(hs_wdata), .hs_q(hs_q), .hs_ack(hs_ack),   // HS
     .dbg_irq_ack(irq_ack_v2), .dbg_irq_vector(irq_vec),
     .dbg_spr_oow_wr(spr_oow_wr), .dbg_spr_oow_rd(spr_oow_rd), .dbg_spr_oow_eng(spr_oow_eng),   // SP (observation)
     .dbg_v2(dbg_v2), .dbg_bus(dbg_bus),   // GA2Play5 freeze readout (observation)
@@ -897,7 +970,7 @@ s32_core core (
     .adc_ch(adc_ch),
     .track_p1_x(8'd0), .track_p1_y(8'd0), .track_p2_x(8'd0), .track_p2_y(8'd0),
     .track_p3_x(8'd0), .track_p3_y(8'd0),
-    .track_p1_dir(4'd0), .track_p2_dir(4'd0), .track_p3_dir(4'd0),
+    .track_p1_dir(g_trk1), .track_p2_dir(g_trk2), .track_p3_dir(g_trk3),   // SN; MP: player 3
     .track_mouse_dx(9'sd0), .track_mouse_dy(9'sd0), .track_mouse_strobe(1'b0),
     .trackball_y_invert(1'b0),
     .ppi_pa(g_ppa), .ppi_pb(g_ppb), .ppi_pc(g_ppi_pc),   // 4P: players 3 / 4 = Pocket controllers 3 / 4
@@ -1009,7 +1082,8 @@ end
     wire [23:0] vid_rgb_pre;
     wire        vid_de, vid_skip, vid_hs, vid_vs, vid_fallback;
     wire [15:0] vid_blank_lines;
-ga2_video vbridge (
+u1_video vbridge (   // SN2
+    .wide(mode_416_active),
     .clk_sys(clk_sys), .ce_pix(ce_pix), .rgb(rgb_a), .hs(hs), .vs(vs), .hblank(hb), .vblank(vb),
     .clk_vid(clk_vid), .video_rgb(vid_rgb_pre), .video_de(vid_de), .video_skip(vid_skip),
     .video_hs(vid_hs), .video_vs(vid_vs), .fallback(vid_fallback), .n_blank_lines(vid_blank_lines));
@@ -1065,3 +1139,75 @@ assign video_vs   = vid_vs;
 endmodule
 
 `default_nettype wire
+
+// u1_wram_clear (rel_derive.py WC): zero the external work RAM once after PLL lock, through d2_sram_port's own write cycle, then
+// pass the core's port signals through unchanged. The score engine and the work-RAM second port tap the core side, so they never
+// see the clear. While clearing: one write every 8 clk_sys (d2_sram_port takes 5), read request held low.
+module u1_wram_clear (
+    input  wire        clk,
+    input  wire        start,          // PLL locked (clk domain)
+    input  wire [15:0] c_addr, c_wdata,
+    input  wire  [1:0] c_be,
+    input  wire        c_we, c_rd,
+    output wire [15:0] p_addr, p_wdata,
+    output wire  [1:0] p_be,
+    output wire        p_we, p_rd,
+    output reg         done = 1'b0
+);
+    reg [15:0] a = 16'd0;
+    reg  [2:0] ph = 3'd0;
+    reg        last = 1'b0;
+// Reset by !start (the PLL is unlocked at power-up), NOT by initial values alone: Quartus treats power-up values as don't care, and
+// with only initial values it found done's data input constant 1 and removed the whole engine (fit rel-wc-1, 2026-11-24).
+always @(posedge clk)
+    if (!start) begin done <= 1'b0; a <= 16'd0; ph <= 3'd0; last <= 1'b0; end
+    else if (!done) begin
+        ph <= ph + 3'd1;
+        if (ph == 3'd7) begin
+            if (last) done <= 1'b1;
+            else begin a <= a + 16'd1; last <= (a == 16'hFFFE); end
+        end
+    end
+    wire cw = start && !done && ph == 3'd0;   // addresses 0..FFFF, each written once
+assign p_addr  = done ? c_addr  : a;
+assign p_wdata = done ? c_wdata : 16'h0000;
+assign p_be    = done ? c_be    : 2'b11;
+assign p_we    = done ? c_we    : cw;
+assign p_rd    = done ? c_rd    : 1'b0;
+endmodule
+
+// u1_chute (rel_derive.py MP2): coin wiring from the game's own coin-chute setting (one bit of its 93C46 EEPROM).
+// rd_busy = the Save read-back owns the read port (it sets its address on the edge that raises rd_busy); otherwise this module
+// drives the configured word and samples it after 8 stable clocks. No state depends on initial values for correctness.
+module u1_chute (
+    input  wire        clk,
+    input  wire        en, pol,
+    input  wire  [3:0] bitn,
+    input  wire  [5:0] word,
+    input  wire        cab_en,         // CB: cabinet type field (2 bits at cab_bit of cab_word)
+    input  wire  [3:0] cab_bit,
+    input  wire  [5:0] cab_word,
+    output wire  [1:0] cab,
+    input  wire        dflt_shared,    // the regional default (profile)
+    input  wire        rd_busy,
+    input  wire [15:0] eep_q,
+    output wire  [5:0] rd_addr,
+    output wire        shared
+);
+    reg  [2:0] cnt = 3'd0;
+    reg        ind = 1'b0, en_q = 1'b0;
+    reg        ph = 1'b0, cab_en_q = 1'b0;   // CB: ph = 1 while the cabinet word is addressed
+    reg  [1:0] cab_r = 2'd2;
+    wire [15:0] cab_sh = eep_q >> cab_bit;
+always @(posedge clk) begin
+    en_q <= en; cab_en_q <= cab_en;
+    if (rd_busy) cnt <= 3'd0; else if (cnt != 3'd7) cnt <= cnt + 3'd1; else if (cab_en) cnt <= 3'd0;   // CB: re-address
+    if (!rd_busy && cnt == 3'd7) begin
+        if (!ph) ind <= (eep_q[bitn] == pol); else cab_r <= cab_sh[1:0];
+        ph <= cab_en ? !ph : 1'b0;
+    end
+end
+assign rd_addr = ph ? cab_word : word;
+assign shared  = en_q ? !ind : dflt_shared;
+assign cab     = (en_q && cab_en_q) ? cab_r : 2'd2;   // CB: no field = 4P (the previous wiring)
+endmodule

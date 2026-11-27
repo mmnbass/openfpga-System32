@@ -1,0 +1,32 @@
+{
+  "instance": {
+    "magic": "APF_VER_1",
+    "data_path": "",
+    "core_select": {
+      "id": 0,
+      "select": false
+    },
+    "data_slots": [
+      {
+        "id": 1,
+        "filename": "sonic_main.bin"
+      },
+      {
+        "id": 2,
+        "filename": "sonic_tiles.bin"
+      },
+      {
+        "id": 3,
+        "filename": "sonic_sprites.bin"
+      },
+      {
+        "id": 7,
+        "filename": "sonic_sound.bin"
+      },
+      {
+        "id": 6,
+        "filename": "sonic_u1cfg.bin"
+      }
+    ]
+  }
+}

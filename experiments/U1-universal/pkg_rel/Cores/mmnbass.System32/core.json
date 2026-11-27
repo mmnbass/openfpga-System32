@@ -6,11 +6,11 @@
         "segas32"
       ],
       "shortname": "System32",
-      "description": "Sega System 32 arcade hardware for Analogue Pocket. Initial release supporting Golden Axe: The Revenge of Death Adder and Spider-Man: The Video Game.",
+      "description": "Sega System 32 for the Analogue Pocket. One core for Golden Axe: The Revenge of Death Adder, Spider-Man: The Videogame and SegaSonic The Hedgehog, in their World, US and Japanese versions, chosen by a Game file at launch. Saved high scores for Spider-Man and SegaSonic, multiplayer with the Analogue Dock, pauses while the Pocket menu is open. Needs your own ROM files (not included).",
       "author": "mmnbass",
       "url": "https://github.com/mmnbass/openfpga-System32",
-      "version": "0.1.0",
-      "date_release": "2026-11-21"
+      "version": "0.2.0",
+      "date_release": "2026-11-24"
     },
     "framework": {
       "target_product": "Analogue Pocket",

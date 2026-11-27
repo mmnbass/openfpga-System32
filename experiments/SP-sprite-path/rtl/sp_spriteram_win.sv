@@ -1,27 +1,34 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 //============================================================================
-//  sp_spriteram_win: on-chip window onto System 32's 128 KB sprite RAM
-//  (exp/sprite-path, page map revised on exp/sprite-int from the MAME census).
-//  Same parameters and ports as upstream s32_big_dpram (and F2's
-//  f2_xram_standin), so it replaces the sprite_ram instance in
-//  s32_core_d2_fit.sv one for one.
+//  EXPERIMENT V60-SONIC-DMAP (research, simulation only so far; not fitted,
+//  not in any release file list). Demand-mapped variant of sp_spriteram_win:
+//  same module name, parameters and ports, so it replaces the release window
+//  one for one in a private file list.
 //
-//  The 64K-word space is cut into 2^(16-PAGE_BITS) pages of 2^PAGE_BITS words.
-//  PAGE_LIST names the pages that have a slot: slot k holds page PAGE_LIST[6k +: 6]
-//  (page number = word address >> PAGE_BITS). The slots are the 2^PAGE_BITS-word
-//  slices of ONE upstream s32_big_dpram of NSLOT * 2^PAGE_BITS words.
-//  Default (PAGE_BITS 10 = 1K-word pages, NSLOT 11 = 22 M10K): pages at words
-//  0x0000, 0x4000 (sprite list / indirect tables), 0x8000..0x9C00 (eight pages,
-//  from-RAM pixel data) and 0xA000 (CPU block copied at the scene transition
-//  around frame 293/328, never read by the engine). Evidence:
-//  experiments/SP-sprite-path/tools/census_report.py / census_fbt.py and the
-//  README section "Sprite-RAM page map".
+//  Storage is unchanged: ONE s32_big_dpram of NSLOT * 2^PAGE_BITS words
+//  (default 11 x 1K words = 22 M10K), same ports, same read latency. Only the
+//  address translation differs: PAGE_LIST is ignored; each slot has a page tag
+//  register and a valid bit.
 //
-//  Outside the window: CPU writes are dropped, reads (both ports) return 0000,
-//  and each event is counted (saturating) so a scene that leaves the census
-//  is visible on the diagnostic band and in the sim summaries rather than
-//  silently mis-drawn.  Invariant: while the CPU-write counter is 0, every
-//  out-of-window word is still its power-up 0000, so engine reads of it
-//  (counter n_oow_rd_b, informational only) are exact.
+//  Allocation (clock_a, CPU port only): a write to a page that has no slot,
+//  whose ENABLED byte lanes carry non-zero data, takes the next free slot and
+//  is performed in the same clock. A write of zero to an unmapped page is
+//  dropped (the page reads 0000 already, so that is exact). With no slot left
+//  the write is dropped and counted in n_oow_wr_a ("overflow").
+//
+//  The NSLOT slots are a LIFETIME budget, not a cache: there is no eviction
+//  and NO RESET INPUT. Tags, valid bits and the slot counter take their
+//  initial values at FPGA configuration only, exactly like the RAM contents,
+//  so a slot never changes page while the RAM holds data.
+//
+//  Invariant: while n_oow_wr_a is 0, both ports return what a full
+//  2^ADDR_WIDTH-word s32_big_dpram (zero at power-up, same parameters) returns
+//  on every clock. The first-write bypass below is what makes that hold for
+//  the engine port in the clocks around an allocation.
+//
+//  Port B is the engine's read port (clock_b = 2 x clock_a, phase aligned).
+//  A port-B write lands only in a page that already has a slot; it never
+//  allocates (the release instance ties wren_b to 0).
 //============================================================================
 
 module sp_spriteram_win #(
@@ -31,10 +38,9 @@ module sp_spriteram_win #(
     parameter bit     PORT_B_READ_ONLY = 1'b0,
     parameter bit     MIXED_COLLISION_FWD = PORT_B_READ_ONLY,
     parameter bit     SIM_COLLISION_POISON = 1'b0,
-    parameter integer PAGE_BITS = 10,          // words per page = 2^PAGE_BITS (10: 1K words = 2 M10K)
-    parameter integer NSLOT     = 11,          // pages with a slot (<= 16)
-    // slot k -> page number PAGE_LIST[6k+5:6k]; default: words 0x0000, 0x4000, 0x8000..0x9C00 step 0x400, 0xA000
-    parameter [95:0]  PAGE_LIST = {6'd40, 6'd39, 6'd38, 6'd37, 6'd36, 6'd35, 6'd34, 6'd33, 6'd32, 6'd16, 6'd0}
+    parameter integer PAGE_BITS = 10,          // words per page = 2^PAGE_BITS
+    parameter integer NSLOT     = 11,          // slots (<= 16)
+    parameter [95:0]  PAGE_LIST = 96'd0        // ignored (kept so the release instance elaborates unchanged)
 ) (
     input                       clock_a,
     input      [ADDR_WIDTH-1:0] address_a,
@@ -50,29 +56,53 @@ module sp_spriteram_win #(
     input                       wren_b,
     output               [15:0] q_b,
 
-    // CPU read strobe (one clock per CPU read bus cycle; tie 0 if unused)
     input                       rd_strobe_a,
-    // diagnostics: clock_a domain (CPU) and clock_b domain (engine)
-    output reg           [15:0] n_oow_wr_a,
-    output reg           [15:0] n_oow_rd_a,
-    output reg           [15:0] n_oow_rd_b
+    output reg           [15:0] n_oow_wr_a,    // CPU writes dropped for lack of a slot (overflow)
+    output reg           [15:0] n_oow_rd_a,    // CPU read cycles of a page with no slot (answered 0000; exact while n_oow_wr_a = 0)
+    output reg           [15:0] n_oow_rd_b     // engine address steps into a page with no slot (same remark)
 );
 
-localparam integer PW = ADDR_WIDTH - PAGE_BITS;    // page-number bits (6 for 64K words / 1K pages)
+localparam integer PW = ADDR_WIDTH - PAGE_BITS;
 
-// map_of -> {valid, slot[3:0]} (slot index of the page, constant per parameter set)
+reg [PW-1:0] tag [0:NSLOT-1];
+reg [NSLOT-1:0] tag_v;
+reg [4:0]    n_used;                           // slots taken, 0..NSLOT
+integer i;
+initial begin
+    for (i = 0; i < NSLOT; i = i + 1) tag[i] = {PW{1'b0}};
+    tag_v = {NSLOT{1'b0}}; n_used = 5'd0;
+    n_oow_wr_a = 16'd0; n_oow_rd_a = 16'd0; n_oow_rd_b = 16'd0;
+end
+
+// {hit, slot[3:0]} of a page number
 function automatic [4:0] map_of(input [PW-1:0] page);
     integer k;
     begin
         map_of = 5'd0;
         for (k = 0; k < NSLOT; k = k + 1)
-            if (PAGE_LIST[6*k +: 6] == page) map_of = {1'b1, k[3:0]};
+            if (tag_v[k] && tag[k] == page) map_of = map_of | {1'b1, k[3:0]};
     end
 endfunction
 
-wire [4:0] ma = map_of(address_a[ADDR_WIDTH-1:PAGE_BITS]);
-wire [4:0] mb = map_of(address_b[ADDR_WIDTH-1:PAGE_BITS]);
+wire [PW-1:0] pg_a = address_a[ADDR_WIDTH-1:PAGE_BITS];
+wire [PW-1:0] pg_b = address_b[ADDR_WIDTH-1:PAGE_BITS];
+wire [4:0] ma = map_of(pg_a);
+wire [4:0] mb = map_of(pg_b);
 wire       va = ma[4], vb = mb[4];
+
+// CPU write classification
+wire nz_a    = (byteena_a[0] && data_a[7:0] != 8'h00) || (byteena_a[1] && data_a[15:8] != 8'h00);
+wire full    = (n_used == NSLOT[4:0]);
+wire alloc   = wren_a && !va && nz_a && !full;         // first non-zero write to a page: take a slot, write now
+wire ovf     = wren_a && !va && nz_a &&  full;         // dropped and counted
+// a miss addresses slot 0 (ma[3:0] = 0), as the release window does; only the allocating write addresses the free slot
+wire [3:0] slot_a = ma[3:0] | (alloc ? n_used[3:0] : 4'd0);
+
+always @(posedge clock_a) if (alloc) begin
+    tag[n_used[3:0]]   <= pg_a;
+    tag_v[n_used[3:0]] <= 1'b1;
+    n_used             <= n_used + 5'd1;
+end
 
 wire [15:0] ram_q_a, ram_q_b;
 s32_big_dpram #(
@@ -80,34 +110,56 @@ s32_big_dpram #(
     .MIXED_RDW_MODE(MIXED_RDW_MODE), .PORT_B_READ_ONLY(PORT_B_READ_ONLY),
     .MIXED_COLLISION_FWD(MIXED_COLLISION_FWD), .SIM_COLLISION_POISON(SIM_COLLISION_POISON)
 ) ram (
-    .clock_a(clock_a), .address_a({ma[3:0], address_a[PAGE_BITS-1:0]}), .data_a(data_a), .byteena_a(byteena_a),
-    .wren_a(wren_a && va), .q_a(ram_q_a),
+    .clock_a(clock_a), .address_a({slot_a, address_a[PAGE_BITS-1:0]}), .data_a(data_a), .byteena_a(byteena_a),
+    .wren_a(wren_a && (va || alloc)), .q_a(ram_q_a),
     .clock_b(clock_b), .address_b({mb[3:0], address_b[PAGE_BITS-1:0]}), .data_b(data_b), .byteena_b(byteena_b),
     .wren_b(wren_b && vb), .q_b(ram_q_b)
 );
 
-// The RAM output is registered from the address; qualify it with the window
-// flag of the same address (also registered).
+// The RAM output is registered from the address; qualify it with the hit flag of the same address.
 reg va_q = 1'b0, vb_q = 1'b0;
 always @(posedge clock_a) va_q <= va;
 always @(posedge clock_b) vb_q <= vb;
 assign q_a = va_q ? ram_q_a : 16'h0000;
-assign q_b = vb_q ? ram_q_b : 16'h0000;
 
-// Counters (saturating): CPU writes (one per wren_a clock) and CPU reads (one
-// per rd_strobe_a clock) outside the window; engine reads per distinct
-// out-of-window address it presents.
-initial begin n_oow_wr_a = 16'd0; n_oow_rd_a = 16'd0; n_oow_rd_b = 16'd0; end
-always @(posedge clock_a)
-    if (wren_a && !va && n_oow_wr_a != 16'hFFFF) n_oow_wr_a <= n_oow_wr_a + 1'd1;
+// First-write bypass (engine port). While the allocating write is on port A the page has no tag yet, so a
+// port-B read of the SAME word in those clocks would miss and return 0000, where the full RAM's mixed-port
+// forwarding (s32_big_dpram g_mixed_fwd) returns the written lanes. Mirror it: enabled lanes = the CPU data,
+// the other lanes = 00 (the word was never written, so its old content is 0000 by construction).
+generate
+if (MIXED_COLLISION_FWD) begin : g_fw
+    reg        fw_r = 1'b0;
+    reg [15:0] fw_d = 16'h0000;
+    always @(posedge clock_b) begin
+        fw_r <= alloc && (address_a == address_b);
+        fw_d <= {byteena_a[1] ? data_a[15:8] : 8'h00, byteena_a[0] ? data_a[7:0] : 8'h00};
+    end
+    assign q_b = fw_r ? fw_d : (vb_q ? ram_q_b : 16'h0000);
+end
+else begin : g_nofw
+    assign q_b = vb_q ? ram_q_b : 16'h0000;
+end
+endgenerate
+
+// Counters (saturating)
+always @(posedge clock_a) begin
+    if (ovf && n_oow_wr_a != 16'hFFFF) n_oow_wr_a <= n_oow_wr_a + 1'd1;
+    if (rd_strobe_a && !va && n_oow_rd_a != 16'hFFFF) n_oow_rd_a <= n_oow_rd_a + 1'd1;
+end
 reg [ADDR_WIDTH-1:0] addr_b_q;
 always @(posedge clock_b) begin
     addr_b_q <= address_b;
-    // count each distinct out-of-window engine address step (not every
-    // clock it is held), so the number is comparable between benches
     if (!vb && address_b != addr_b_q && n_oow_rd_b != 16'hFFFF) n_oow_rd_b <= n_oow_rd_b + 1'd1;
 end
-always @(posedge clock_a)
-    if (rd_strobe_a && !va && n_oow_rd_a != 16'hFFFF) n_oow_rd_a <= n_oow_rd_a + 1'd1;
+
+`ifdef SIMULATION
+// simulation report: the allocation order and what was dropped
+always @(posedge clock_a) if (alloc) $display("DMAP alloc slot=%0d page=%0d (word %04x)", n_used, pg_a, {pg_a, {PAGE_BITS{1'b0}}});
+final begin
+    $write("DMAPSUM slots_used=%0d of %0d overflow_wr=%0d unmapped_cpu_rd=%0d unmapped_eng=%0d pages=", n_used, NSLOT, n_oow_wr_a, n_oow_rd_a, n_oow_rd_b);
+    for (i = 0; i < NSLOT; i = i + 1) if (tag_v[i]) $write("%0d ", tag[i]);
+    $write("\n");
+end
+`endif
 
 endmodule
