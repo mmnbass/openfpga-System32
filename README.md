@@ -15,7 +15,8 @@ You choose the game at launch with its Game file, named by its full title and ve
 
 ## Status
 
-- **Every set, one and two players:** played on hardware (Analogue Pocket with the Dock).
+- **Every set:** builds through the ROM plugin and plays on hardware (Analogue Pocket with the Dock). Two-player play is
+  verified on hardware for Golden Axe, Spider-Man and SegaSonic the Hedgehog (Rev C).
 - **Three or four players:** validated in simulation, not yet on hardware. Community testing is welcome.
 - **Operator settings:** each game's own operator (test) menu is reachable from the core menu, so cabinet size and coin chutes
   (common or individual) can be set as on the original board; the core follows them. Every set starts with its own factory settings.
